@@ -1,0 +1,11 @@
+{
+    "name": "notifications",
+    "full_name": "Notifications",
+    "description": "Notifications Manager Antares",
+    "author": "Łukasz Cirut",
+    "url": "https://antaresproject.io",
+    "version": "0.9.0",
+    "provides": [
+        "Antares\\Notifications\\NotificationsServiceProvider"
+    ]
+}

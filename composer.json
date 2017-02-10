@@ -1,0 +1,13 @@
+{
+    "name": "components/notifications",
+    "description": "Antares Notifications Component",
+    "authors": [
+        {
+            "name": "Łukasz Cirut",
+            "email": "contact@antaresproject.io"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.9"
+    }
+}
