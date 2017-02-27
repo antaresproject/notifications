@@ -17,8 +17,6 @@
  * @copyright  (c) 2017, Antares Project
  * @link       http://antaresproject.io
  */
-
-
 use Illuminate\Routing\Router;
 
 $router->group(['prefix' => 'notifications'], function (Router $router) {
@@ -47,6 +45,11 @@ $router->group(['prefix' => 'notifications'], function (Router $router) {
     $router->post('sidebar/read/{type?}', 'SidebarController@read');
     $router->get('sidebar/get', 'SidebarController@get');
     $router->get('sidebar/clear/{type?}', 'SidebarController@clear');
+
+    $router->match(['GET', 'POST'], '/logs/index', 'LogsController@index');
+    $router->get('/logs/{id}/delete', 'LogsController@delete');
+    $router->post('/logs/delete', 'LogsController@delete');
+    $router->get('/logs/preview/{id}', 'LogsController@preview');
 });
 
 

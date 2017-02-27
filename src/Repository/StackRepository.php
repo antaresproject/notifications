@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Repository;
 
 use Antares\Notifications\Model\NotificationsStackRead;
@@ -112,7 +111,7 @@ class StackRepository extends AbstractRepository
      * 
      * @return \Illuminate\Database\Query\Builder
      */
-    protected function query()
+    public function query()
     {
         $read = NotificationsStackRead::select(['stack_id'])
                 ->withTrashed()

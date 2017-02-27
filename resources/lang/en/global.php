@@ -17,8 +17,7 @@
  * @copyright  (c) 2017, Antares Project
  * @link       http://antaresproject.io
  */
-
-
 return [
-    'Notifications' => 'Notifications',
+    'Notifications'     => 'Notifications',
+    'notification_logs' => 'Notification Logs'
 ];

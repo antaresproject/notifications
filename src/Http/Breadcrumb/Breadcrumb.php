@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Http\Presenters;
 
 use DaveJamesMiller\Breadcrumbs\Facade as Breadcrumbs;
@@ -89,6 +88,17 @@ class Breadcrumb
             $breadcrumbs->push(trans('antares/notifications::messages.notification_templates_create'));
         });
         view()->share('breadcrumbs', Breadcrumbs::render('notification-create'));
+    }
+
+    /**
+     * On notification logs list
+     */
+    public function onLogsList()
+    {
+        Breadcrumbs::register('notifications-logs', function($breadcrumbs) {
+            $breadcrumbs->push(trans('antares/notifications::logs.notification_logs'), handles('antares::notifications/logs/index'));
+        });
+        view()->share('breadcrumbs', Breadcrumbs::render('notifications-logs'));
     }
 
 }
