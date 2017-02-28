@@ -118,39 +118,36 @@ class StackRepository extends AbstractRepository
                 ->where('user_id', user()->id)
                 ->whereNotNull('deleted_at')
                 ->lists('stack_id');
-
-
-        $builder = $this->makeModel()->newQuery()
-                ->distinct()
-                ->select(['tbl_notifications_stack.*'])
-                ->whereHas('content', function($query) {
-                    $query->where([
-                        'lang_id' => lang_id()
-                    ]);
-                })
-                ->whereHas('notification', function($query) {
-                    $query->whereHas('type', function($subquery) {
-                        $subquery->where('name', area());
-                    });
-                })
-                ->where(function ($query) {
-                    $query
-                    ->whereNull('author_id')
-                    ->orWhere('author_id', user()->id)
-                    ->orWhereHas('author', function($subquery) {
-                        $subquery->whereHas('roles', function($rolesQuery) {
-                            $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
-                        });
-                    })
-                    ->orWhereHas('params', function($subquery) {
-                        $subquery->where('model_id', user()->id);
-                    });
-                })
-                ->with('author')
-                ->with('content')->with('notification.severity')
-                ->whereNotIn('id', $read)
-                ->orderBy('tbl_notifications_stack.created_at', 'desc');
-        return $builder;
+        return $this->makeModel()->newQuery()
+                        ->distinct()
+                        ->select(['tbl_notifications_stack.*'])
+                        ->whereHas('content', function($query) {
+                            $query->where([
+                                'lang_id' => lang_id()
+                            ]);
+                        })
+                        ->whereHas('notification', function($query) {
+                            $query->whereHas('type', function($subquery) {
+                                $subquery->where('name', area());
+                            });
+                        })
+                        ->where(function ($query) {
+                            $query
+                            ->whereNull('author_id')
+                            ->orWhere('author_id', user()->id)
+                            ->orWhereHas('author', function($subquery) {
+                                $subquery->whereHas('roles', function($rolesQuery) {
+                                    $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
+                                });
+                            })
+                            ->orWhereHas('params', function($subquery) {
+                                $subquery->where('model_id', user()->id);
+                            });
+                        })
+                        ->whereNotIn('id', $read)
+                        ->with('author')
+                        ->with('content')->with('notification.severity')
+                        ->orderBy('tbl_notifications_stack.created_at', 'desc');
     }
 
     /**
@@ -320,6 +317,31 @@ class StackRepository extends AbstractRepository
             $log[$name] = json_encode($value);
         }
         return $log;
+    }
+
+    /**
+     * Fetch stacks
+     * 
+     * @param mixed $id
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function fetch($id = null)
+    {
+        $builder = $this->makeModel()->newQuery()->withoutGlobalScopes()->distinct()
+                ->select(['tbl_notifications_stack.*'])->with('content')->with('content.lang')->with('notification.type')
+                ->where(function ($query) {
+                    $query->whereNull('author_id')->orWhere('author_id', user()->id)->orWhereHas('author', function($subquery) {
+                        $subquery->whereHas('roles', function($rolesQuery) {
+                            $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
+                        });
+                    });
+                })
+                ->with('author')->with('author.roles')->with('content')->with('notification.severity')
+                ->orderBy('tbl_notifications_stack.created_at', 'desc');
+        if (!is_null($id)) {
+            $builder->whereId($id);
+        }
+        return $builder;
     }
 
 }

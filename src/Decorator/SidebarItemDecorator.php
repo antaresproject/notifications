@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Decorator;
 
 use Antares\Notifications\Adapter\VariablesAdapter;
@@ -56,7 +55,7 @@ class SidebarItemDecorator
      * @param String $view
      * @return String
      */
-    protected function item($item, $view)
+    public function item($item, $view)
     {
         $content = app(VariablesAdapter::class)->get($item->content[0]->content, (array) $item->variables);
         return view($view, [

@@ -21,9 +21,17 @@
 namespace Antares\Notifications\Processor;
 
 use Antares\Notifications\Http\Datatables\Logs as Datatables;
+use Antares\Notifications\Decorator\SidebarItemDecorator;
+use Antares\Notifications\Repository\StackRepository;
 use Antares\Notifications\Http\Presenters\Breadcrumb;
+use Antares\Notifications\Model\NotificationsStack;
+use Antares\Foundation\Template\EmailNotification;
 use Antares\Notifications\Contracts\LogsListener;
+use Antares\Foundation\Template\SmsNotification;
 use Antares\Foundation\Processor\Processor;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
+use Illuminate\View\View;
 
 class LogsProcessor extends Processor
 {
@@ -43,21 +51,30 @@ class LogsProcessor extends Processor
     protected $datatables;
 
     /**
+     * NotificationsStack instance
+     *
+     * @var NotificationsStack
+     */
+    protected $stack;
+
+    /**
      * Construct
      * 
      * @param Breadcrumb $breadcrumb
      * @param Datatables $datatables
+     * @param NotificationsStack $stack
      */
-    public function __construct(Breadcrumb $breadcrumb, Datatables $datatables)
+    public function __construct(Breadcrumb $breadcrumb, Datatables $datatables, NotificationsStack $stack)
     {
         $this->breadcrumb = $breadcrumb;
         $this->datatables = $datatables;
+        $this->stack      = $stack;
     }
 
     /**
      * Default index action
      * 
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function index()
     {
@@ -69,11 +86,22 @@ class LogsProcessor extends Processor
      * Preview notification log
      * 
      * @param mixed $id
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function preview($id)
     {
-        
+        $item = app(StackRepository::class)->fetch($id)->firstOrFail();
+
+        if (in_array($item->notification->type->name, ['email', 'sms'])) {
+            $classname    = $item->notification->type->name === 'email' ? EmailNotification::class : SmsNotification::class;
+            $notification = app($classname);
+            $notification->setModel($item);
+            return view('antares/notifications::admin.logs.preview', ['content' => $notification->render()]);
+        }
+
+        $decorator = app(SidebarItemDecorator::class);
+        $decorated = $decorator->item($item, config('antares/notifications::templates.notification'));
+        return new JsonResponse(['content' => $decorated], 200);
     }
 
     /**
@@ -81,11 +109,15 @@ class LogsProcessor extends Processor
      * 
      * @param mixed $id
      * @param LogsListener $listener
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function delete($id, LogsListener $listener)
     {
-        return $listener->deleteSuccess();
+        $stack = $this->stack->newQuery()->findOrFail($id);
+        if ($stack->delete()) {
+            return $listener->deleteSuccess();
+        }
+        return $listener->deleteFailed();
     }
 
 }

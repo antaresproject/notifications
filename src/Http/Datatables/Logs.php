@@ -28,6 +28,7 @@ use Antares\Notifications\Filter\DateRangeNotificationLogsFilter;
 use Antares\Notifications\Filter\NotificationNameFilter;
 use Antares\Notifications\Filter\NotificationLangFilter;
 use Antares\Notifications\Filter\NotificationAreaFilter;
+use Antares\Notifications\Repository\StackRepository;
 
 class Logs extends DataTable
 {
@@ -56,27 +57,7 @@ class Logs extends DataTable
      */
     public function query()
     {
-        $builder = app(\Antares\Notifications\Model\NotificationsStack::class)
-                ->distinct()
-                ->select(['tbl_notifications_stack.*'])
-                ->with('content.lang')
-                ->with('notification.type')
-                ->where(function ($query) {
-                    $query
-                    ->whereNull('author_id')
-                    ->orWhere('author_id', user()->id)
-                    ->orWhereHas('author', function($subquery) {
-                        $subquery->whereHas('roles', function($rolesQuery) {
-                            $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
-                        });
-                    });
-                })
-                ->with('author')
-                ->with('author.roles')
-                ->with('content')->with('notification.severity')
-                ->orderBy('tbl_notifications_stack.created_at', 'desc');
-
-        return $builder;
+        return app(StackRepository::class)->fetch();
     }
 
     /**
@@ -92,12 +73,15 @@ class Logs extends DataTable
                             return '<i data-tooltip-inline="' . $lang->name . '" class="flag-icon flag-icon-' . $codeIcon . '"></i>';
                         })
                         ->editColumn('author.roles.0.area', function ($row = null) {
-                            $area = $row->author->roles[0]->area;
+                            $area = (isset($row->variables['recipients'])) ? user($row->variables['recipients'][0]['id'])->getArea() : $row->author->roles[0]->area;
                             return config('areas.areas.' . $area);
                         })
                         ->editColumn('author.fullname', function ($row = null) {
-                            $title = '#' . $row->author->id . ' ' . $row->author->fullname;
-                            return app('html')->link(handles('antares/foundation::users/' . $row->author->id), $title)->get();
+                            $recipients = isset($row->variables['recipients']) ? $row->variables['recipients'][0] : [];
+                            $id         = $row->author ? $row->author->id : array_get($recipients, 'id');
+
+                            $title = '#' . $id . ' ' . array_get($recipients, 'fullname', ($row->author) ? $row->author->fullname : '---');
+                            return app('html')->link(handles('antares/foundation::users/' . $id), $title)->get();
                         })
                         ->addColumn('action', $this->getActionsColumn())
                         ->make(true);
@@ -109,13 +93,13 @@ class Logs extends DataTable
     public function html()
     {
         $html = app('html');
-        publish('notifications', ['js/notifications-table.js']);
+        publish('notifications', ['js/notification-logs.js']);
         return $this->setName('Notifications List')
                         ->addColumn(['data' => 'id', 'name' => 'id', 'data' => 'id', 'title' => 'Id'])
                         ->addColumn(['data' => 'created_at', 'name' => 'created_at', 'title' => trans('antares/notifications::logs.headers.date'), 'className' => 'bolded'])
                         ->addColumn(['data' => 'notification.event', 'name' => 'notification.event', 'title' => trans('antares/notifications::logs.headers.name')])
                         ->addColumn(['data' => 'content.0.lang.code', 'name' => 'lang', 'title' => trans('antares/notifications::logs.headers.lang')])
-                        ->addColumn(['data' => 'content.0.title', 'name' => 'content.0.code', 'title' => trans('antares/notifications::logs.headers.title')])
+                        ->addColumn(['data' => 'content.0.title', 'name' => 'title', 'title' => trans('antares/notifications::logs.headers.title')])
                         ->addColumn(['data' => 'notification.type.title', 'name' => 'notification.type.title', 'title' => trans('antares/notifications::logs.headers.type')])
                         ->addColumn(['data' => 'author.roles.0.area', 'name' => 'author.roles.0.area', 'title' => trans('antares/notifications::logs.headers.level')])
                         ->addColumn(['data' => 'author.fullname', 'name' => 'author.fullname', 'title' => trans('antares/notifications::logs.headers.user')])
@@ -149,8 +133,8 @@ class Logs extends DataTable
         return function ($row) {
             $html    = app('html');
             $btns    = [
-                $html->create('li', $html->link(handles("antares::notifications/logs/preview/" . $row->id), trans('antares/notification::logs.actions.preview'), ['data-icon' => 'desktop-windows'])),
-                $html->create('li', $html->link(handles("antares::notifications/logs/" . $row->id . "/delete"), trans('antares/notification::logs.actions.delete'), ['class' => "triggerable confirm", 'data-icon' => 'delete', 'data-title' => trans("antares/notification::logs.are_you_sure"), 'data-description' => trans('antares/notification::logs.delete_notification_log_desc', ['id' => $row->id])]))
+                $html->create('li', $html->link(handles("antares::notifications/logs/preview/" . $row->id), trans('antares/notifications::logs.actions.preview'), ['data-notification' => !in_array($row->notification->type->name, ['email', 'sms']), 'data-icon' => 'desktop-windows', 'class' => "triggerable preview-notification-log"])),
+                $html->create('li', $html->link(handles("antares::notifications/logs/" . $row->id . "/delete"), trans('antares/notifications::logs.actions.delete'), ['class' => "triggerable confirm", 'data-icon' => 'delete', 'data-title' => trans("antares/notifications::logs.are_you_sure"), 'data-description' => trans('antares/notifications::logs.delete_notification_log_desc', ['id' => $row->id])]))
             ];
             $section = $html->create('div', $html->create('section', $html->create('ul', $html->raw(implode('', $btns)))), ['class' => 'mass-actions-menu'])->get();
 

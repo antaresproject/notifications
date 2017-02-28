@@ -22,6 +22,7 @@ namespace Antares\Notifications\Filter;
 
 use Yajra\Datatables\Contracts\DataTableScopeContract;
 use Antares\Datatables\Filter\SelectFilter;
+use Antares\Area\AreaManager;
 
 class NotificationAreaFilter extends SelectFilter implements DataTableScopeContract
 {
@@ -45,7 +46,12 @@ class NotificationAreaFilter extends SelectFilter implements DataTableScopeContr
      *
      * @var String
      */
-    protected $pattern = '%value';
+    protected $pattern = 'antares/notifications::logs.filter.areas';
+
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
     /**
      * Filter instance dataprovider
@@ -54,13 +60,12 @@ class NotificationAreaFilter extends SelectFilter implements DataTableScopeContr
      */
     protected function options()
     {
-//        $jobs   = Jobs::all(['id', 'name', 'value']);
-//        $return = [];
-//        foreach ($jobs as $job) {
-//            $return[$job->id] = $job->value['title'];
-//        }
-//        return $return;
-        return [];
+        $areas   = app(AreaManager::class)->getAreas();
+        $options = [];
+        foreach ($areas as $area) {
+            array_set($options, $area->getId(), $area->getLabel());
+        }
+        return $options;
     }
 
     /**
@@ -70,14 +75,15 @@ class NotificationAreaFilter extends SelectFilter implements DataTableScopeContr
      */
     public function apply($builder)
     {
-//        $params = $this->getParams();
-//
-//        if (is_null($ids = array_get($params, __CLASS__ . '.value'))) {
-//            return false;
-//        }
-//        if (!empty($ids)) {
-//            $builder->whereIn('job_id', $ids);
-//        }
+        $values = $this->getValues();
+        if (empty($values)) {
+            return false;
+        }
+        $builder->whereHas('author', function($query) use($values) {
+            $query->whereHas('roles', function($subquery) use($values) {
+                $subquery->whereIn('area', $values);
+            });
+        });
     }
 
 }

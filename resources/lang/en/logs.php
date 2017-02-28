@@ -22,7 +22,10 @@ return [
     'notification_delete_failed'            => 'Notification log has not been deleted.',
     'notification_logs'                     => 'Notification Logs',
     'filter'                                => [
-        'daterange' => 'Date range [:start - :end]'
+        'daterange' => 'Date range [:start - :end]',
+        'langs'     => 'Languages: %value',
+        'names'     => 'Names: %value',
+        'areas'     => 'Areas: %value',
     ],
     'headers'                               => [
         'date'  => 'Date',
@@ -39,5 +42,7 @@ return [
     ],
     'are_you_sure'                          => 'Are you sure?',
     'delete_notification_log_desc'          => 'Deleting notification log #:id',
-    'mass_deleteing_notification_logs_desc' => 'Deleting selected notification logs...'
+    'mass_deleteing_notification_logs_desc' => 'Deleting selected notification logs...',
+    'preview_error'                         => 'Unable to preview notification log.',
+    'sidebar_preview'                       => 'Notification preview'
 ];

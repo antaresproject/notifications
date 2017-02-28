@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Event;
 
 use Antares\Foundation\Template\SendableNotification;
@@ -56,8 +55,10 @@ class EventDispatcher
         }
         $instance->setPredefinedVariables($variables);
         $instance->setModel($notification);
+
         if ($instance instanceof SendableNotification) {
             $instance->setRecipients($recipients);
+
             if (!$this->validate($instance)) {
                 return false;
             }

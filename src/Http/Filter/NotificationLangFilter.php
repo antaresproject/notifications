@@ -45,7 +45,7 @@ class NotificationLangFilter extends SelectFilter implements DataTableScopeContr
      *
      * @var String
      */
-    protected $pattern = '%value';
+    protected $pattern = 'antares/notifications::logs.filter.langs';
 
     /**
      * Filter instance dataprovider
@@ -54,13 +54,7 @@ class NotificationLangFilter extends SelectFilter implements DataTableScopeContr
      */
     protected function options()
     {
-//        $jobs   = Jobs::all(['id', 'name', 'value']);
-//        $return = [];
-//        foreach ($jobs as $job) {
-//            $return[$job->id] = $job->value['title'];
-//        }
-//        return $return;
-        return [];
+        return app('languages')->langs()->lists('name', 'id')->toArray();
     }
 
     /**
@@ -70,14 +64,15 @@ class NotificationLangFilter extends SelectFilter implements DataTableScopeContr
      */
     public function apply($builder)
     {
-//        $params = $this->getParams();
-//
-//        if (is_null($ids = array_get($params, __CLASS__ . '.value'))) {
-//            return false;
-//        }
-//        if (!empty($ids)) {
-//            $builder->whereIn('job_id', $ids);
-//        }
+        $values = $this->getValues();
+        if (empty($values)) {
+            return false;
+        }
+        $builder->whereHas('content', function($query) use($values) {
+            $query->whereHas('lang', function($subquery) use($values) {
+                $subquery->whereIn('id', $values);
+            });
+        });
     }
 
 }

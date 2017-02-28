@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Widgets\NotificationSender\Controller;
 
 use Antares\Notifications\Widgets\NotificationSender\Form\NotificationWidgetForm;
@@ -96,7 +95,7 @@ class NotificationController extends AdminController
     /**
      * Fires notification events
      * 
-     * @param array $events
+     * @param Model $model
      * @return void
      */
     protected function fire(Model $model)

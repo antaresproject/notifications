@@ -46,7 +46,7 @@ class NotificationNameFilter extends SelectFilter implements DataTableScopeContr
      *
      * @var String
      */
-    protected $pattern = '%value';
+    protected $pattern = 'antares/notifications::logs.filter.names';
 
     /**
      * Filter instance dataprovider

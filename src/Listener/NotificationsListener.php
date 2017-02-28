@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Listener;
 
 use Antares\Notifications\Repository\Repository;

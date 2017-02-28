@@ -11,6 +11,7 @@ Vue.config.debug = !0, Vue.config.devtools = !0, function () {
         },
         methods: {
             bindChangeListener: function () {
+
                 var self = this, handler = $(this.$el);
                 handler.on('change', function (e) {
                     self.lockSelect();
@@ -58,6 +59,7 @@ Vue.config.debug = !0, Vue.config.devtools = !0, function () {
         },
     });
 }.call(this);
+
 $(document).ready(function () {
     $('.notification-widget-test-button').on('click', function (e) {
         e.preventDefault();
