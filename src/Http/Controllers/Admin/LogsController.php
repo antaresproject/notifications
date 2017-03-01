@@ -65,9 +65,9 @@ class LogsController extends AdminController implements LogsListener
     /**
      * {@inheritdoc}
      */
-    public function delete($id)
+    public function delete($id = null)
     {
-        return $this->processor->delete($id, $this);
+        return $this->processor->delete($this, $id);
     }
 
     /**

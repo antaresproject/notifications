@@ -17,6 +17,7 @@
  * @copyright  (c) 2017, Antares Project
  * @link       http://antaresproject.io
  */
+declare(strict_types = 1);
 
 namespace Antares\Notifications\Processor;
 
@@ -76,7 +77,7 @@ class LogsProcessor extends Processor
      * 
      * @return View
      */
-    public function index()
+    public function index(): View
     {
         $this->breadcrumb->onLogsList();
         return $this->datatables->render('antares/notifications::admin.logs.index');
@@ -90,7 +91,7 @@ class LogsProcessor extends Processor
      */
     public function preview($id)
     {
-        $item = app(StackRepository::class)->fetch($id)->firstOrFail();
+        $item = app(StackRepository::class)->fetchOne((int) $id)->firstOrFail();
 
         if (in_array($item->notification->type->name, ['email', 'sms'])) {
             $classname    = $item->notification->type->name === 'email' ? EmailNotification::class : SmsNotification::class;
@@ -107,13 +108,13 @@ class LogsProcessor extends Processor
     /**
      * Deletes notification log
      * 
-     * @param mixed $id
      * @param LogsListener $listener
+     * @param mixed $id
      * @return RedirectResponse
      */
-    public function delete($id, LogsListener $listener)
+    public function delete(LogsListener $listener, $id = null): RedirectResponse
     {
-        $stack = $this->stack->newQuery()->findOrFail($id);
+        $stack = !empty($ids   = input('attr')) ? $this->stack->newQuery()->whereIn('id', $ids) : $this->stack->newQuery()->findOrFail($id);
         if ($stack->delete()) {
             return $listener->deleteSuccess();
         }

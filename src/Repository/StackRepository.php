@@ -17,6 +17,7 @@
  * @copyright  (c) 2017, Antares Project
  * @link       http://antaresproject.io
  */
+declare(strict_types = 1);
 
 namespace Antares\Notifications\Repository;
 
@@ -28,6 +29,7 @@ use Antares\Notifications\Model\NotificationContents;
 use Antares\Notifications\Model\NotificationsStack;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Model\Notifications;
+use Illuminate\Database\Eloquent\Builder;
 use Antares\Widgets\Model\Widgets;
 use Illuminate\Support\Facades\DB;
 use Antares\Logger\Model\Logs;
@@ -322,26 +324,59 @@ class StackRepository extends AbstractRepository
     /**
      * Fetch stacks
      * 
-     * @param mixed $id
-     * @return \Illuminate\Database\Query\Builder
+     * @param array $columns
+     * @return Builder
      */
-    public function fetch($id = null)
+    public function fetchAll(array $columns = []): Builder
     {
-        $builder = $this->makeModel()->newQuery()->withoutGlobalScopes()->distinct()
-                ->select(['tbl_notifications_stack.*'])->with('content')->with('content.lang')->with('notification.type')
-                ->where(function ($query) {
-                    $query->whereNull('author_id')->orWhere('author_id', user()->id)->orWhereHas('author', function($subquery) {
-                        $subquery->whereHas('roles', function($rolesQuery) {
-                            $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
+        return $this->makeModel()
+                        ->newQuery()
+                        ->select([
+                            'tbl_notifications_stack.id',
+                            'tbl_notifications_stack.variables as variables',
+                            'tbl_notifications_stack.created_at as created_at',
+                            'tbl_notifications_stack.author_id as author_id',
+                            'tbl_notifications.event as name',
+                            'tbl_notification_contents.title as title',
+                            'tbl_notification_types.title as type',
+                            'tbl_languages.code as lang_code',
+                            'tbl_languages.name as lang_name',
+                            'tbl_roles.area as area',
+                            DB::raw('CONCAT_WS(" ",tbl_users.firstname,tbl_users.lastname) AS fullname')
+                        ])
+                        ->leftJoin('tbl_notification_contents', 'tbl_notifications_stack.notification_id', '=', 'tbl_notification_contents.notification_id')
+                        ->leftJoin('tbl_notifications', 'tbl_notifications_stack.notification_id', '=', 'tbl_notifications.id')
+                        ->leftJoin('tbl_notification_types', 'tbl_notifications.type_id', '=', 'tbl_notification_types.id')
+                        ->leftJoin('tbl_languages', 'tbl_notification_contents.lang_id', '=', 'tbl_languages.id')
+                        ->leftJoin('tbl_users', 'tbl_notifications_stack.author_id', '=', 'tbl_users.id')
+                        ->leftJoin('tbl_user_role', 'tbl_users.id', '=', 'tbl_user_role.user_id')
+                        ->leftJoin('tbl_roles', 'tbl_user_role.role_id', '=', 'tbl_roles.id')
+                        ->where(function($query) {
+                            $query->whereNull('author_id')
+                            ->orWhere('author_id', user()->id)
+                            ->orWhereIn('tbl_roles.id', user()->roles->first()->getChilds());
                         });
-                    });
-                })
-                ->with('author')->with('author.roles')->with('content')->with('notification.severity')
-                ->orderBy('tbl_notifications_stack.created_at', 'desc');
-        if (!is_null($id)) {
-            $builder->whereId($id);
-        }
-        return $builder;
+    }
+
+    /**
+     * Fetch one stack item
+     * 
+     * @param int $id
+     * @return Builder
+     */
+    public function fetchOne(int $id): Builder
+    {
+        return $this->makeModel()->newQuery()->withoutGlobalScopes()->distinct()
+                        ->select(['tbl_notifications_stack.*'])->with('content')->with('content.lang')->with('notification.type')
+                        ->where(function ($query) {
+                            $query->whereNull('author_id')->orWhere('author_id', user()->id)->orWhereHas('author', function($subquery) {
+                                $subquery->whereHas('roles', function($rolesQuery) {
+                                    $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
+                                });
+                            });
+                        })
+                        ->with('author')->with('author.roles')->with('content')
+                        ->whereId($id);
     }
 
 }

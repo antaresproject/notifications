@@ -68,11 +68,7 @@ class NotificationLangFilter extends SelectFilter implements DataTableScopeContr
         if (empty($values)) {
             return false;
         }
-        $builder->whereHas('content', function($query) use($values) {
-            $query->whereHas('lang', function($subquery) use($values) {
-                $subquery->whereIn('id', $values);
-            });
-        });
+        $builder->whereIn('tbl_languages.id', $values);
     }
 
 }

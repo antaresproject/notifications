@@ -79,11 +79,7 @@ class NotificationAreaFilter extends SelectFilter implements DataTableScopeContr
         if (empty($values)) {
             return false;
         }
-        $builder->whereHas('author', function($query) use($values) {
-            $query->whereHas('roles', function($subquery) use($values) {
-                $subquery->whereIn('area', $values);
-            });
-        });
+        $builder->whereIn('tbl_roles.area', $values);
     }
 
 }

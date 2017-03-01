@@ -63,7 +63,7 @@ class DateRangeNotificationLogsFilter extends DateRangeFilter implements DataTab
             }
             $start = $range['start'] . ' 00:00:00';
             $end   = $range['end'] . ' 23:59:59';
-            $builder->whereBetween('created_at', [$start, $end]);
+            $builder->whereBetween('tbl_notifications_stack.created_at', [$start, $end]);
         }
     }
 

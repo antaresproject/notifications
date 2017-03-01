@@ -69,7 +69,7 @@ class NotificationNameFilter extends SelectFilter implements DataTableScopeContr
         if (empty($values)) {
             return false;
         }
-        $builder->whereIn('id', $values);
+        $builder->whereIn('tbl_notifications.id', $values);
     }
 
 }

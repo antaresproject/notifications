@@ -44,7 +44,7 @@ interface LogsListener
      * @param mixed $id
      * @return RedirectResponse
      */
-    public function delete($id);
+    public function delete($id = null);
 
     /**
      * When deletion of notification log completed successfully
