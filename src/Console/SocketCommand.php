@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Console;
 
 use Symfony\Component\Console\Input\InputOption;
@@ -41,16 +40,6 @@ class SocketCommand extends Command
      * @var string
      */
     protected $description = 'Starts Notifications and the Ratchet WebSocket server to start running event-driven apps with Antares.';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     /**
      * Execute the console command.

@@ -18,13 +18,10 @@
  * @link       http://antaresproject.io
  */
 
-
-namespace Antares\Foundation\Http\Handlers;
+namespace Antares\Notifications\Http\Handlers;
 
 use Antares\Contracts\Authorization\Authorization;
 use Antares\Foundation\Support\MenuHandler;
-use function app;
-use function handles;
 
 class NotificationsBreadcrumbMenu extends MenuHandler
 {

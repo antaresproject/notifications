@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares Project
@@ -31,7 +31,9 @@ use Antares\Notifications\Contracts\LogsListener;
 use Antares\Foundation\Template\SmsNotification;
 use Antares\Foundation\Processor\Processor;
 use Illuminate\Http\RedirectResponse;
+use Antares\Html\Form\FormBuilder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Fluent;
 use Illuminate\View\View;
 
 class LogsProcessor extends Processor
@@ -119,6 +121,42 @@ class LogsProcessor extends Processor
             return $listener->deleteSuccess();
         }
         return $listener->deleteFailed();
+    }
+
+    /**
+     * Saves notifications config
+     * 
+     * @param LogsListener $listener
+     * @return RedirectResponse
+     */
+    public function config(LogsListener $listener)
+    {
+        $this->breadcrumb->onNotificationsConfig();
+        $memory = app('antares.memory')->make('primary');
+        $model  = new Fluent([
+            'days' => $memory->get('notifications_remove_after_days', ''),
+        ]);
+        $form   = $this->form($model);
+        if (!request()->isMethod('post')) {
+            return view('antares/notifications::admin.logs.config', compact('form'));
+        }
+        if (!$form->isValid()) {
+            return $listener->configValidationFailed($form->getMessageBag());
+        }
+        $memory->put('notifications_remove_after_days', input('days'));
+        $memory->finish();
+        return $listener->configSaveSuccess();
+    }
+
+    /**
+     * Notification configuration form creator
+     * 
+     * @param Fluent $model
+     * @return FormBuilder
+     */
+    protected function form(Fluent $model): FormBuilder
+    {
+        return new FormBuilder(new \Antares\Notifications\Http\Form\Configuration($model));
     }
 
 }

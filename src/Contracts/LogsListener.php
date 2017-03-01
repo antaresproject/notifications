@@ -20,6 +20,8 @@
 
 namespace Antares\Notifications\Contracts;
 
+use Illuminate\Support\MessageBag;
+
 interface LogsListener
 {
 
@@ -59,4 +61,26 @@ interface LogsListener
      * @return RedirectResponse
      */
     public function deleteFailed();
+
+    /**
+     * When shows notifications configuration form
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function config();
+
+    /**
+     * When validation of notifications configuration form failed
+     * 
+     * @params \Antares\Messages\MessageBag $errors
+     * @return Illuminate\Http\RedirectResponse
+     */
+    public function configValidationFailed(MessageBag $errors): \Illuminate\Http\RedirectResponse;
+
+    /**
+     * When save notifications configuration completed successfully
+     * 
+     * @return Illuminate\Http\RedirectResponse
+     */
+    public function configSaveSuccess(): \Illuminate\Http\RedirectResponse;
 }

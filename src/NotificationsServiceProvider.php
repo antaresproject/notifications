@@ -18,17 +18,18 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications;
 
-use Antares\Foundation\Http\Handlers\NotificationsBreadcrumbMenu;
+use Antares\Notifications\Http\Handlers\NotificationsBreadcrumbMenu;
 use Antares\Foundation\Http\Handlers\NotificationsTopMenuHandler;
 use Antares\Foundation\Support\Providers\ModuleServiceProvider;
 use Antares\Notifications\Console\NotificationCategoriesCommand;
 use Antares\Notifications\Console\NotificationSeveritiesCommand;
 use Antares\Notifications\Console\NotificationTypesCommand;
 use Antares\Notifications\Listener\NotificationsListener;
+use Antares\Notifications\Console\NotificationsRemover;
 use Antares\Notifications\Console\SocketCommand;
+use Antares\Control\Http\Handlers\ControlPane;
 
 class NotificationsServiceProvider extends ModuleServiceProvider
 {
@@ -95,6 +96,10 @@ class NotificationsServiceProvider extends ModuleServiceProvider
             publish('notifications', 'scripts.default');
         }
         $this->attachMenu(NotificationsBreadcrumbMenu::class);
+        $this->app->make('view')->composer('antares/notifications::admin.logs.config', ControlPane::class);
+        $this->commands([
+            NotificationsRemover::class
+        ]);
     }
 
     /**
