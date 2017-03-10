@@ -53,8 +53,7 @@ class NotificationLogsMenu extends MenuHandler
      */
     public function getTitleAttribute()
     {
-
-        return trans('antares/notifications::global.notification_logs');
+        return trans('antares/notifications::logs.notification_log');
     }
 
     /**

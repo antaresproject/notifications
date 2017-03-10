@@ -20,7 +20,7 @@
 return [
     'notification_delete_success'           => 'Notification log has been deleted successfully.',
     'notification_delete_failed'            => 'Notification log has not been deleted.',
-    'notification_logs'                     => 'Notification Logs',
+    'notification_log'                      => 'Notification Log',
     'filter'                                => [
         'daterange' => 'Date range [:start - :end]',
         'langs'     => 'Languages: %value',

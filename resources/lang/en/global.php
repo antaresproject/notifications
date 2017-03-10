@@ -18,6 +18,5 @@
  * @link       http://antaresproject.io
  */
 return [
-    'Notifications'     => 'Notifications',
-    'notification_logs' => 'Notification Logs'
+    'Notifications' => 'Notifications',
 ];

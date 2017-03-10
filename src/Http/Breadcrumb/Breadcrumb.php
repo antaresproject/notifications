@@ -96,7 +96,7 @@ class Breadcrumb
     public function onLogsList()
     {
         Breadcrumbs::register('notifications-logs', function($breadcrumbs) {
-            $breadcrumbs->push(trans('antares/notifications::logs.notification_logs'), handles('antares::notifications/logs/index'));
+            $breadcrumbs->push(trans('antares/notifications::logs.notification_log'), handles('antares::notifications/logs/index'));
         });
         view()->share('breadcrumbs', Breadcrumbs::render('notifications-logs'));
     }

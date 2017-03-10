@@ -57,8 +57,8 @@ class NotificationsWidget extends AbstractWidget
     protected $attributes = [
         'x'              => 0,
         'y'              => 0,
-        'min_width'      => 3,
-        'min_height'     => 9,
+        'min_width'      => 2,
+        'min_height'     => 3,
         'max_width'      => 12,
         'max_height'     => 9,
         'default_width'  => 3,

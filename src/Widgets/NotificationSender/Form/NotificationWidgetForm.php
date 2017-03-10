@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Widgets\NotificationSender\Form;
 
 use Antares\Contracts\Html\Form\Grid as FormGrid;
@@ -75,9 +74,9 @@ class NotificationWidgetForm
         return app('antares.form')->of("antares.widgets: notification-widget")->extend(function (FormGrid $form) {
 
                     $form->name('Notification Tester');
-                    $url = '#';
                     $form->simple(handles('antares::notifications/widgets/send'), ['id' => 'notification-widget-form']);
-                    $form->layout('vertical_compact');
+
+                    $form->layout('antares/notifications::widgets.forms.send_notification_form');
 
                     $form->fieldset(trans('Default Fieldset'), function (Fieldset $fieldset) {
 
