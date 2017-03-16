@@ -50,6 +50,6 @@ return [
     'form'                                  => [
         'notifications_config_legend'     => 'Notifications configuration',
         'notifications_config_days_label' => 'Remove notification logs every X days',
-        'notifications_config_days_help'  => '*Notification logs will be deleted automatically after X days from the date of creation.'
+        'notifications_config_days_help'  => 'Notification logs will be deleted automatically after X days from the date of creation.'
     ]
 ];

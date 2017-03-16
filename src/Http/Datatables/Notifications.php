@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Http\Datatables;
 
 use Antares\Notifications\Model\Notifications as NotificationsModel;
@@ -27,13 +26,13 @@ use Antares\Notifications\Filter\NotificationFilter;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Datatables\Services\DataTable;
 use Illuminate\Database\Eloquent\Builder;
-use Antares\Support\Facades\Form;
+use Illuminate\Support\Collection;
 
 class Notifications extends DataTable
 {
 
     /**
-     * available filters
+     * Available filters
      *
      * @var array 
      */
@@ -53,23 +52,9 @@ class Notifications extends DataTable
      */
     public function query()
     {
-        $builder = app(NotificationsModel::class)
-                ->select(['tbl_notifications.*'])
-                ->with(['category', 'contents'])
-                ->whereHas('contents', function ($query) {
-            $query->where('lang_id', lang_id());
-        });
-
-
-        if (!request()->ajax()) {
-            $builder->whereHas('type', function ($query) {
-                $query->where('name', 'email');
-            });
-            $builder->whereHas('category', function ($query) {
-                $query->where('name', 'default');
-            });
-        }
-        return $builder;
+        return app(NotificationsModel::class)->select(['tbl_notifications.*'])->with(['category', 'contents'])->whereHas('contents', function ($query) {
+                    $query->where('lang_id', lang_id());
+                });
     }
 
     /**
@@ -82,7 +67,6 @@ class Notifications extends DataTable
         $canTest         = $acl->can('notifications-test');
         $canChangeStatus = $acl->can('notifications-change-status');
         $canDelete       = $acl->can('notifications-delete');
-
         return $this->prepare()
                         ->filter(function ($query) {
                             $request = app('request');
@@ -173,30 +157,28 @@ class Notifications extends DataTable
                         ->addColumn(['data' => 'active', 'name' => 'active', 'title' => trans('Enabled')])
                         ->addAction(['name' => 'edit', 'title' => '', 'class' => 'mass-actions dt-actions', 'orderable' => false, 'searchable' => false])
                         ->setDeferedData()
-                        ->addGroupSelect($this->categoriesSelect())
-                        ->addGroupSelect($this->typesSelect());
+                        ->addGroupSelect($this->categories(), 3, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'class' => 'mr24', 'id' => 'datatables-notification-category'])
+                        ->addGroupSelect($this->types(), 4, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type']);
     }
 
     /**
      * Creates select for categories
      * 
-     * @return String
+     * @return Collection
      */
-    protected function categoriesSelect()
+    protected function categories(): Collection
     {
-        $options = NotificationCategory::all(['id', 'title'])->lists('title', 'id');
-        return Form::select('category', $options, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'data-selectAR--mdl-big' => "true", 'class' => 'notifications-select-category mr24 select2--prefix']);
+        return NotificationCategory::lists('title', 'id');
     }
 
     /**
      * Creates select for types
      * 
-     * @return String
+     * @return Collection
      */
-    protected function typesSelect()
+    protected function types(): Collection
     {
-        $options = NotificationTypes::all(['id', 'title'])->lists('title', 'id');
-        return Form::select('type', $options, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'data-selectar--mdl-big' => "true", 'class' => 'notifications-select-type select2--prefix mr24']);
+        return NotificationTypes::lists('title', 'id');
     }
 
     /**

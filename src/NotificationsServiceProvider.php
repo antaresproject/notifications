@@ -22,14 +22,16 @@ namespace Antares\Notifications;
 
 use Antares\Notifications\Http\Handlers\NotificationsBreadcrumbMenu;
 use Antares\Foundation\Http\Handlers\NotificationsTopMenuHandler;
-use Antares\Foundation\Support\Providers\ModuleServiceProvider;
 use Antares\Notifications\Console\NotificationCategoriesCommand;
 use Antares\Notifications\Console\NotificationSeveritiesCommand;
+use Antares\Foundation\Support\Providers\ModuleServiceProvider;
 use Antares\Notifications\Console\NotificationTypesCommand;
 use Antares\Notifications\Listener\NotificationsListener;
+use Antares\Notifications\Listener\ConfigurationListener;
 use Antares\Notifications\Console\NotificationsRemover;
 use Antares\Notifications\Console\SocketCommand;
 use Antares\Control\Http\Handlers\ControlPane;
+use Antares\Memory\Model\Option;
 
 class NotificationsServiceProvider extends ModuleServiceProvider
 {
@@ -49,12 +51,22 @@ class NotificationsServiceProvider extends ModuleServiceProvider
     protected $routeGroup = 'antares/notifications';
 
     /**
+     * The event handler mappings for the application.
+     *
+     * @var array
+     */
+    protected $listen = [
+        "antares.form: foundation.settings" => ConfigurationListener::class,
+    ];
+
+    /**
      * Register service provider.
      *
      * @return void
      */
     public function register()
     {
+
         $this->bindContracts();
         $this->app->singleton('notifications.contents', function ($app) {
             return new Contents();
@@ -100,6 +112,7 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         $this->commands([
             NotificationsRemover::class
         ]);
+        Option::observe(new ConfigurationListener());
     }
 
     /**

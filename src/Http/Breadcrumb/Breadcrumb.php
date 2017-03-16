@@ -101,15 +101,4 @@ class Breadcrumb
         view()->share('breadcrumbs', Breadcrumbs::render('notifications-logs'));
     }
 
-    /**
-     * On notification configuration
-     */
-    public function onNotificationsConfig()
-    {
-        Breadcrumbs::register('notifications-config', function($breadcrumbs) {
-            $breadcrumbs->push(trans('antares/notifications::logs.notifications_config'), handles('antares::notifications/logs/config'));
-        });
-        view()->share('breadcrumbs', Breadcrumbs::render('notifications-config'));
-    }
-
 }
