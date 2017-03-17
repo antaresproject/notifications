@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Http\Datatables;
 
 use Antares\Notifications\Model\Notifications as NotificationsModel;
@@ -82,7 +81,6 @@ class Notifications extends DataTable
         $canTest         = $acl->can('notifications-test');
         $canChangeStatus = $acl->can('notifications-change-status');
         $canDelete       = $acl->can('notifications-delete');
-
         return $this->prepare()
                         ->filter(function ($query) {
                             $request = app('request');
@@ -173,30 +171,28 @@ class Notifications extends DataTable
                         ->addColumn(['data' => 'active', 'name' => 'active', 'title' => trans('Enabled')])
                         ->addAction(['name' => 'edit', 'title' => '', 'class' => 'mass-actions dt-actions', 'orderable' => false, 'searchable' => false])
                         ->setDeferedData()
-                        ->addGroupSelect($this->categoriesSelect())
-                        ->addGroupSelect($this->typesSelect());
+                        ->addGroupSelect($this->categories(), 3, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'class' => 'mr24', 'id' => 'datatables-notification-category'])
+                        ->addGroupSelect($this->types(), 4, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type']);
     }
 
     /**
      * Creates select for categories
      * 
-     * @return String
+     * @return \Illuminate\Support\Collection
      */
-    protected function categoriesSelect()
+    protected function categories(): \Illuminate\Support\Collection
     {
-        $options = NotificationCategory::all(['id', 'title'])->lists('title', 'id');
-        return Form::select('category', $options, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'data-selectAR--mdl-big' => "true", 'class' => 'notifications-select-category mr24 select2--prefix']);
+        return NotificationCategory::lists('title', 'id');
     }
 
     /**
      * Creates select for types
      * 
-     * @return String
+     * @return \Illuminate\Support\Collection
      */
-    protected function typesSelect()
+    protected function types(): \Illuminate\Support\Collection
     {
-        $options = NotificationTypes::all(['id', 'title'])->lists('title', 'id');
-        return Form::select('type', $options, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'data-selectar--mdl-big' => "true", 'class' => 'notifications-select-type select2--prefix mr24']);
+        return NotificationTypes::lists('title', 'id');
     }
 
     /**

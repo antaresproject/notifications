@@ -50,7 +50,6 @@ $router->group(['prefix' => 'notifications'], function (Router $router) {
     $router->get('/logs/{id}/delete', 'LogsController@delete');
     $router->post('/logs/delete', 'LogsController@delete');
     $router->get('/logs/preview/{id}', 'LogsController@preview');
-    $router->match(['GET', 'POST'], '/logs/config', 'LogsController@config');
 });
 
 

@@ -23,7 +23,6 @@ namespace Antares\Notifications\Http\Controllers\Admin;
 use Antares\Notifications\Processor\LogsProcessor as Processor;
 use Antares\Foundation\Http\Controllers\AdminController;
 use Antares\Notifications\Contracts\LogsListener;
-use Illuminate\Support\MessageBag;
 
 class LogsController extends AdminController implements LogsListener
 {
@@ -87,31 +86,6 @@ class LogsController extends AdminController implements LogsListener
     {
         app('antares.messages')->add('error', trans('antares/notifications::logs.notification_delete_failed'));
         return redirect()->to(handles('antares::notifications/logs/index'));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function config()
-    {
-        return $this->processor->config($this);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function configValidationFailed(MessageBag $errors): \Illuminate\Http\RedirectResponse
-    {
-        return $this->redirectWithErrors(handles('antares::notifications/logs/config'), $errors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function configSaveSuccess(): \Illuminate\Http\RedirectResponse
-    {
-        app('antares.messages')->add('success', trans('antares/notifications::logs.notification_config_save_success'));
-        return redirect()->to(handles('antares::notifications/logs/config'));
     }
 
 }

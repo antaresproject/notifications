@@ -123,40 +123,4 @@ class LogsProcessor extends Processor
         return $listener->deleteFailed();
     }
 
-    /**
-     * Saves notifications config
-     * 
-     * @param LogsListener $listener
-     * @return RedirectResponse
-     */
-    public function config(LogsListener $listener)
-    {
-        $this->breadcrumb->onNotificationsConfig();
-        $memory = app('antares.memory')->make('primary');
-        $model  = new Fluent([
-            'days' => $memory->get('notifications_remove_after_days', ''),
-        ]);
-        $form   = $this->form($model);
-        if (!request()->isMethod('post')) {
-            return view('antares/notifications::admin.logs.config', compact('form'));
-        }
-        if (!$form->isValid()) {
-            return $listener->configValidationFailed($form->getMessageBag());
-        }
-        $memory->put('notifications_remove_after_days', input('days'));
-        $memory->finish();
-        return $listener->configSaveSuccess();
-    }
-
-    /**
-     * Notification configuration form creator
-     * 
-     * @param Fluent $model
-     * @return FormBuilder
-     */
-    protected function form(Fluent $model): FormBuilder
-    {
-        return new FormBuilder(new \Antares\Notifications\Http\Form\Configuration($model));
-    }
-
 }
