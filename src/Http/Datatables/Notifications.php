@@ -26,13 +26,13 @@ use Antares\Notifications\Filter\NotificationFilter;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Datatables\Services\DataTable;
 use Illuminate\Database\Eloquent\Builder;
-use Antares\Support\Facades\Form;
+use Illuminate\Support\Collection;
 
 class Notifications extends DataTable
 {
 
     /**
-     * available filters
+     * Available filters
      *
      * @var array 
      */
@@ -52,23 +52,9 @@ class Notifications extends DataTable
      */
     public function query()
     {
-        $builder = app(NotificationsModel::class)
-                ->select(['tbl_notifications.*'])
-                ->with(['category', 'contents'])
-                ->whereHas('contents', function ($query) {
-            $query->where('lang_id', lang_id());
-        });
-
-
-        if (!request()->ajax()) {
-            $builder->whereHas('type', function ($query) {
-                $query->where('name', 'email');
-            });
-            $builder->whereHas('category', function ($query) {
-                $query->where('name', 'default');
-            });
-        }
-        return $builder;
+        return app(NotificationsModel::class)->select(['tbl_notifications.*'])->with(['category', 'contents'])->whereHas('contents', function ($query) {
+                    $query->where('lang_id', lang_id());
+                });
     }
 
     /**
@@ -178,9 +164,9 @@ class Notifications extends DataTable
     /**
      * Creates select for categories
      * 
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
-    protected function categories(): \Illuminate\Support\Collection
+    protected function categories(): Collection
     {
         return NotificationCategory::lists('title', 'id');
     }
@@ -188,9 +174,9 @@ class Notifications extends DataTable
     /**
      * Creates select for types
      * 
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
-    protected function types(): \Illuminate\Support\Collection
+    protected function types(): Collection
     {
         return NotificationTypes::lists('title', 'id');
     }

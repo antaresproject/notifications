@@ -97,6 +97,7 @@ class NotificationsWidget extends AbstractWidget
     public function render()
     {
         app('antares.asset')->container('antares/foundation::application')->add('webpack_forms_basic', '/webpack/forms_basic.js', ['app_cache']);
+
         publish('notifications', ['js/notification-widget.js']);
         return view('antares/notifications::widgets.send_notification', ['form' => $this->form->get()])->render();
     }

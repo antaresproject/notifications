@@ -31,9 +31,7 @@ use Antares\Notifications\Contracts\LogsListener;
 use Antares\Foundation\Template\SmsNotification;
 use Antares\Foundation\Processor\Processor;
 use Illuminate\Http\RedirectResponse;
-use Antares\Html\Form\FormBuilder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Fluent;
 use Illuminate\View\View;
 
 class LogsProcessor extends Processor
@@ -79,7 +77,7 @@ class LogsProcessor extends Processor
      * 
      * @return View
      */
-    public function index(): View
+    public function index()
     {
         $this->breadcrumb->onLogsList();
         return $this->datatables->render('antares/notifications::admin.logs.index');
