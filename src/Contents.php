@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications;
 
 use Antares\Notifications\Model\NotificationContents;
@@ -67,7 +66,7 @@ class Contents
      */
     public function find($operation, $locale)
     {
-        $model = $this->notifications->first(function ($key, $value) use($operation, $locale) {
+        $model = $this->notifications->first(function ($value, $key) use($operation, $locale) {
             return $value->code == $locale && ($value->title == $operation or $value->name == $operation);
         });
         return !is_null($model) ? $model->content : false;

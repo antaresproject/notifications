@@ -130,7 +130,7 @@ class Logs extends DataTable
      */
     protected function types(): array
     {
-        return array_merge(['' => 'All'], NotificationTypes::all(['name', 'title'])->lists('title', 'name')->toArray());
+        return array_merge(['' => 'All'], NotificationTypes::all(['name', 'title'])->pluck('title', 'name')->toArray());
     }
 
     /**

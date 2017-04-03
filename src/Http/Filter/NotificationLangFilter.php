@@ -54,7 +54,7 @@ class NotificationLangFilter extends SelectFilter implements DataTableScopeContr
      */
     protected function options()
     {
-        return app('languages')->langs()->lists('name', 'id')->toArray();
+        return app('languages')->langs()->pluck('name', 'id')->toArray();
     }
 
     /**

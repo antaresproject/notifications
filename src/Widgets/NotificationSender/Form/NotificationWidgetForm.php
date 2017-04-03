@@ -92,10 +92,10 @@ class NotificationWidgetForm
 
                         $fieldset->control('select', 'notifications')
                                 ->attributes(['class' => 'notification-widget-notifications-select'])
-                                ->options($this->repository->getNotificationContents('email')->lists('title', 'id'))
+                                ->options($this->repository->getNotificationContents('email')->pluck('title', 'id'))
                                 ->wrapper(['class' => 'w300']);
 
-                        if (!is_null(from_route('users'))) {
+                        if (!is_null(from_route('user'))) {
                             $fieldset->control('button', 'send')
                                     ->attributes([
                                         'type'       => 'submit',
