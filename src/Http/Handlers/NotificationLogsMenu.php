@@ -43,7 +43,7 @@ class NotificationLogsMenu extends MenuHandler
      */
     public function getPositionAttribute()
     {
-        return $this->handler->has('logger.api-logs') ? '>:logger.api-logs' : '>:logger.automation-logs';
+        return $this->handler->has('logger.api-logs') ? '>:logger.api-logs' : '>:logger.request-log';
     }
 
     /**

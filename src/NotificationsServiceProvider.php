@@ -29,7 +29,6 @@ use Antares\Notifications\Console\NotificationTypesCommand;
 use Antares\Notifications\Listener\NotificationsListener;
 use Antares\Notifications\Listener\ConfigurationListener;
 use Antares\Notifications\Console\NotificationsRemover;
-use Antares\Notifications\Console\SocketCommand;
 use Antares\Control\Http\Handlers\ControlPane;
 use Antares\Memory\Model\Option;
 
@@ -72,7 +71,6 @@ class NotificationsServiceProvider extends ModuleServiceProvider
             return new Contents();
         });
         $this->commands([
-            SocketCommand::class,
             NotificationCategoriesCommand::class,
             NotificationSeveritiesCommand::class,
             NotificationTypesCommand::class

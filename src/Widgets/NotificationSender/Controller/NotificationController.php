@@ -119,7 +119,7 @@ class NotificationController extends AdminController
             return user();
         }
         $route = app('router')->getRoutes()->match(app('request')->create(url()->previous()));
-        return (in_array('users', $route->parameterNames()) && $uid   = $route->getParameter('users')) ? user()->newQuery()->findOrFail($uid) : user();
+        return (in_array('users', $route->parameterNames()) && $uid   = $route->parameter('users')) ? user()->newQuery()->findOrFail($uid) : user();
     }
 
     /**
