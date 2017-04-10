@@ -89,7 +89,7 @@ class Form extends FormBuilder
             $control = $fieldset->control('select', 'type')
                     ->label(trans('Type'))
                     ->options(function() {
-                return NotificationTypes::all()->lists('title', 'name');
+                return NotificationTypes::all()->pluck('title', 'name');
             });
 
             if (!is_null($this->fluent->id)) {
@@ -102,7 +102,7 @@ class Form extends FormBuilder
             $fieldset->control('select', 'category')
                     ->label('Category')
                     ->options(function() {
-                        return app(NotificationCategory::class)->get()->lists('title', 'id');
+                        return app(NotificationCategory::class)->get()->pluck('title', 'id');
                     })
                     ->value($this->fluent->type);
 

@@ -168,7 +168,7 @@ class Notifications extends DataTable
      */
     protected function categories(): Collection
     {
-        return NotificationCategory::lists('title', 'id');
+        return NotificationCategory::pluck('title', 'id');
     }
 
     /**
@@ -178,7 +178,7 @@ class Notifications extends DataTable
      */
     protected function types(): Collection
     {
-        return NotificationTypes::lists('title', 'id');
+        return NotificationTypes::pluck('title', 'id');
     }
 
     /**

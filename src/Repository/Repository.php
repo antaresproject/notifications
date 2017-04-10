@@ -249,7 +249,7 @@ class Repository extends AbstractRepository
      */
     public function getDecoratedNotificationTypes()
     {
-        return NotificationTypes::whereIn('name', ['email', 'sms'])->lists('name', 'id')->map(function ($item, $key) {
+        return NotificationTypes::whereIn('name', ['email', 'sms'])->pluck('name', 'id')->map(function ($item, $key) {
                     return ucfirst($item);
                 });
     }
