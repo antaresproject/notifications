@@ -18,15 +18,14 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Templates\TestCase;
 
-use Mockery as m;
-use Antares\Testing\TestCase;
-use Antares\Templates\TemplatesServiceProvider;
+use Antares\Notifications\NotificationsServiceProvider;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
+use Antares\Testing\ApplicationTestCase;
+use Mockery as m;
 
-class TemplatesServiceProviderTest extends TestCase
+class NotificationsServiceProviderTest extends ApplicationTestCase
 {
 
     use WithoutMiddleware;
@@ -57,7 +56,7 @@ class TemplatesServiceProviderTest extends TestCase
         $app           = $this->app;
         $app['events'] = m::mock('\Illuminate\Contracts\Events\Dispatcher');
         $app['files']  = m::mock('\Illuminate\Filesystem\Filesystem');
-        $stub          = new TemplatesServiceProvider($app);
+        $stub          = new NotificationsServiceProvider($app);
         $this->assertNull($stub->register());
     }
 
@@ -67,7 +66,7 @@ class TemplatesServiceProviderTest extends TestCase
     public function testBootExtensionComponents()
     {
         $app  = $this->app;
-        $stub = new TemplatesServiceProvider($app);
+        $stub = new NotificationsServiceProvider($app);
         $stub->register();
         $this->assertNull($stub->bootExtensionComponents());
     }
