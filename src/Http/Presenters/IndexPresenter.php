@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Http\Presenters;
 
 use Antares\Notifications\Contracts\IndexPresenter as PresenterContract;

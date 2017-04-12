@@ -18,25 +18,26 @@
  * @link       http://antaresproject.io
  */
 
+namespace Antares\Notifications\Http\Presenters\TestCase;
 
-namespace Antares\Templates\Http\Presenters\TestCase;
-
-use Antares\Templates\Http\Presenters\IndexPresenter;
-use Antares\Datatables\Html\Builder;
-use Antares\Testing\TestCase;
-use Exception;
-use Illuminate\Database\Eloquent\Builder as Builder3;
-use Illuminate\Database\Query\Builder as Builder2;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
+use Antares\Notifications\Http\Datatables\Notifications as Datatables;
+use Antares\Notifications\Http\Presenters\IndexPresenter;
+use Antares\Notifications\Http\Presenters\Breadcrumb;
+use Antares\Notifications\Model\Notifications;
+use Antares\Testing\ApplicationTestCase;
+use Antares\Html\Form\FormBuilder;
 use Illuminate\View\View;
 use Mockery as m;
-use function base_path;
-use function url;
+use Exception;
 
-class IndexPresenterTest extends TestCase
+class IndexPresenterTest extends ApplicationTestCase
 {
 
+    /**
+     * Presenter instance
+     *
+     * @var IndexPresenter
+     */
     protected $stub;
 
     /**
@@ -45,97 +46,67 @@ class IndexPresenterTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $htmlBuilder  = $this->app->make('Collective\Html\HtmlBuilder');
-        $formBuilder  = $this->app->make('Antares\Html\Support\FormBuilder');
-        $urlGenerator = url();
-        $builder      = new Builder($this->app['config'], $this->app['view'], $htmlBuilder, $urlGenerator, $formBuilder);
-        $this->stub   = new IndexPresenter($this->app, $builder);
-        $this->app['view']->addNamespace('antares/templates', realpath(base_path() . '../../../../components/templates/resources/views'));
-    }
+        $breadcrumb = m::mock(Breadcrumb::class);
+        $breadcrumb->shouldReceive('onTable')->once()->with(null)->andReturnNull()
+                ->shouldReceive('onEdit')->once()->with(m::type(Notifications::class))->andReturnNull()
+                ->shouldReceive('onCreate')->once()->with(null)->andReturnNull();
 
-    protected function getModel()
-    {
-        return m::mock('Antares\Templates\Model\Templates')
-                        ->shouldReceive('getTable')->withNoArgs()->andReturn('tbl_jobs')
-                        ->shouldReceive('getConnectionName')->withAnyArgs()->andReturn('mysql')
-                        ->shouldReceive('hydrate')->withAnyArgs()->andReturn(new Collection([1 => 2]))
-                        ->shouldReceive('where')->withAnyArgs()->andReturnSelf()
-                        ->shouldReceive('first')->withNoArgs()->andReturnSelf()
-                        ->shouldReceive('delete')->withNoArgs()->andReturnSelf()
-                        ->shouldReceive('newCollection')->withAnyArgs()->andReturn(new Collection())
-                        ->getMock();
-    }
-
-    protected function getBuilder()
-    {
-        $resolver   = m::mock('Illuminate\Database\ConnectionInterface')
-                        ->shouldReceive('getTablePrefix')->withNoArgs()->andReturn('dupa')
-                        ->shouldReceive('getDriverName')->withNoArgs()->andReturn('mysql')
-                        ->shouldReceive('getQueryGrammar')
-                        ->andReturn($this->app['Illuminate\Database\Query\Grammars\Grammar'])
-                        ->shouldReceive('raw')
-                        ->andReturn($expression = m::mock('Illuminate\Database\Query\Expression'))
-                        ->shouldReceive('select')
-                        ->once()
-                        ->withAnyArgs()
-                        ->andReturn(null)->getMock();
-
-        $expression->shouldReceive('getValue')->andReturn('testowanie');
-
-        $queryBuilder = m::mock(Builder2::class);
-        $queryBuilder->shouldReceive('getConnection')->withNoArgs()->andReturn($resolver)
-                ->shouldReceive('toSql')->withNoArgs()->andReturn('')
-                ->shouldReceive('select')->once()->withAnyArgs()->andReturn(null)
-                ->shouldReceive('getBindings')->once()->withAnyArgs()->andReturn([])
-                ->shouldReceive('setBindings')->once()->withAnyArgs()->andReturnSelf()
-                ->shouldReceive('count')->once()->withAnyArgs()->andReturn(0)
-                ->shouldReceive('get')->once()->withAnyArgs()->andReturn([1 => 2])
-                ->shouldReceive('from')->once()->with('tbl_jobs')->andReturnSelf();
-
-
-        $resolver->shouldReceive('table')
-                ->andReturn($queryBuilder);
-        $builder = new Builder3($queryBuilder);
-        $model   = $this->getModel();
-        $model->shouldReceive('get')->withAnyArgs()->andReturn($builder);
-        $builder->setModel($model);
-        return $builder;
+        $datatables = $this->app->make(Datatables::class);
+        $this->stub = new IndexPresenter($breadcrumb, $datatables);
+        $this->app['view']->addNamespace('antares/notifications', realpath(base_path() . '../../../../components/notifications/resources/views'));
     }
 
     /**
-     * Teardown the test environment.
+     * Tests Antares\Notifications\Http\Presenters\IndexPresenter::edit
+     * 
+     * @test
      */
-    public function tearDown()
+    public function testGetForm()
     {
-        parent::tearDown();
+        $model = new Notifications();
+        $this->assertInstanceOf(FormBuilder::class, $this->stub->getForm($model));
     }
 
     /**
-     * Tests Antares\Templates\Http\Presenters\IndexPresenter::show
+     * Tests Antares\Notifications\Http\Presenters\IndexPresenter::preview
+     * 
+     * @test
      */
-    public function testShow()
+    public function testPreview()
     {
-        $this->assertInstanceOf(View::class, $this->stub->show($this->getModel()));
+        $this->assertInstanceOf(View::class, $this->stub->preview([]));
     }
 
     /**
-     * Tests Antares\Templates\Http\Presenters\IndexPresenter::table
+     * Tests Antares\Notifications\Http\Presenters\IndexPresenter::create
+     * 
+     * @test
+     */
+    public function testCreate()
+    {
+        $model = new Notifications();
+        $this->assertInstanceOf(View::class, $this->stub->create($model));
+    }
+
+    /**
+     * Tests Antares\Notifications\Http\Presenters\IndexPresenter::edit
+     */
+    public function testEdit()
+    {
+        $model = new Notifications();
+        $this->assertInstanceOf(View::class, $this->stub->edit($model, 'en'));
+    }
+
+    /**
+     * Tests Antares\Notifications\Http\Presenters\IndexPresenter::table
      */
     public function testTable()
     {
-        $this->assertInstanceOf(View::class, $this->stub->table($this->getBuilder()));
+        $this->assertInstanceOf(View::class, $this->stub->table());
     }
 
     /**
-     * Tests Antares\Templates\Http\Presenters\IndexPresenter::tableJson
-     */
-    public function testTableJson()
-    {
-        $this->assertInstanceOf(JsonResponse::class, $this->stub->tableJson($this->getBuilder()));
-    }
-
-    /**
-     * Tests Antares\Templates\Http\Presenters\IndexPresenter::view
+     * Tests Antares\Notifications\Http\Presenters\IndexPresenter::view
      */
     public function testView()
     {

@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Repository;
 
 use Antares\Notifications\Model\NotificationContents;

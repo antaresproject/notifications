@@ -18,66 +18,65 @@
  * @link       http://antaresproject.io
  */
 
+namespace Antares\Notifications\Http\Handlers\TestCase;
 
-namespace Antares\Templates\Http\Handlers\TestCase;
-
-use Antares\Templates\Http\Handlers\Menu as TemplatesMenu;
+use Antares\Notifications\Http\Handlers\Menu as NotificationsMenu;
 use Antares\Foundation\Support\MenuHandler;
-use Antares\Testbench\TestCase;
+use Antares\Testing\ApplicationTestCase;
 use Mockery as m;
 
-class MenuTest extends TestCase
+class MenuTest extends ApplicationTestCase
 {
 
     /**
-     * Setup the test environment.
+     * Tests Antares\Notifications\Http\Handlers\Menu::__construct
+     * 
+     * @test
      */
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    /**
-     * Teardown the test environment.
-     */
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
-
     public function testItIsInitializable()
     {
-
         $app  = m::mock('Illuminate\Container\Container');
         $menu = m::mock(Menu::class);
         $app->shouldReceive('make')->once()->with('antares.platform.menu')->andReturn($menu);
-        $stub = new TemplatesMenu($app);
-        $this->assertInstanceOf(TemplatesMenu::class, $stub);
+        $stub = new NotificationsMenu($app);
+        $this->assertInstanceOf(NotificationsMenu::class, $stub);
         $this->assertInstanceOf(MenuHandler::class, $stub);
     }
 
+    /**
+     * Tests Antares\Notifications\Http\Handlers\Menu::getPositionAttribute
+     * 
+     * @test
+     */
     public function testItShouldBeChildOfExtensionGivenExtensionIsAvailable()
     {
         $app  = m::mock('Illuminate\Container\Container');
         $menu = m::mock(Menu::class);
         $app->shouldReceive('make')->once()->with('antares.platform.menu')->andReturn($menu);
-        $menu->shouldReceive('has')->once()->with('extensions')->andReturn(true);
-        $stub = new TemplatesMenu($app);
-        $this->assertEquals('^:settings', $stub->getPositionAttribute());
+        $menu->shouldReceive('has')->once()->with('settings.brands')->andReturn(true);
+        $stub = new NotificationsMenu($app);
+        $this->assertEquals('>:settings.brands', $stub->getPositionAttribute());
     }
 
+    /**
+     * Tests Antares\Notifications\Http\Handlers\Menu::getPositionAttribute
+     * 
+     * @test
+     */
     public function testItShouldNextToHomeGivenExtensionIsntAvailable()
     {
         $app  = m::mock('Illuminate\Container\Container');
         $menu = m::mock(Menu::class);
         $app->shouldReceive('make')->once()->with('antares.platform.menu')->andReturn($menu);
-        $menu->shouldReceive('has')->once()->with('extensions')->andReturn(false);
-        $stub = new TemplatesMenu($app);
-        $this->assertEquals('>:home', $stub->getPositionAttribute());
+        $menu->shouldReceive('has')->once()->with('settings.brands')->andReturn(false);
+        $stub = new NotificationsMenu($app);
+        $this->assertEquals('>:settings.general-config', $stub->getPositionAttribute());
     }
 
     /**
-     * Tests Antares\Templates\Http\Handlers\Menu::authorize
+     * Tests Antares\Notifications\Http\Handlers\Menu::authorize
+     * 
+     * @test
      */
     public function testAuthorize()
     {
@@ -85,14 +84,14 @@ class MenuTest extends TestCase
         $app                                  = m::mock('Illuminate\Container\Container');
         $menu                                 = m::mock(Menu::class);
         $acl                                  = m::mock('Antares\Authorization\Factory')
-                ->shouldReceive('make')->with("antares/templates")->andReturnSelf()
+                ->shouldReceive('make')->with("antares/notifications")->andReturnSelf()
                 ->shouldReceive("can")->with(m::type("String"))->andReturn(true)
                 ->shouldReceive('attach')->with($this->app['antares.platform.memory'])->andReturnSelf()
                 ->getMock();
 
         $this->app['antares.acl'] = $acl;
         $app->shouldReceive('make')->once()->with('antares.platform.menu')->andReturn($menu);
-        $stub                     = new TemplatesMenu($app);
+        $stub                     = new NotificationsMenu($app);
         $guardMock                = m::mock('\Antares\Contracts\Auth\Guard');
         $guardMock->shouldReceive('guest')->andReturn(false);
         $this->assertTrue($stub->authorize($guardMock));

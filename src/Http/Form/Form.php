@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Http\Form;
 
 use Antares\Notifications\Model\NotificationCategory;

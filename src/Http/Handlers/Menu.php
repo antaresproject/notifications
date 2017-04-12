@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Http\Handlers;
 
 use Antares\Contracts\Auth\Guard;
@@ -57,6 +56,7 @@ class Menu extends MenuHandler
      */
     public function getPositionAttribute()
     {
+
         return $this->handler->has('settings.brands') ? '>:settings.brands' : '>:settings.general-config';
     }
 
