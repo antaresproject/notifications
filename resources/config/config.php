@@ -17,8 +17,6 @@
  * @copyright  (c) 2017, Antares Project
  * @link       http://antaresproject.io
  */
-
-
 return [
     /** Whether application use sockets with notifications * */
     'sockets'               => false,
@@ -56,7 +54,8 @@ return [
         ]
     ],
     'default'               => [
-        'sms'          => '48697274132',
-        'custom_event' => 'antares.notifier.events.custom'
-    ]
+        'sms'                             => '48697274132',
+        'custom_event'                    => 'antares.notifier.events.custom',
+        'notifications_remove_after_days' => 90
+    ],
 ];

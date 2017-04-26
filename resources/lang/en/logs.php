@@ -49,7 +49,7 @@ return [
     'notification_config_save_success'      => 'Notifications configuration has been saved successfully.',
     'form'                                  => [
         'notifications_config_legend'     => 'Notifications configuration',
-        'notifications_config_days_label' => 'Remove notification logs every X days',
-        'notifications_config_days_help'  => 'Notification logs will be deleted automatically after X days from the date of creation.'
+        'notifications_config_days_label' => 'Remove notification logs every &nbsp;&nbsp; :x &nbsp;&nbsp; days',
+        'notifications_config_days_help'  => '* Notification logs will be deleted automatically after X days from the date of creation.<br/>If you leave this field empty logs will not be deleted.'
     ]
 ];

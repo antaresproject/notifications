@@ -19,12 +19,13 @@ class ConfigurationListener
     {
         $grid->fieldset(function(Fieldset $fieldset) {
             $fieldset->legend(trans('antares/notifications::logs.form.notifications_config_legend'));
-            $memory = app('antares.memory')->make('primary');
+
             $fieldset->control('input:text', 'days')
-                    ->label(trans('antares/notifications::logs.form.notifications_config_days_label'))
-                    ->tip(trans('antares/notifications::logs.form.notifications_config_days_help'))
-                    ->attributes(['class' => 'w100'])
-                    ->value($memory->get('notifications_remove_after_days', ''));
+                    ->label('')
+                    ->field(function() {
+                        $memory = app('antares.memory')->make('primary');
+                        return '<div class="col-group"><div class="col-dt-16 col-16 col-mb-16">' . trans('antares/notifications::logs.form.notifications_config_days_label', ['x' => '<input class="w50" type="number" name="days" value="' . $memory->get('notifications_remove_after_days', '') . '" size="2" max-length="2"  />']) . '</div><div class="col-dt-16 col-16 col-mb-16 "><div class="input-field__desc">' . trans('antares/notifications::logs.form.notifications_config_days_help') . '</div></div></div>';
+                    });
         });
         $grid->rules(array_merge($grid->rules, [
             'days' => ['numeric'],
