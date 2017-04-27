@@ -17,8 +17,6 @@
  * @copyright  (c) 2017, Antares Project
  * @link       http://antaresproject.io
  */
-
-
 use Antares\Notifier\Seeder\NotificationSeeder;
 use Illuminate\Support\Facades\DB;
 
@@ -39,7 +37,7 @@ class EmailSmsSentNoificationSeeder extends NotificationSeeder
 
             $this->addNotification([
                 'category' => 'default',
-                'type'     => 'administrators',
+                'type'     => 'admin',
                 'severity' => 'high',
                 'event'    => 'sms.notification_not_sent',
                 'contents' => [
@@ -52,7 +50,7 @@ class EmailSmsSentNoificationSeeder extends NotificationSeeder
 
             $this->addNotification([
                 'category' => 'default',
-                'type'     => 'administrators',
+                'type'     => 'admin',
                 'severity' => 'medium',
                 'event'    => 'sms.notification_sent',
                 'contents' => [
@@ -65,7 +63,7 @@ class EmailSmsSentNoificationSeeder extends NotificationSeeder
 
             $this->addNotification([
                 'category' => 'default',
-                'type'     => 'administrators',
+                'type'     => 'admin',
                 'severity' => 'high',
                 'event'    => 'email.notification_not_sent',
                 'contents' => [
@@ -78,7 +76,7 @@ class EmailSmsSentNoificationSeeder extends NotificationSeeder
 
             $this->addNotification([
                 'category' => 'default',
-                'type'     => 'administrators',
+                'type'     => 'admin',
                 'severity' => 'medium',
                 'event'    => 'email.notification_sent',
                 'contents' => [
