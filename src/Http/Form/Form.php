@@ -87,6 +87,7 @@ class Form extends FormBuilder
             $attrs   = ['class' => 'notification-select-type', 'url' => handles('antares::notifications/create')];
             $control = $fieldset->control('select', 'type')
                     ->label(trans('Type'))
+                    ->wrapper(['class' => 'w180'])
                     ->options(function() {
                 return NotificationTypes::all()->pluck('title', 'name');
             });

@@ -51,11 +51,7 @@ class NotificationsListener
      */
     public function listen()
     {
-        app('events')->listen("after.install.components/notifications", function() {
-            app('antares.watchdog')->up('notifications:start');
-        });
         $notifications = $this->repository->findSendable()->toArray();
-
         foreach ($notifications as $notification) {
             $this->listenNotificationsEvents($notification);
         }

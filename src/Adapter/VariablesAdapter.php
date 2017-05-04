@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Adapter;
 
 use Illuminate\Database\Eloquent\Collection;
@@ -71,10 +70,12 @@ class VariablesAdapter
                 }
             }
         }
+
         $content = str_replace(['<p>', '</p>', '<br />'], '', $content);
         $filled  = $this->fill($content);
 
         preg_match_all('/\[\[(.*?)\]\]/', $content, $matches);
+
         if (!isset($matches[0]) or ! isset($matches[1])) {
             return $filled;
         }
