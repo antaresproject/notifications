@@ -22,10 +22,10 @@ namespace Antares\Notifications\Widgets\NotificationSender;
 
 use Antares\Notifications\Widgets\NotificationSender\Controller\NotificationController;
 use Antares\Notifications\Widgets\NotificationSender\Form\NotificationWidgetForm;
-use Antares\Widgets\Adapter\AbstractWidget;
+use Antares\UI\UIComponents\Adapter\AbstractTemplate;
 use Illuminate\Support\Facades\Route;
 
-class NotificationsWidget extends AbstractWidget
+class NotificationsWidget extends AbstractTemplate
 {
 
     /**
