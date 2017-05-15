@@ -30,7 +30,6 @@ use Antares\Notifications\Model\NotificationsStack;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Model\Notifications;
 use Illuminate\Database\Eloquent\Builder;
-use Antares\Widgets\Model\Widgets;
 use Illuminate\Support\Facades\DB;
 use Antares\Logger\Model\Logs;
 use Exception;
@@ -41,7 +40,7 @@ class StackRepository extends AbstractRepository
     /**
      * name of repositroy model
      *
-     * @return Widgets
+     * @return NotificationsStack
      */
     public function model()
     {
