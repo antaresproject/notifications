@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,7 +14,7 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
 declare(strict_types = 1);
@@ -30,7 +30,6 @@ use Antares\Notifications\Model\NotificationsStack;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Model\Notifications;
 use Illuminate\Database\Eloquent\Builder;
-use Antares\Widgets\Model\Widgets;
 use Illuminate\Support\Facades\DB;
 use Antares\Logger\Model\Logs;
 use Exception;
@@ -41,7 +40,7 @@ class StackRepository extends AbstractRepository
     /**
      * name of repositroy model
      *
-     * @return Widgets
+     * @return NotificationsStack
      */
     public function model()
     {
