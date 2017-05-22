@@ -1,6 +1,6 @@
 {
     "name": "antaresproject/component-notifications",
-    "description": "Notifications Manager Antares",
+    "description": "Notifications module is responsible for configuration interface of notification templates and sending notifications to users in the system. It handles email and sms notifications, but also displays alerts (the bell icon) to the users. It allows administrator to set up their own text and supports multi-language.",
     "type": "antaresproject-component",
     "version": "0.9.2.1",
     "homepage": "https://github.com/antaresproject/notifications",
