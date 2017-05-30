@@ -1,5 +1,8 @@
 $(document).ready(function () {
     if ($('.richtext').length) {
+        CKEDITOR.editorConfig = function (config) {
+            config.protectedSource.push(/<\?[\s\S]*?\?>/g);
+        };
         $('.richtext').each(function (index, item) {
             CKEDITOR.replace($(item).attr('name'), {
                 height: 500,

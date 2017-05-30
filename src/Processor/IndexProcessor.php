@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,10 +14,9 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
-
 
 namespace Antares\Notifications\Processor;
 
@@ -182,18 +181,20 @@ class IndexProcessor extends Processor
         $inputs  = Input::all();
         $content = str_replace("&#39;", '"', $inputs['content']);
         $content = $this->variablesAdapter->get($content);
+
         preg_match_all('/\[\[(.*?)\]\]/', $content, $matches);
-        $view    = str_replace($matches[0], $matches[1], $content);
+        $view = str_replace($matches[0], $matches[1], $content);
+
         if (array_get($inputs, 'type') == 'email') {
             event('antares.notifier.before_send_email', [&$view]);
         }
 
 
         $brandTemplate = \Antares\Brands\Model\BrandOptions::query()->where('brand_id', brand_id())->first();
-        $header        = $brandTemplate->header;
-        $html          = str_replace('</head>', '<style>' . $brandTemplate->styles . '</style></head>', $header) . $view . $brandTemplate->footer;
-        array_set($inputs, 'content', $html);
+        $header        = str_replace('</head>', '<style>' . $brandTemplate->styles . '</style></head>', $brandTemplate->header);
+        $html          = preg_replace("/<body[^>]*>(.*?)<\/body>/is", '<body>' . $view . '</body>', $header . $brandTemplate->footer);
 
+        array_set($inputs, 'content', $html);
         return $this->presenter->preview($inputs);
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,7 +14,7 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
 
@@ -96,7 +96,7 @@ class Breadcrumb
     public function onLogsList()
     {
         Breadcrumbs::register('notifications-logs', function($breadcrumbs) {
-            $breadcrumbs->push(trans('antares/notifications::logs.notification_logs'), handles('antares::notifications/logs/index'));
+            $breadcrumbs->push(trans('antares/notifications::logs.notification_log'), handles('antares::notifications/logs/index'));
         });
         view()->share('breadcrumbs', Breadcrumbs::render('notifications-logs'));
     }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,10 +14,9 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
-
 
 namespace Antares\Notifications;
 
@@ -67,7 +66,7 @@ class Contents
      */
     public function find($operation, $locale)
     {
-        $model = $this->notifications->first(function ($key, $value) use($operation, $locale) {
+        $model = $this->notifications->first(function ($value, $key) use($operation, $locale) {
             return $value->code == $locale && ($value->title == $operation or $value->name == $operation);
         });
         return !is_null($model) ? $model->content : false;

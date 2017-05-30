@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,21 +14,23 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications;
 
-use Antares\Foundation\Http\Handlers\NotificationsBreadcrumbMenu;
+use Antares\Notifications\Http\Handlers\NotificationsBreadcrumbMenu;
 use Antares\Foundation\Http\Handlers\NotificationsTopMenuHandler;
-use Antares\Foundation\Support\Providers\ModuleServiceProvider;
 use Antares\Notifications\Console\NotificationCategoriesCommand;
 use Antares\Notifications\Console\NotificationSeveritiesCommand;
+use Antares\Foundation\Support\Providers\ModuleServiceProvider;
 use Antares\Notifications\Console\NotificationTypesCommand;
 use Antares\Notifications\Listener\NotificationsListener;
-use Antares\Notifications\Console\SocketCommand;
+use Antares\Notifications\Listener\ConfigurationListener;
+use Antares\Notifications\Console\NotificationsRemover;
+use Antares\Acl\Http\Handlers\ControlPane;
+use Antares\Memory\Model\Option;
 
 class NotificationsServiceProvider extends ModuleServiceProvider
 {
@@ -48,18 +50,27 @@ class NotificationsServiceProvider extends ModuleServiceProvider
     protected $routeGroup = 'antares/notifications';
 
     /**
+     * The event handler mappings for the application.
+     *
+     * @var array
+     */
+    protected $listen = [
+        "antares.form: foundation.settings" => ConfigurationListener::class,
+    ];
+
+    /**
      * Register service provider.
      *
      * @return void
      */
     public function register()
     {
+
         $this->bindContracts();
         $this->app->singleton('notifications.contents', function ($app) {
             return new Contents();
         });
         $this->commands([
-            SocketCommand::class,
             NotificationCategoriesCommand::class,
             NotificationSeveritiesCommand::class,
             NotificationTypesCommand::class
@@ -95,6 +106,11 @@ class NotificationsServiceProvider extends ModuleServiceProvider
             publish('notifications', 'scripts.default');
         }
         $this->attachMenu(NotificationsBreadcrumbMenu::class);
+        $this->app->make('view')->composer('antares/notifications::admin.logs.config', ControlPane::class);
+        $this->commands([
+            NotificationsRemover::class
+        ]);
+        Option::observe(new ConfigurationListener());
     }
 
     /**

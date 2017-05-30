@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,18 +14,20 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
 
+namespace Antares\Notifications\Http\Controllers\Admin\TestCase;
 
-namespace Antares\Templates\Http\Controllers\Admin\TestCase;
-
-use Antares\Templates\TemplatesServiceProvider;
-use Antares\Templates\Http\Presenters\IndexPresenter;
-use Antares\Templates\Processor\IndexProcessor;
-use Antares\Testing\TestCase;
+use Antares\Notifications\Http\Presenters\IndexPresenter;
+use Antares\Notifications\NotificationsServiceProvider;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
+use Antares\Notifications\Adapter\VariablesAdapter;
+use Antares\Notifications\Processor\IndexProcessor;
+use Antares\Notifications\Repository\Repository;
+use Antares\Notifications\Model\Notifications;
+use Antares\Testing\TestCase;
 use Illuminate\View\View;
 use Mockery as m;
 
@@ -39,7 +41,7 @@ class IndexControllerTest extends TestCase
      */
     public function setUp()
     {
-        $this->addProvider(TemplatesServiceProvider::class);
+        $this->addProvider(NotificationsServiceProvider::class);
         parent::setUp();
         $this->disableMiddlewareForAllTests();
     }
@@ -51,89 +53,70 @@ class IndexControllerTest extends TestCase
      */
     protected function getProcessorMock()
     {
-        $kernel    = m::mock(\Illuminate\Contracts\Console\Kernel::class);
-        $processor = m::mock(IndexProcessor::class, [m::mock(IndexPresenter::class), $kernel]);
+        $variablesAdapter = $this->app->make(VariablesAdapter::class);
+        $repository       = m::mock(Repository::class);
+        $repository->shouldReceive('find')->once()->andReturn(new Notifications())
+                ->shouldReceive('findByLocale')->once()->andReturn(new Notifications());
+
+        $processor = m::mock(IndexProcessor::class, [m::mock(IndexPresenter::class), $variablesAdapter, $repository]);
         $processor->shouldReceive('update')->withAnyArgs()->andReturnNull();
         $this->app->instance(IndexProcessor::class, $processor);
         return $processor;
     }
 
     /**
-     * Tests Antares\Templates\Http\Controllers\Admin\IndexController::index
+     * Tests Antares\Notifications\Http\Controllers\Admin\IndexController::index
      */
     public function testIndex()
     {
         $this->getProcessorMock()->shouldReceive('index')->once()->andReturn(View::class);
-        $this->call('GET', 'admin/templates');
+        $this->call('GET', 'antares/notifications/index');
         $this->assertResponseOk();
     }
 
     /**
-     * Tests Antares\Templates\Http\Controllers\Admin\IndexController::show
-     */
-    public function testShow()
-    {
-        $this->getProcessorMock()->shouldReceive('show')->once()->andReturn(View::class);
-        $this->call('GET', 'admin/templates/show/1');
-        $this->assertResponseOk();
-    }
-
-    /**
-     * Tests Antares\Templates\Http\Controllers\Admin\IndexController::showFailed
-     */
-    public function testShowFailed()
-    {
-        $this->getProcessorMock()->shouldReceive('show')->once()
-                ->andReturnUsing(function ($request, $listener) {
-                    return $listener->showFailed();
-                });
-        $this->call('GET', 'admin/templates/show/1');
-        $this->assertResponseStatus(302);
-    }
-
-    /**
-     * Tests Antares\Templates\Http\Controllers\Admin\IndexController::edit
+     * Tests Antares\Notifications\Http\Controllers\Admin\IndexController::edit
      */
     public function testEdit()
     {
         $this->getProcessorMock()->shouldReceive('edit')->once()->andReturn(View::class);
-        $this->call('GET', 'admin/templates/edit/1');
+        $this->call('GET', 'antares/notifications/edit/1');
         $this->assertResponseOk();
     }
 
     /**
-     * Tests Antares\Templates\Http\Controllers\Admin\IndexController::update
+     * Tests Antares\Notifications\Http\Controllers\Admin\IndexController::update
      */
     public function testUpdate()
     {
         $this->getProcessorMock()->shouldReceive('edit')->once()->andReturnUsing(function ($id, $listener) {
             return $listener->updateSuccess();
         });
-        $this->call('POST', 'admin/templates/update');
+        $this->call('POST', 'antares/notifications/update');
         $this->assertResponseStatus(200);
     }
 
     /**
-     * Tests Antares\Templates\Http\Controllers\Admin\IndexController::updateFailed
+     * Tests Antares\Notifications\Http\Controllers\Admin\IndexController::updateFailed
      */
     public function testUpdateFailed()
     {
         $this->getProcessorMock()->shouldReceive('edit')->once()->andReturnUsing(function ($id, $listener) {
             return $listener->updateFailed();
         });
-        $this->call('POST', 'admin/templates/update');
+        $this->call('POST', 'antares/notifications/update');
         $this->assertResponseStatus(200);
     }
 
     /**
-     * Tests Antares\Templates\Http\Controllers\Admin\IndexController::updateSuccess
+     * Tests Antares\Notifications\Http\Controllers\Admin\IndexController::updateSuccess
      */
     public function testUpdateSuccess()
     {
         $this->getProcessorMock()->shouldReceive('edit')->once()->andReturnUsing(function ($id, $listener) {
             return $listener->updateSuccess();
         });
-        $this->call('POST', 'admin/templates/update');
+        $this->call('POST', 'antares/notifications/update');
         $this->assertResponseStatus(200);
     }
 

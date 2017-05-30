@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -11,10 +11,10 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
 declare(strict_types = 1);
@@ -94,7 +94,6 @@ class Logs extends DataTable
     {
         publish('notifications', ['js/notification-logs.js']);
         $html = app('html');
-
         return $this->setName('Notifications List')
                         ->addColumn(['data' => 'tbl_notifications_stack.id', 'name' => 'tbl_notifications_stack.id', 'data' => 'id', 'title' => 'Id'])
                         ->addColumn(['data' => 'created_at', 'name' => 'tbl_notifications_stack.created_at', 'title' => trans('antares/notifications::logs.headers.date'), 'className' => 'bolded'])
@@ -105,7 +104,7 @@ class Logs extends DataTable
                         ->addColumn(['data' => 'area', 'name' => 'area', 'title' => trans('antares/notifications::logs.headers.level')])
                         ->addColumn(['data' => 'fullname', 'name' => 'tbl_users.firstname', 'title' => trans('antares/notifications::logs.headers.user')])
                         ->addAction(['name' => 'edit', 'title' => '', 'class' => 'mass-actions dt-actions', 'orderable' => false, 'searchable' => false])
-                        ->addGroupSelect($this->typesSelect())
+                        ->addGroupSelect($this->types(), 5, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_type')])
                         ->addMassAction('delete', $html->link(handles('antares::notifications/logs/delete', ['csrf' => true]), $html->raw('<i class="zmdi zmdi-delete"></i><span>' . trans('antares/notifications::logs.actions.delete') . '</span>'), [
                                     'class'            => "triggerable confirm mass-action",
                                     'data-title'       => trans("antares/notifications::logs.are_you_sure"),
@@ -127,46 +126,11 @@ class Logs extends DataTable
     /**
      * Creates select for types
      * 
-     * @return String
+     * @return array
      */
-    protected function typesSelect(): String
+    protected function types(): array
     {
-        $options   = array_merge(['' => 'All'], NotificationTypes::all(['name', 'title'])->lists('title', 'name')->toArray());
-        $classname = 'notifications-select-type';
-        $column    = 5;
-        app('antares.asset')
-                ->container('antares/foundation::scripts')
-                ->inlineScript($classname, $this->inline($classname, $column));
-
-        return Form::select('type', $options, null, [
-                    'data-prefix'            => trans('antares/notifications::messages.datatables.select_type'),
-                    'data-selectar--mdl-big' => "true",
-                    'class'                  => $classname . ' select2--prefix mr24']);
-    }
-
-    /**
-     * Generate datatable inline type selector
-     * 
-     * @param String $classname
-     * @param mixed $column
-     * @return String
-     */
-    protected function inline($classname, $column): String
-    {
-        $inline = <<<EOD
-           $(document).ready(function(){                         
-                $('.%s', document).on('change', function (e) {
-                    var table = $(this).closest('.tbl-c').find('[data-table-init]');
-                    if (table.length < 0) {
-                        return false;
-                    }
-                    var api = table.dataTable().api();
-                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
-                    api.column(%s).search(val, true, false).draw();
-                });            
-           });
-EOD;
-        return sprintf($inline, $classname, $column);
+        return array_merge(['' => 'All'], NotificationTypes::all(['name', 'title'])->pluck('title', 'name')->toArray());
     }
 
     /**

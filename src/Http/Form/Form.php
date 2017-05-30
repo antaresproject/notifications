@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,10 +14,9 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
-
 
 namespace Antares\Notifications\Http\Form;
 
@@ -88,8 +87,9 @@ class Form extends FormBuilder
             $attrs   = ['class' => 'notification-select-type', 'url' => handles('antares::notifications/create')];
             $control = $fieldset->control('select', 'type')
                     ->label(trans('Type'))
+                    ->wrapper(['class' => 'w180'])
                     ->options(function() {
-                return NotificationTypes::all()->lists('title', 'name');
+                return NotificationTypes::all()->pluck('title', 'name');
             });
 
             if (!is_null($this->fluent->id)) {
@@ -102,7 +102,7 @@ class Form extends FormBuilder
             $fieldset->control('select', 'category')
                     ->label('Category')
                     ->options(function() {
-                        return app(NotificationCategory::class)->get()->lists('title', 'id');
+                        return app(NotificationCategory::class)->get()->pluck('title', 'id');
                     })
                     ->value($this->fluent->type);
 

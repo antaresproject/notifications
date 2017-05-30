@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,7 +14,7 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
 declare(strict_types = 1);
@@ -30,7 +30,6 @@ use Antares\Notifications\Model\NotificationsStack;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Model\Notifications;
 use Illuminate\Database\Eloquent\Builder;
-use Antares\Widgets\Model\Widgets;
 use Illuminate\Support\Facades\DB;
 use Antares\Logger\Model\Logs;
 use Exception;
@@ -41,7 +40,7 @@ class StackRepository extends AbstractRepository
     /**
      * name of repositroy model
      *
-     * @return Widgets
+     * @return NotificationsStack
      */
     public function model()
     {
@@ -95,7 +94,7 @@ class StackRepository extends AbstractRepository
      */
     protected function getNotificationsSeverityIds()
     {
-        return NotificationSeverity::whereIn('name', config('antares/notifications::notification_severity'))->get()->lists('id')->toArray();
+        return NotificationSeverity::whereIn('name', config('antares/notifications::notification_severity'))->get()->pluck('id')->toArray();
     }
 
     /**
@@ -105,7 +104,7 @@ class StackRepository extends AbstractRepository
      */
     protected function getAlertsSeverityIds()
     {
-        return NotificationSeverity::whereIn('name', config('antares/notifications::alert_severity'))->get()->lists('id')->toArray();
+        return NotificationSeverity::whereIn('name', config('antares/notifications::alert_severity'))->get()->pluck('id')->toArray();
     }
 
     /**
@@ -119,7 +118,7 @@ class StackRepository extends AbstractRepository
                 ->withTrashed()
                 ->where('user_id', user()->id)
                 ->whereNotNull('deleted_at')
-                ->lists('stack_id');
+                ->pluck('stack_id');
         return $this->makeModel()->newQuery()
                         ->distinct()
                         ->select(['tbl_notifications_stack.*'])
@@ -184,7 +183,7 @@ class StackRepository extends AbstractRepository
      */
     protected function count($builder)
     {
-        $read = NotificationsStackRead::select(['stack_id'])->withTrashed()->where('user_id', user()->id)->lists('stack_id');
+        $read = NotificationsStackRead::select(['stack_id'])->withTrashed()->where('user_id', user()->id)->pluck('stack_id');
         return $builder->whereNotIn('id', $read)->count();
     }
 
@@ -216,7 +215,7 @@ class StackRepository extends AbstractRepository
                         ->read()
                         ->getModel()
                         ->newQuery()
-                        ->whereIn('stack_id', $builder->lists('id'))->delete();
+                        ->whereIn('stack_id', $builder->pluck('id'))->delete();
     }
 
     /**
@@ -230,7 +229,7 @@ class StackRepository extends AbstractRepository
         DB::beginTransaction();
         try {
             $builder = ($type == 'alerts') ? $this->getAlerts() : $this->getNotifications();
-            $read    = NotificationsStackRead::select(['stack_id'])->withTrashed()->where('user_id', user()->id)->lists('stack_id');
+            $read    = NotificationsStackRead::select(['stack_id'])->withTrashed()->where('user_id', user()->id)->pluck('stack_id');
             $items   = $builder->whereNotIn('id', $read)->get();
 
             foreach ($items as $item) {

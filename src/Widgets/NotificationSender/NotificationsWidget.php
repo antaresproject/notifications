@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,7 +14,7 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
 
@@ -22,10 +22,10 @@ namespace Antares\Notifications\Widgets\NotificationSender;
 
 use Antares\Notifications\Widgets\NotificationSender\Controller\NotificationController;
 use Antares\Notifications\Widgets\NotificationSender\Form\NotificationWidgetForm;
-use Antares\Widgets\Adapter\AbstractWidget;
+use Antares\UI\UIComponents\Adapter\AbstractTemplate;
 use Illuminate\Support\Facades\Route;
 
-class NotificationsWidget extends AbstractWidget
+class NotificationsWidget extends AbstractTemplate
 {
 
     /**
@@ -57,8 +57,8 @@ class NotificationsWidget extends AbstractWidget
     protected $attributes = [
         'x'              => 0,
         'y'              => 0,
-        'min_width'      => 3,
-        'min_height'     => 9,
+        'min_width'      => 2,
+        'min_height'     => 3,
         'max_width'      => 12,
         'max_height'     => 9,
         'default_width'  => 3,
@@ -97,6 +97,7 @@ class NotificationsWidget extends AbstractWidget
     public function render()
     {
         app('antares.asset')->container('antares/foundation::application')->add('webpack_forms_basic', '/webpack/forms_basic.js', ['app_cache']);
+
         publish('notifications', ['js/notification-widget.js']);
         return view('antares/notifications::widgets.send_notification', ['form' => $this->form->get()])->render();
     }

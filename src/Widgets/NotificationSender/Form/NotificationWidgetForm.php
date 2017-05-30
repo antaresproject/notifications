@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of the Antares Project package.
+ * Part of the Antares package.
  *
  * NOTICE OF LICENSE
  *
@@ -14,10 +14,9 @@
  * @version    0.9.0
  * @author     Antares Team
  * @license    BSD License (3-clause)
- * @copyright  (c) 2017, Antares Project
+ * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
-
 
 namespace Antares\Notifications\Widgets\NotificationSender\Form;
 
@@ -75,9 +74,9 @@ class NotificationWidgetForm
         return app('antares.form')->of("antares.widgets: notification-widget")->extend(function (FormGrid $form) {
 
                     $form->name('Notification Tester');
-                    $url = '#';
                     $form->simple(handles('antares::notifications/widgets/send'), ['id' => 'notification-widget-form']);
-                    $form->layout('vertical_compact');
+
+                    $form->layout('antares/notifications::widgets.forms.send_notification_form');
 
                     $form->fieldset(trans('Default Fieldset'), function (Fieldset $fieldset) {
 
@@ -93,10 +92,10 @@ class NotificationWidgetForm
 
                         $fieldset->control('select', 'notifications')
                                 ->attributes(['class' => 'notification-widget-notifications-select'])
-                                ->options($this->repository->getNotificationContents('email')->lists('title', 'id'))
+                                ->options($this->repository->getNotificationContents('email')->pluck('title', 'id'))
                                 ->wrapper(['class' => 'w300']);
 
-                        if (!is_null(from_route('users'))) {
+                        if (!is_null(from_route('user'))) {
                             $fieldset->control('button', 'send')
                                     ->attributes([
                                         'type'       => 'submit',
