@@ -103,11 +103,13 @@ class IndexPresenter implements PresenterContract
             'type'      => ($eloquent->exists ? $eloquent->type->name : ''),
             'form_name' => $eloquent->name
         ];
-        $notification  = app(!strlen($classname) ? Notification::class : $classname);
-        $fluent        = new Fluent(array_merge($configuration, array_except($eloquent->toArray(), ['type'])));
-        if (!is_null($fluent->type)) {
-            $fluent->type = $type;
-        }
+
+        $notification = app(!strlen($classname) ? Notification::class : $classname);
+        $fluent       = new Fluent(array_merge($configuration, array_except($eloquent->toArray(), ['type'])));
+
+//        if (!is_null($fluent->type)) {
+//            $fluent->type = $type;
+//        }
         return $this->form($fluent, $notification);
     }
 

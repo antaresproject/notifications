@@ -87,7 +87,10 @@ class IndexProcessor extends Processor
      */
     public function edit($id, $locale, IndexListener $listener)
     {
-        app('antares.asset')->container('antares/foundation::application')->add('ckeditor', '/packages/ckeditor/ckeditor.js', ['webpack_forms_basic']);
+        app('antares.asset')->container('antares/foundation::application')
+                ->add('view_brand_settings', '/js/view_brand_settings.js', ['app-cache'])
+                ->add('forms_advanced', '/js/forms_advanced.js', ['view_brand_settings'])
+                ->add('view_notification_templates', '/js/view_notification_templates.js', ['forms_advanced']);
         $model = $this->repository->findByLocale($id, $locale);
         if (is_null($model)) {
             throw new ModelNotFoundException('Model not found');
@@ -224,7 +227,7 @@ class IndexProcessor extends Processor
      */
     public function create($type = null)
     {
-        app('antares.asset')->container('antares/foundation::application')->add('ckeditor', '/packages/ckeditor/ckeditor.js', ['webpack_forms_basic']);
+        //app('antares.asset')->container('antares/foundation::application')->add('ckeditor', '/packages/ckeditor/ckeditor.js', ['webpack_forms_basic']);
         return $this->presenter->create($this->repository->makeModel()->getModel(), $type);
     }
 
