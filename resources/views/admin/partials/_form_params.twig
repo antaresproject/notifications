@@ -1,67 +1,51 @@
-<fieldset class="page-notification-templates__info">
-    <legend>
-        {{ fieldsets[0].legend|raw }}
-    </legend>
-    <div class="col-group page-notification-templates__name">
+<fieldset class="inputs">               
+    <legend>{{ fieldsets[0].legend|raw }} </legend>
+    <div class="form-block">
+        {% set control=fieldsets[0].field('type') %}
+        <div class="col-16 mb2">
+            {{ Form.label(control.name, control.label,{'class':'form-block__name'})|raw }}
+        </div>
+        <div class="col-16">
+            <div class="input-field">
+                {{ control.getField(row, control, [])|raw }}
+            </div>
+        </div>
+        <span class="error col-dt-14  col-13  col-mb-11 ">
+            {{ errors.first(control.name, format)|raw }}
+        </span>
+    </div>                         
+    {% if fieldsets[0].has('category') %}
         <div class="form-block">
-            <div class="col-6">
-                {% set control=fieldsets[1].field('title') %}                
+            {% set control=fieldsets[0].field('category') %}
+            <div class="col-16 mb2">
                 {{ Form.label(control.name, control.label,{'class':'form-block__name'})|raw }}
             </div>
-            <div class="col-6">
+            <div class="col-16">
                 <div class="input-field">
                     {{ control.getField(row, control, [])|raw }}
-                    {% if fieldsets[0].has('active') %}
-                        {% set active=fieldsets[0].field('active') %}
-                        <div class="page-notification-templates__switch">
-                            <label class="form-block__name">Published</label>
-                            <label class="switch">
-                                {{ active.getField(row, active, [])|raw }}
-                                <span class="switch-container"><span class="switch-handle"></span></span>
-                            </label>
-                        </div>
-                    {% endif %} 
                 </div>
             </div>
             <span class="error col-dt-14  col-13  col-mb-11 ">
                 {{ errors.first(control.name, format)|raw }}
             </span>
         </div>
-    </div>
-    {% set control=fieldsets[0].field('type') %}
-    {% if     control.attributes.attributes.disabled!='disabled' %}
-        <div class="col-group">
-            <div class="form-block">
-                <div class="col-6">
-                    {{ Form.label(control.name, control.label,{'class':'form-block__name'})|raw }}
-                </div>
-                <div class="col-6">
-                    <div class="input-field">
-                        {{ control.getField(row, control, [])|raw }}
-                    </div>
-                    <span class="error col-dt-14  col-13  col-mb-11 ">
-                        {{ errors.first(control.name, format)|raw }}
-                    </span>
-                </div>
-            </div>  
-        </div>
     {% endif %}
-    {% if fieldsets[0].has('category') %}
-        {% set control=fieldsets[0].field('category') %}
-        <div class="col-group">
-            <div class="form-block w600">
-                <div class="col-6">
-                    {{ Form.label(control.name, control.label,{'class':'form-block__name'})|raw }}
-                </div>
-                <div class="col-6">
-                    <div class="input-field">
+    {% if fieldsets[0].has('active') %}
+        <div class="form-block">
+            {% set control=fieldsets[0].field('active') %}
+            <div class="col-16 mb2">
+                <label class="form-block__name">
+                    <div class="input-field input-field--short">
                         {{ control.getField(row, control, [])|raw }}
                     </div>
-                    <span class="error col-dt-14  col-13  col-mb-11 ">
+                    <span>{{ Form.label(control.name, control.label,{'class':'form-block__name'})|raw }}</span>
+
+                    <span id="{{ control.id }}_error"
+                          class="error col-dt-14  col-13  col-mb-11 ">
                         {{ errors.first(control.name, format)|raw }}
                     </span>
-                </div>
+                </label>
             </div>
-        </div>               
-    {% endif %}    
+        </div>
+    {% endif %}               
 </fieldset>

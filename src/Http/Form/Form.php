@@ -69,14 +69,13 @@ class Form extends FormBuilder
         parent::__construct($grid, $clientScript, app());
 
         $this->name             = "antares.notification: " . $fluent->form_name;
-        $this->grid->simple(handles('antares::notifications/update/'), [], $fluent);
+        $this->grid->simple(handles('antares::notifications/update/'), ['class' => 'form--hor'], $fluent);
         $this->layoutAttributes = [
             'variables'    => $notification->getVariables(),
             'instructions' => $notification->getInstructions(),
-            'rich'         => true,
-            'sms'          => $fluent->type === 'sms'
+            'rich'         => true
         ];
-        //$this->bindScripts();
+        $this->bindScripts();
         $this->grid->layout('antares/notifications::admin.index.form', $this->layoutAttributes);
         $this->grid->hidden('id');
         $this->grid->name('Notification form');
@@ -109,9 +108,10 @@ class Form extends FormBuilder
 
 
             $fieldset->control('input:checkbox', 'active')
-                    ->field(function() use($fluent) {
-                        $checked = $fluent->active ? 'checked="checked"' : '';
-                        return '<input class="switch-checkbox" ' . $checked . ' name="active" type="checkbox" value="1" >';
+                    ->label(trans('antares/notifications::messages.notification_content_enabled'))
+                    ->value(1)
+                    ->checked(function() use($fluent) {
+                        return $fluent->active;
                     });
 
             $this->buttons($fluent, $fieldset);
@@ -122,22 +122,20 @@ class Form extends FormBuilder
         foreach ($langs as $lang) {
 
             $this->grid->fieldset(function (Fieldset $fieldset) use($fluent, $notification, $lang) {
-                $fieldset->legend($lang->name);
+                $fieldset->legend(trans('antares/notifications::messages.notification_content_legend', ['lang' => $lang->name]));
                 $fieldset->control('input:text', 'title')
                         ->label(trans('antares/notifications::messages.notification_content_title'))
                         ->name('title[' . $lang->id . ']')
                         ->attributes(['class' => 'notification-title'])
                         ->value($this->getNotificationContentData($fluent, $lang->id));
 
-
-                $fieldset->control('textarea', 'content')
+                $fieldset->control('ckeditor', 'content')
                         ->label(trans('antares/notifications::messages.notification_content_content'))
-                        ->attributes(['class' => 'richtext hidden', 'id' => 'wysiwyg', 'rows' => 10, 'cols' => 80])
+                        ->attributes(['scripts' => false, 'class' => 'richtext'])
                         ->name('content[' . $lang->id . ']')
                         ->value($this->getNotificationContentData($fluent, $lang->id, 'content'));
             });
         }
-
         $this->grid->ajaxable();
         if (!in_array($fluent->type, ['sms', 'email'])) {
             unset($this->rules['title']);

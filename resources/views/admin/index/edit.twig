@@ -1,9 +1,5 @@
-{% extends app.request.isXmlHttpRequest() ? "antares/foundation::layouts.antares..clear" : "antares/foundation::layouts.antares.index" %}    
-{% block grid_col__container %}
-    <div class="grid--notification grid-col grid-col--container">
-        {% block content %}
-            {{ form|raw }}
-            {% include 'antares/notifications::admin.partials._modal' %}
-        {% endblock %}        
-    </div>    
+{% extends "antares/foundation::layouts.antares.index" %}
+{% block content %}    
+    {{ form|raw }}
+    {% include 'antares/notifications::admin.partials._modal' %}
 {% endblock %}
