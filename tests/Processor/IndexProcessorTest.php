@@ -43,7 +43,7 @@ class IndexProcessorTest extends TestCase
      */
     protected function getPresenter()
     {
-        $this->app['view']->addNamespace('antares/notifications', realpath(base_path() . '../../../../components/notifications/resources/views'));
+        $this->app['view']->addNamespace('antares/notifications', realpath(getcwd() . '/resources/views'));
         $breadcrumb = m::mock(Breadcrumb::class);
         $breadcrumb
                 ->shouldReceive('onTable')->with(m::type('Object'))->once()->andReturnNull()

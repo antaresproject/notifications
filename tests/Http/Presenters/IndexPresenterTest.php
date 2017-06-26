@@ -53,7 +53,7 @@ class IndexPresenterTest extends ApplicationTestCase
 
         $datatables = $this->app->make(Datatables::class);
         $this->stub = new IndexPresenter($breadcrumb, $datatables);
-        $this->app['view']->addNamespace('antares/notifications', realpath(base_path() . '../../../../components/notifications/resources/views'));
+        $this->app['view']->addNamespace('antares/notifications', realpath(getcwd() . '/resources/views'));
     }
 
     /**
