@@ -39,12 +39,12 @@ class ConfigurationListener
      */
     public function updated(Option $model)
     {
-
-        $model        = Option::query()->firstOrNew([
+        $option  = Option::query()->firstOrNew([
             'name' => 'notifications_remove_after_days'
         ]);
-        $model->value = input('days');
-        return $model->save();
+
+        $option->value = input('days');
+        return $option->save();
     }
 
 }

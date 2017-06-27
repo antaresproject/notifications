@@ -26,6 +26,7 @@ use Antares\Html\Form\ClientScript;
 use Antares\Html\Form\FormBuilder;
 use Antares\Html\Form\Fieldset;
 use Antares\Html\Form\Grid;
+use Antares\View\Notification\Notification;
 
 class Form extends FormBuilder
 {
@@ -57,22 +58,21 @@ class Form extends FormBuilder
     /**
      * cosntructing
      * 
-     * @param \Antares\View\Notification\Notification $notification
+     * @param Notification $notification
      * @param \Antares\Support\Fluent $fluent
      */
-    public function __construct($notification, $fluent)
+    public function __construct(Notification $notification, $fluent)
     {
         $this->fluent = $fluent;
-        $clientScript = app(ClientScript::class);
         $grid         = app(Grid::class);
 
-        parent::__construct($grid, $clientScript, app());
+        parent::__construct($grid);
 
         $this->name             = "antares.notification: " . $fluent->form_name;
         $this->grid->simple(handles('antares::notifications/update/'), ['class' => 'form--hor'], $fluent);
         $this->layoutAttributes = [
             'variables'    => $notification->getVariables(),
-            'instructions' => $notification->getInstructions(),
+            'instructions' => Notification::getInstructions(),
             'rich'         => true
         ];
         $this->bindScripts();
@@ -128,6 +128,14 @@ class Form extends FormBuilder
                         ->name('title[' . $lang->id . ']')
                         ->attributes(['class' => 'notification-title'])
                         ->value($this->getNotificationContentData($fluent, $lang->id));
+
+                if($fluent->type === 'email') {
+                    $fieldset->control('input:text', 'subject')
+                        ->label(trans('antares/notifications::messages.notification_content_subject'))
+                        ->name('subject[' . $lang->id . ']')
+                        ->attributes(['class' => 'notification-subject'])
+                        ->value($this->getNotificationContentData($fluent, $lang->id, 'subject'));
+                }
 
                 $fieldset->control('ckeditor', 'content')
                         ->label(trans('antares/notifications::messages.notification_content_content'))

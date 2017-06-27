@@ -25,6 +25,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Antares\Model\User;
 
+/**
+ * Class NotificationsStackRead
+ * @package Antares\Notifications\Model
+ *
+ * @property int $id
+ * @property int $stack_id
+ * @property int $user_id
+ * @property string $name
+ *
+ * @property-read NotificationsStack $stack
+ * @property-read User $user
+ */
 class NotificationsStackRead extends Model
 {
 

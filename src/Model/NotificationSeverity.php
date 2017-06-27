@@ -18,11 +18,20 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Model;
 
 use Antares\Model\Eloquent;
 
+/**
+ * Class NotificationSeverity
+ * @package Antares\Notifications\Model
+ *
+ * @property int $id
+ * @property int $notification_id
+ * @property string $name
+ *
+ * @property-read Notifications $notification
+ */
 class NotificationSeverity extends Eloquent
 {
 

@@ -23,7 +23,23 @@ namespace Antares\Notifications\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Antares\Model\User;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * Class NotificationsStack
+ * @package Antares\Notifications\Model
+ *
+ * @property int $id
+ * @property int $notification_id
+ * @property int $author_id
+ * @property array $variables
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection|NotificationContents[] $content
+ * @property-read \Illuminate\Database\Eloquent\Collection|NotificationsStackParams[] $params
+ * @property-read \Illuminate\Database\Eloquent\Collection|NotificationsStackRead[] $read
+ * @property-read Notifications $notification
+ * @property-read User $author
+ */
 class NotificationsStack extends Model
 {
 
@@ -98,9 +114,9 @@ class NotificationsStack extends Model
     /**
      * Relation to stack read table
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasOne
      */
-    public function author()
+    public function author() : HasOne
     {
         return $this->hasOne(User::class, 'id', 'author_id');
     }

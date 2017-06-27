@@ -22,6 +22,7 @@ namespace Antares\Notifications\Decorator;
 
 use Antares\Notifications\Adapter\VariablesAdapter;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use RuntimeException;
 
 class SidebarItemDecorator
@@ -43,7 +44,7 @@ class SidebarItemDecorator
         }
         $return = [];
         foreach ($items as $item) {
-            array_push($return, $this->item($item, $view));
+            $return[] = $this->item($item, $view);
         }
         return $return;
     }
@@ -51,21 +52,29 @@ class SidebarItemDecorator
     /**
      * Decorates single item
      * 
-     * @param \Illuminate\Database\Eloquent\Model $item
+     * @param Model $item
      * @param String $view
      * @return String
      */
-    public function item($item, $view)
+    public function item(Model $item, $view)
     {
-        $content = app(VariablesAdapter::class)->get($item->content[0]->content, (array) $item->variables);
+        $content = $this->getVariablesAdapter()->get($item->content[0]->content, (array) $item->variables);
+
         return view($view, [
-                    'id'         => $item->id,
-                    'author'     => $item->author,
-                    'title'      => $item->content[0]->title,
-                    'value'      => $content,
-                    'priority'   => priority_label($item->notification->severity->name),
-                    'created_at' => $item->created_at
-                ])->render();
+            'id'         => $item->id,
+            'author'     => $item->author,
+            'title'      => $item->content[0]->title,
+            'value'      => $content,
+            'priority'   => priority_label($item->notification->severity->name),
+            'created_at' => $item->created_at
+        ])->render();
+    }
+
+    /**
+     * @return VariablesAdapter
+     */
+    protected function getVariablesAdapter() {
+        return app(VariablesAdapter::class);
     }
 
 }

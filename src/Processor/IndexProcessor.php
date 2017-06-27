@@ -20,6 +20,7 @@
 
 namespace Antares\Notifications\Processor;
 
+use Antares\Brands\Model\BrandOptions;
 use Antares\Notifications\Contracts\IndexPresenter as Presenter;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Antares\Notifications\Adapter\VariablesAdapter;
@@ -182,19 +183,26 @@ class IndexProcessor extends Processor
         $content = str_replace("&#39;", '"', $inputs['content']);
         $content = $this->variablesAdapter->get($content);
 
+        if( isset($inputs['subject']) ) {
+            $subject = str_replace("&#39;", '"', $inputs['subject']);
+            $subject = $this->variablesAdapter->get($subject);
+
+            array_set($inputs, 'subject', $subject);
+        }
+
         preg_match_all('/\[\[(.*?)\]\]/', $content, $matches);
         $view = str_replace($matches[0], $matches[1], $content);
 
-        if (array_get($inputs, 'type') == 'email') {
+        if (array_get($inputs, 'type') === 'email') {
             event('antares.notifier.before_send_email', [&$view]);
         }
 
-
-        $brandTemplate = \Antares\Brands\Model\BrandOptions::query()->where('brand_id', brand_id())->first();
+        $brandTemplate = BrandOptions::query()->where('brand_id', brand_id())->first();
         $header        = str_replace('</head>', '<style>' . $brandTemplate->styles . '</style></head>', $brandTemplate->header);
         $html          = preg_replace("/<body[^>]*>(.*?)<\/body>/is", '<body>' . $view . '</body>', $header . $brandTemplate->footer);
 
         array_set($inputs, 'content', $html);
+
         return $this->presenter->preview($inputs);
     }
 
@@ -211,7 +219,7 @@ class IndexProcessor extends Processor
         if (is_null($model)) {
             return $listener->changeStatusFailed();
         }
-        $model->active = ($model->active) ? 0 : 1;
+        $model->active = $model->active ? 0 : 1;
         $model->save();
         return $listener->changeStatusSuccess();
     }

@@ -32,7 +32,12 @@ $(document).ready(function () {
         container.html('<h1>' + handler.attr('data-title') + '</h1>');
         $.ajax({
             url: handler.attr('url'),
-            data: {title: form.find('.notification-title:first').val(), content: dataProvider.getContent(), type: $('.notification-select-type').val()},
+            data: {
+                title: form.find('.notification-title:first').val(),
+                subject: form.find('.notification-subject:first').val(),
+                content: dataProvider.getContent(),
+                type: $('.notification-select-type').val()
+            },
             type: 'POST',
             success: function (response) {
                 modalBody.LoadingOverlay('hide');

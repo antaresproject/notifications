@@ -23,6 +23,14 @@ namespace Antares\Notifications\Model;
 
 use Antares\Model\Eloquent;
 
+/**
+ * Class NotificationCategory
+ * @package Antares\Notifications\Model
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $title
+ */
 class NotificationCategory extends Eloquent
 {
 

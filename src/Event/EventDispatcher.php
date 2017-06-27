@@ -27,6 +27,7 @@ use Antares\Foundation\Template\EmailNotification;
 use Antares\View\Contracts\NotificationContract;
 use Antares\Foundation\Template\SmsNotification;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Arr;
 
 class EventDispatcher
 {
@@ -34,15 +35,18 @@ class EventDispatcher
     use DispatchesJobs;
 
     /**
-     * sends notification
-     * 
+     * Sends notification.
+     *
      * @param array $notification
-     * @return boolean
+     * @param array|null $variables
+     * @param array|null $recipients
+     * @return bool|\Symfony\Component\HttpFoundation\Response
      */
-    public function run($notification, $variables = null, $recipients = null)
+    public function run(array $notification, array $variables = null, array $recipients = null)
     {
-        $name = NotificationTypes::whereId($notification['type_id'])->first()->name;
-        switch ($name) {
+        $typeName = Arr::get($notification, 'type.name');
+
+        switch ($typeName) {
             case 'email':
                 $instance = app(EmailNotification::class);
                 break;

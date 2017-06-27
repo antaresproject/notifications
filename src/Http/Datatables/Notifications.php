@@ -201,7 +201,7 @@ class Notifications extends DataTable
                 $btns[] = $html->create('li', $html->link(handles("antares::notifications/sendtest/" . $row->id), trans('Send preview'), ['class' => "triggerable confirm", 'data-icon' => 'desktop-windows', 'data-title' => trans("Are you sure?"), 'data-description' => trans('Sending preview notification with item') . ' #' . $row->contents[0]->title]));
             }
 
-            if ($canDelete and ( ( $row->event == config('antares/notifications::default.custom_event')))) {
+            if ($canDelete and $row->event == config('antares/notifications::default.custom_event')) {
                 $btns[] = $html->create('li', $html->link(handles("antares::notifications/delete/" . $row->id), trans('Delete'), ['class' => "triggerable confirm", 'data-icon' => 'delete', 'data-title' => trans("Are you sure?"), 'data-description' => trans('Deleting item #') . ' #' . $row->id]));
             }
             if (empty($btns)) {

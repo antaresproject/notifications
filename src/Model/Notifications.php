@@ -25,6 +25,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Antares\Model\Eloquent;
 
+/**
+ * Class Notifications
+ * @package Antares\Notifications\Model
+ *
+ * @property int $id
+ * @property int $severity_id
+ * @property int $category_id
+ * @property int $type_id
+ * @property int $active
+ * @property string $event
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection|NotificationsStack[] $stack
+ * @property-read \Illuminate\Database\Eloquent\Collection|NotificationContents[] $contents
+ * @property-read NotificationCategory $category
+ * @property-read NotificationTypes $type
+ * @property-read NotificationSeverity $severity
+ */
 class Notifications extends Eloquent
 {
 

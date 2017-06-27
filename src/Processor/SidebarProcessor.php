@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Processor;
 
 use Antares\Notifications\Decorator\SidebarItemDecorator;
@@ -35,7 +34,7 @@ class SidebarProcessor extends Processor
     /**
      * Notifications stack repository
      *
-     * @var NotificationsStack
+     * @var StackRepository
      */
     protected $stack;
 
@@ -118,7 +117,7 @@ class SidebarProcessor extends Processor
     /**
      * Clears messages depends on type
      * 
-     * @param type $type
+     * @param string $type
      * @return JsonResponse
      */
     public function clear($type = null)

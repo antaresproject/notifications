@@ -18,12 +18,27 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Model;
 
 use Antares\Translations\Models\Languages;
 use Antares\Model\Eloquent;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * Class NotificationContents
+ * @package Antares\Notifications\Model\
+ *
+ * @property int $id
+ * @property int $notification_id
+ * @property int $lang_id
+ * @property string $title
+ * @property string $subject
+ * @property string $content
+ *
+ * @property-read Notifications $notification
+ * @property-read Languages $lang
+ */
 class NotificationContents extends Eloquent
 {
 
@@ -46,7 +61,7 @@ class NotificationContents extends Eloquent
      *
      * @var array
      */
-    protected $fillable = ['notification_id', 'lang_id', 'title', 'content'];
+    protected $fillable = ['notification_id', 'lang_id', 'title', 'subject', 'content'];
 
     /**
      * Indicates if the model should be timestamped.
@@ -58,9 +73,9 @@ class NotificationContents extends Eloquent
     /**
      * notification belongs to relation
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
-    public function notification()
+    public function notification() : BelongsTo
     {
         return $this->belongsTo(Notifications::class, 'notification_id', 'id');
     }
@@ -72,12 +87,15 @@ class NotificationContents extends Eloquent
      */
     protected function fires()
     {
-        $classname = isset($this->notification->classname) ? snake_case(class_basename($this->notification->classname)) : false;
-        if (!$classname) {
-            return;
+        $className = isset($this->notification->classname) ? snake_case(class_basename($this->notification->classname)) : false;
+
+        if (! $className) {
+            return [];
         }
-        $before = event('notifications:' . $classname . '.render.before');
-        $after  = event('notifications:' . $classname . '.render.after');
+
+        $before = event('notifications:' . $className . '.render.before');
+        $after  = event('notifications:' . $className . '.render.after');
+
         return [
             'before' => !empty($before) ? current($before) : '',
             'after'  => !empty($after) ? current($after) : ''
@@ -93,12 +111,18 @@ class NotificationContents extends Eloquent
     public function __get($key)
     {
         $return = parent::__get($key);
+
         if ($key !== 'content') {
             return $return;
         }
+
         $fired = $this->fires();
 
-        return $fired['before'] . $return . $fired['after'];
+        if( count($fired) ) {
+            return $fired['before'] . $return . $fired['after'];
+        }
+
+        return  $return;
     }
 
     /**
@@ -108,8 +132,12 @@ class NotificationContents extends Eloquent
      */
     public function save(array $options = array())
     {
-        $fired                       = $this->fires();
-        $content                     = str_replace([$fired['before'], $fired['after']], '', $this->content);
+        $fired = $this->fires();
+
+        $content = count($fired)
+            ? str_replace([$fired['before'], $fired['after']], '', $this->content)
+            : $this->content;
+
         $this->setAttribute('content', $content);
         $this->attributes['content'] = $content;
         parent::save($options);
@@ -118,9 +146,9 @@ class NotificationContents extends Eloquent
     /**
      * Relation to languages table
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
-    public function lang()
+    public function lang() : HasOne
     {
         return $this->hasOne(Languages::class, 'id', 'lang_id');
     }

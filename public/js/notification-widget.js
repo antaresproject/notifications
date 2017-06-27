@@ -56,7 +56,7 @@ Vue.config.debug = !0, Vue.config.devtools = !0, function () {
                 this.container.removeAttr('disabled');
                 this.container.closest('.grid-stack-item-content').LoadingOverlay('hide');
             }
-        },
+        }
     });
 }.call(this);
 

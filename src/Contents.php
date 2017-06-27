@@ -21,22 +21,19 @@
 namespace Antares\Notifications;
 
 use Antares\Notifications\Model\NotificationContents;
-use Antares\Logger\Model\Logs;
 
 class Contents
 {
 
     /**
-     * Notification contens container
+     * Notification contents container
      *
      * @var NotificationContents 
      */
     protected $notifications;
 
     /**
-     * name of repositroy model
-     * 
-     * @return Logs
+     * Contents constructor.
      */
     public function __construct()
     {
@@ -58,18 +55,19 @@ class Contents
     }
 
     /**
-     * Finds notification content by title and locale
-     * 
-     * @param type $operation
-     * @param type $locale
-     * @return type
+     * Finds notification content by title and locale.
+     *
+     * @param string $operation
+     * @param string $locale
+     * @return bool
      */
-    public function find($operation, $locale)
+    public function find(string $operation, string $locale)
     {
-        $model = $this->notifications->first(function ($value, $key) use($operation, $locale) {
-            return $value->code == $locale && ($value->title == $operation or $value->name == $operation);
+        $model = $this->notifications->first(function ($value) use($operation, $locale) {
+            return $value->code === $locale && ($value->title === $operation || $value->name === $operation);
         });
-        return !is_null($model) ? $model->content : false;
+
+        return $model ? $model->content : false;
     }
 
 }

@@ -25,6 +25,7 @@ use Antares\Foundation\Http\Controllers\AdminController;
 use Antares\Notifications\Repository\Repository;
 use Antares\Notifications\Model\Notifications;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Http\JsonResponse;
 
@@ -83,12 +84,17 @@ class NotificationController extends AdminController
      * 
      * @return JsonResponse
      */
-    public function send()
+    public function send(Request $request)
     {
-        if (!Input::get('afterValidate')) {
+        $afterValidate = $request->get('afterValidate');
+        $notifications = (array) $request->get('notifications', []);
+
+        if (! $afterValidate) {
             return $this->form->get()->isValid();
         }
-        $this->fire($this->findModel(Input::get('notifications')));
+
+        $this->fire($this->findModel($notifications));
+
         return new JsonResponse(['message' => trans('antares/notifications::messages.widget_notification_added_to_queue')]);
     }
 
@@ -96,15 +102,18 @@ class NotificationController extends AdminController
      * Fires notification events
      * 
      * @param Model $model
-     * @return void
+     * @return array
      */
-    protected function fire(Model $model)
+    protected function fire(Model $model) : array
     {
         $recipient = $this->getRecipient();
-        if (is_null($recipient->phone)) {
+
+        if ($recipient->phone === null) {
             $recipient->phone = config('antares/notifications::default.sms');
         }
+
         $params = ['variables' => ['user' => $recipient], 'recipients' => [$recipient]];
+
         return event($model->event, $params);
     }
 
@@ -123,15 +132,15 @@ class NotificationController extends AdminController
     }
 
     /**
-     * Finds notification model
-     * 
-     * @return \Illuminate\Database\Eloquent\Model
+     * @param array $ids
+     * @return Notifications
+     * @throws \Exception
      */
-    protected function findModel()
+    protected function findModel(array $ids) : Notifications
     {
-        return Notifications::whereHas('contents', function($query) {
-                    $query->where('id', Input::get('notifications'));
-                })->firstOrFail();
+        return Notifications::whereHas('contents', function($query) use($ids) {
+            $query->where('id', $ids);
+        })->firstOrFail();
     }
 
     /**

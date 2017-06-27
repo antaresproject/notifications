@@ -26,11 +26,12 @@ use Antares\Notifications\Console\NotificationCategoriesCommand;
 use Antares\Notifications\Console\NotificationSeveritiesCommand;
 use Antares\Foundation\Support\Providers\ModuleServiceProvider;
 use Antares\Notifications\Console\NotificationTypesCommand;
-use Antares\Notifications\Listener\NotificationsListener;
+use Antares\Notifications\Http\Middlewares\ListenerMiddleware;
 use Antares\Notifications\Listener\ConfigurationListener;
 use Antares\Notifications\Console\NotificationsRemover;
 use Antares\Acl\Http\Handlers\ControlPane;
 use Antares\Memory\Model\Option;
+use Illuminate\Routing\Router;
 
 class NotificationsServiceProvider extends ModuleServiceProvider
 {
@@ -65,16 +66,24 @@ class NotificationsServiceProvider extends ModuleServiceProvider
      */
     public function register()
     {
-
         $this->bindContracts();
-        $this->app->singleton('notifications.contents', function ($app) {
+        $this->app->singleton('notifications.contents', function () {
             return new Contents();
         });
         $this->commands([
             NotificationCategoriesCommand::class,
             NotificationSeveritiesCommand::class,
-            NotificationTypesCommand::class
+            NotificationTypesCommand::class,
+            NotificationsRemover::class,
         ]);
+    }
+
+    public function boot() {
+        parent::boot();
+
+        /* @var $router Router */
+        $router = $this->app->make(Router::class);
+        $router->pushMiddlewareToGroup('web',ListenerMiddleware::class);
     }
 
     /**
@@ -100,16 +109,13 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         $this->addLanguageComponent('antares/notifications', 'antares/notifications', "{$path}/resources/lang");
         $this->addViewComponent('antares/notifications', 'antares/notifications', "{$path}/resources/views");
         $this->bootMemory();
-        $this->listenEvents();
         $this->attachMenu(NotificationsTopMenuHandler::class);
         if (config('antares/notifications::sockets')) {
             publish('notifications', 'scripts.default');
         }
         $this->attachMenu(NotificationsBreadcrumbMenu::class);
         $this->app->make('view')->composer('antares/notifications::admin.logs.config', ControlPane::class);
-        $this->commands([
-            NotificationsRemover::class
-        ]);
+
         Option::observe(new ConfigurationListener());
     }
 
@@ -121,14 +127,6 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         $this->app->make('antares.acl')->make($this->routeGroup)->attach(
                 $this->app->make('antares.platform.memory')
         );
-    }
-
-    /**
-     * Component event listeners
-     */
-    protected function listenEvents()
-    {
-        $this->app->make(NotificationsListener::class)->listen();
     }
 
 }

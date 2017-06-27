@@ -153,8 +153,8 @@ class StackRepository extends AbstractRepository
 
     /**
      * Gets user notifications
-     * 
-     * @return \Illuminate\Database\Eloquent\Collection
+     *
+     * @return Builder
      */
     public function getNotifications()
     {
@@ -166,7 +166,7 @@ class StackRepository extends AbstractRepository
     /**
      * Alerts getter
      * 
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Builder
      */
     public function getAlerts()
     {
@@ -208,7 +208,7 @@ class StackRepository extends AbstractRepository
      */
     public function clear($type = 'notifications')
     {
-        $builder = ($type == 'alerts') ? $this->getAlerts() : $this->getNotifications();
+        $builder = ($type === 'alerts') ? $this->getAlerts() : $this->getNotifications();
 
         return $this->makeModel()
                         ->getModel()
@@ -228,7 +228,7 @@ class StackRepository extends AbstractRepository
     {
         DB::beginTransaction();
         try {
-            $builder = ($type == 'alerts') ? $this->getAlerts() : $this->getNotifications();
+            $builder = ($type === 'alerts') ? $this->getAlerts() : $this->getNotifications();
             $read    = NotificationsStackRead::select(['stack_id'])->withTrashed()->where('user_id', user()->id)->pluck('stack_id');
             $items   = $builder->whereNotIn('id', $read)->get();
 

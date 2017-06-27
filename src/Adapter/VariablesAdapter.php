@@ -42,7 +42,7 @@ class VariablesAdapter
     /**
      * Gets variables filled notification content
      * 
-     * @param String $content
+     * @param string $content
      * @param array $variables
      * @return String
      */
@@ -51,7 +51,6 @@ class VariablesAdapter
 
         $replacements = [];
         $instruction  = 'foreach';
-
 
         foreach ($variables as $key => $values) {
             $inner = $this->getInnerInstruction($content, $instruction);
@@ -98,14 +97,15 @@ class VariablesAdapter
     /**
      * Innser instruction
      * 
-     * @param Stirng $content
-     * @param String $instruction
-     * @return String
+     * @param string $content
+     * @param string $instruction
+     * @return array
      */
     protected function getInnerInstruction($content, $instruction)
     {
         $sources      = $this->getStringsBetween($content, "[[{$instruction}]]", "[[/{$instruction}]]");
         $replacements = [];
+
         foreach ($sources as $index => $source) {
             $toReplace            = $source;
             $source               = $this->clearCondition($source);
@@ -114,6 +114,7 @@ class VariablesAdapter
                 'cleared'    => $source
             ];
         }
+
         return $replacements;
     }
 
@@ -179,7 +180,7 @@ class VariablesAdapter
         foreach ($sources as $source) {
             $toReplace = $source;
             $source    = $this->clearCondition($source);
-            if ($source == '') {
+            if ($source === '') {
                 return $content;
             }
             $variables    = $this->extractVariables($source);
@@ -218,20 +219,20 @@ class VariablesAdapter
      * @param String $end
      * @return array
      */
-    function getStringsBetween($string, $start, $end)
+    public function getStringsBetween($string, $start, $end)
     {
         $lastPos   = 0;
         $positions = array();
 
         while (($lastPos = strpos($string, $start, $lastPos)) !== false) {
             $positions[] = $lastPos;
-            $lastPos     = $lastPos + strlen($start);
+            $lastPos     += strlen($start);
         }
         $lastPos      = 0;
         $positionsEnd = array();
         while (($lastPos      = strpos($string, $end, $lastPos)) !== false) {
             $positionsEnd[] = $lastPos;
-            $lastPos        = $lastPos + strlen($end);
+            $lastPos        += strlen($end);
         }
         $return = [];
         foreach ($positions as $index => $position) {
@@ -248,16 +249,18 @@ class VariablesAdapter
      * @param String $end
      * @return String
      */
-    function getStringBetween($string, $start, $end)
+    public function getStringBetween($string, $start, $end)
     {
-        $string = " " . $string;
+        $string = ' ' . $string;
         $ini    = strpos($string, $start);
 
-        if ($ini == 0) {
-            return "";
+        if ($ini === 0) {
+            return '';
         }
+
         $ini += strlen($start);
         $len = strpos($string, $end, $ini) - $ini;
+
         return substr($string, $ini, $len);
     }
 
@@ -265,16 +268,18 @@ class VariablesAdapter
      * extract variables from notification
      * 
      * @param String $content
-     * @return boolean
+     * @return array
      */
     protected function extractVariables($content)
     {
         preg_match_all('/\[\[(.*?)\]\]/', $content, $matches);
-        if (!isset($matches[0]) or ! isset($matches[1])) {
-            return false;
+
+        if (!isset($matches[0], $matches[1])) {
+            return [];
         }
         $return        = [];
-        $notifications = app('antares.notifications')->all();
+        $notifications = \Antares\Foundation\Notification::getInstance()->all();
+
         foreach ($matches[1] as $index => $match) {
             if (!str_contains($match, '::')) {
                 continue;
@@ -302,8 +307,9 @@ class VariablesAdapter
         if (!isset($matches[0]) or ! isset($matches[1])) {
             return $content;
         }
-        $notifications = app('antares.notifications')->all();
-        foreach ($matches[1] as $index => $match) {
+        $notifications = \Antares\Foundation\Notification::getInstance()->all();
+
+        foreach ( (array) $matches[1] as $index => $match) {
             if (!str_contains($match, '::')) {
                 continue;
             }
@@ -313,9 +319,11 @@ class VariablesAdapter
             $variables = isset($notifications[$name]['variables']) ? $notifications[$name]['variables'] : [];
             event('notifications:notification.variables', [&$variables]);
             $value     = $this->resolveValue($var, $variables);
+
             if (is_array($value)) {
                 $value = $this->getDefaultNotificationForList($value)->render();
             }
+
             $content = str_replace($matches[0][$index], $value, $content);
         }
         return $content;
@@ -333,18 +341,26 @@ class VariablesAdapter
         if (!empty($variables)) {
             foreach ($variables as $container => $vars) {
                 foreach ($vars as $subname => $var) {
-                    if (isset($var['name']) and $name == $var['name'] and isset($var['value'])) {
-                        return $var['value'];
-                    } elseif (!isset($var['name']) and $subname == $name and isset($var['value'])) {
-                        return $var['value'];
+                    $value = $var['value'];
+
+                    if(is_callable($value) && $var['name'] === $name) {
+                        return $value($this->variables);
+                    }
+
+                    if (isset($var['name']) and $name == $value and isset($value)) {
+                        return $value;
+                    }
+                    elseif (!isset($var['name']) and $subname == $name and isset($value)) {
+                        return $value;
                     }
                 }
             }
         }
+
         if (!isset($variables[$name])) {
             return false;
         }
-        $variable = $variables[$name];
+
         if (isset($variable['dataProvider'])) {
             $value = $this->resolveDataProviderValue($variable['dataProvider']);
             if (!$value) {
@@ -352,7 +368,8 @@ class VariablesAdapter
             }
             return $value;
         }
-        return isset($variable['value']) ? $variable['value'] : '';
+
+        return array_get($variable, 'value', '');
     }
 
     /**

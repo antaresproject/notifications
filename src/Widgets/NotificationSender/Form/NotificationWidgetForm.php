@@ -38,7 +38,7 @@ class NotificationWidgetForm
     /**
      * Assets factory instance
      *
-     * @var type 
+     * @var Factory
      */
     protected $assets;
 

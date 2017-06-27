@@ -36,7 +36,7 @@ class Repository extends AbstractRepository
     /**
      * name of repositroy model
      * 
-     * @return Notifications
+     * @return string
      */
     public function model()
     {
@@ -46,7 +46,7 @@ class Repository extends AbstractRepository
     /**
      * find models by level type
      * 
-     * @param String $type
+     * @param string $type
      * @return Collection
      */
     public function findByLevelType($type)
@@ -93,10 +93,13 @@ class Repository extends AbstractRepository
             $model->active = array_get($data, 'active', 0);
             $model->save();
             $titles        = array_get($data, 'title', []);
+
             foreach ($titles as $langId => $title) {
                 $content          = $model->contents()->getModel()->firstOrNew(['notification_id' => $id, 'lang_id' => $langId]);
                 $content->content = $data['content'][$langId];
                 $content->title   = $title;
+                $content->subject = array_get($data, 'subject.' . $langId, '');
+
                 $model->contents()->save($content);
             }
         } catch (Exception $ex) {
@@ -121,7 +124,8 @@ class Repository extends AbstractRepository
                             'notification_id' => $model->id,
                             'lang_id'         => $langId,
                             'title'           => $content,
-                            'content'         => $data['content'][$langId]
+                            'content'         => $data['content'][$langId],
+                            'subject'         => $data['subject'][$langId]
                 ]));
             }
         });
@@ -200,6 +204,7 @@ class Repository extends AbstractRepository
                             'notification_id' => $model->id,
                             'lang_id'         => $lang->id,
                             'title'           => array_get($data, 'title'),
+                            'subject'         => array_get($data, 'subject'),
                             'content'         => $content
         ]));
     }
@@ -207,11 +212,11 @@ class Repository extends AbstractRepository
     /**
      * Finds sendable notifications
      * 
-     * @return \Illuminate\Database\Query\Builder
+     * @return Collection
      */
     public function findSendable()
     {
-        return $this->makeModel()->with('contents')->get();
+        return $this->makeModel()->with('contents', 'type')->get();
     }
 
     /**
@@ -248,9 +253,9 @@ class Repository extends AbstractRepository
      */
     public function getDecoratedNotificationTypes()
     {
-        return NotificationTypes::whereIn('name', ['email', 'sms'])->pluck('name', 'id')->map(function ($item, $key) {
-                    return ucfirst($item);
-                });
+        return NotificationTypes::whereIn('name', ['email', 'sms'])->pluck('name', 'id')->map(function ($item) {
+            return ucfirst($item);
+        });
     }
 
 }

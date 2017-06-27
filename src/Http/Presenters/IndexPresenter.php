@@ -82,7 +82,7 @@ class IndexPresenter implements PresenterContract
     public function edit($eloquent, $locale)
     {
         $this->breadcrumb->onEdit($eloquent);
-        $form = $this->getForm($eloquent, $locale);
+        $form = $this->getForm($eloquent);
         return $this->view('edit', compact('form'));
     }
 
@@ -98,16 +98,18 @@ class IndexPresenter implements PresenterContract
         $classname     = $eloquent->classname;
         $model         = $eloquent->contents->first();
         $configuration = [
-            'content'   => $model !== null ? $model->content : null,
-            'title'     => !is_null($model) ? $model->title : '',
-            'type'      => ($eloquent->exists ? $eloquent->type->name : ''),
-            'form_name' => $eloquent->name
+            'content'       => $model !== null ? $model->content : null,
+            'title'         => $model !== null ? $model->title : '',
+            'type'          => $eloquent->exists ? $eloquent->type->name : '',
+            'form_name'     => $eloquent->name
         ];
-        $notification  = app(!strlen($classname) ? Notification::class : $classname);
+        $notification  = app($classname ?: Notification::class);
+
         $fluent        = new Fluent(array_merge($configuration, array_except($eloquent->toArray(), ['type'])));
-        if (!is_null($fluent->type)) {
+        if (!is_null($fluent->type) && $type) {
             $fluent->type = $type;
         }
+
         return $this->form($fluent, $notification);
     }
 
@@ -122,7 +124,8 @@ class IndexPresenter implements PresenterContract
     {
         publish('notifications', 'scripts.resources-default');
         Event::fire('antares.forms', 'notification.' . $fluent->form_name);
-        $fluent->type = $fluent->type == '' ? 'email' : $fluent->type;
+        $fluent->type = $fluent->type === '' ? 'email' : $fluent->type;
+
         return new Form($notification, $fluent);
     }
 
