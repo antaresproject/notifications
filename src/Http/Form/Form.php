@@ -129,7 +129,7 @@ class Form extends FormBuilder
                         ->attributes(['class' => 'notification-title'])
                         ->value($this->getNotificationContentData($fluent, $lang->id));
 
-                if($fluent->type === 'email') {
+                if($fluent->type !== 'sms') {
                     $fieldset->control('input:text', 'subject')
                         ->label(trans('antares/notifications::messages.notification_content_subject'))
                         ->name('subject[' . $lang->id . ']')
