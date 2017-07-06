@@ -67,6 +67,15 @@ class NotificationsWidget extends AbstractTemplate
     ];
 
     /**
+     * Where widget should be available 
+     *
+     * @var array
+     */
+    protected $views      = [
+        'antares/foundation::admin.users.show'
+    ];
+
+    /**
      * Construct
      * 
      * @param NotificationWidgetForm $form
