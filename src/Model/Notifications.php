@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Model;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -54,7 +53,7 @@ class Notifications extends Eloquent
      *
      * @var array
      */
-    protected $fillable = ['severity_id', 'event', 'category_id', 'type_id', 'active'];
+    protected $fillable = ['severity_id', 'event', 'category_id', 'type_id', 'active', 'classname'];
 
     /**
      * Indicates if the model should be timestamped.
