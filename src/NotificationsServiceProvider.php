@@ -73,8 +73,17 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         $this->commands([
             NotificationCategoriesCommand::class,
             NotificationSeveritiesCommand::class,
-            NotificationTypesCommand::class
+            NotificationTypesCommand::class,
+            NotificationsRemover::class
         ]);
+
+        $this->app->singleton(ChannelManager::class, function ($app) {
+            return new ChannelManager($app);
+        });
+
+        $this->app->singleton(\Antares\Notifier\Mail\Mailer::class, function ($app) {
+            return new \Antares\Notifier\Mail\Mailer($app->make('view'), $app->make('swift.mailer'), $app->make('events'));
+        });
     }
 
     /**
@@ -107,10 +116,13 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         }
         $this->attachMenu(NotificationsBreadcrumbMenu::class);
         $this->app->make('view')->composer('antares/notifications::admin.logs.config', ControlPane::class);
-        $this->commands([
-            NotificationsRemover::class
-        ]);
+
         Option::observe(new ConfigurationListener());
+
+
+        $this->app->alias(
+                \Antares\Notifier\Mail\Mailer::class, \Illuminate\Contracts\Mail\Mailer::class
+        );
     }
 
     /**
