@@ -82,7 +82,7 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         });
 
         $this->app->singleton(\Antares\Notifier\Mail\Mailer::class, function ($app) {
-            return new \Antares\Notifier\Mail\Mailer($app->make('view'), $app->make('swift.mailer'), $app->make('events'));
+            return $app->make('antares.support.mail');
         });
     }
 
@@ -111,14 +111,10 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         $this->bootMemory();
         $this->listenEvents();
         $this->attachMenu(NotificationsTopMenuHandler::class);
-        if (config('antares/notifications::sockets')) {
-            publish('notifications', 'scripts.default');
-        }
         $this->attachMenu(NotificationsBreadcrumbMenu::class);
         $this->app->make('view')->composer('antares/notifications::admin.logs.config', ControlPane::class);
 
         Option::observe(new ConfigurationListener());
-
 
         $this->app->alias(
                 \Antares\Notifier\Mail\Mailer::class, \Illuminate\Contracts\Mail\Mailer::class

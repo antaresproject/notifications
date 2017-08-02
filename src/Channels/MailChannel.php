@@ -45,9 +45,31 @@ class MailChannel extends BaseMailChannel
             return $message->send($this->mailer);
         }
 
+
         $this->mailer->send($this->buildView($message), $message->data(), function ($mailMessage) use ($notifiable, $notification, $message) {
             $this->buildMessage($mailMessage, $notifiable, $notification, $message);
         });
+    }
+
+    /**
+     * Build the notification's view.
+     *
+     * @param  \Illuminate\Notifications\Messages\MailMessage  $message
+     * @return void
+     */
+    protected function buildView($message)
+    {
+
+        if ($message->view) {
+            return $message->view;
+        }
+
+        $markdown = call_user_func($this->markdownResolver);
+
+        return [
+            'html' => $markdown->render($message->markdown, $message->data()),
+            'text' => $markdown->renderText($message->markdown, $message->data()),
+        ];
     }
 
 }

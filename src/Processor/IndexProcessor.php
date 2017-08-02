@@ -29,15 +29,12 @@ use Antares\Notifications\Repository\Repository;
 use Antares\Foundation\Processor\Processor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Input;
-use Antares\Notifier\NotifiableTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Exception;
 
 class IndexProcessor extends Processor
 {
-
-    use NotifiableTrait;
 
     /**
      * instance of variables adapter
