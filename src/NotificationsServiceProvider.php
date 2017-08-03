@@ -25,6 +25,7 @@ use Antares\Foundation\Http\Handlers\NotificationsTopMenuHandler;
 use Antares\Notifications\Console\NotificationCategoriesCommand;
 use Antares\Notifications\Console\NotificationSeveritiesCommand;
 use Antares\Foundation\Support\Providers\ModuleServiceProvider;
+use Antares\Notifications\Console\NotificationsImportCommand;
 use Antares\Notifications\Console\NotificationTypesCommand;
 use Antares\Notifications\Listener\NotificationsListener;
 use Antares\Notifications\Listener\ConfigurationListener;
@@ -74,7 +75,8 @@ class NotificationsServiceProvider extends ModuleServiceProvider
             NotificationCategoriesCommand::class,
             NotificationSeveritiesCommand::class,
             NotificationTypesCommand::class,
-            NotificationsRemover::class
+            NotificationsRemover::class,
+            NotificationsImportCommand::class
         ]);
 
         $this->app->singleton(ChannelManager::class, function ($app) {
