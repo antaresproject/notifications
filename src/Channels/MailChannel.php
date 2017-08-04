@@ -44,6 +44,7 @@ class MailChannel extends BaseMailChannel
         if ($message instanceof Mailable) {
             return $message->send($this->mailer);
         }
+
         $this->mailer->send($this->buildView($message), $message->data(), function ($mailMessage) use ($notifiable, $notification, $message) {
             $this->buildMessage($mailMessage, $notifiable, $notification, $message);
         });

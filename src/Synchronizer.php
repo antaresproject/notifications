@@ -2,6 +2,7 @@
 
 namespace Antares\Notifications;
 
+use Illuminate\Notifications\Events\NotificationSending as LaravelNotificationSending;
 use Antares\Notifications\Model\NotificationContents;
 use Antares\Notifications\Model\NotificationSeverity;
 use Antares\Notifications\Model\NotificationCategory;
@@ -13,6 +14,13 @@ use Exception;
 
 class Synchronizer
 {
+
+    public function syncDatabase($classname, $subject, $body)
+    {
+        $notification = Notifications::query()->firstOrCreate([
+            'classname' => $classname,
+        ]);
+    }
 
     /**
      * Saves notification message

@@ -56,7 +56,10 @@ class NotificationsServiceProvider extends ModuleServiceProvider
      * @var array
      */
     protected $listen = [
-        "antares.form: foundation.settings" => ConfigurationListener::class,
+        "antares.form: foundation.settings"                   => ConfigurationListener::class,
+        'Illuminate\Notifications\Events\NotificationSending' => [
+            'Antares\Notifications\Listener\NotificationSending',
+        ],
     ];
 
     /**
