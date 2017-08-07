@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -105,6 +105,7 @@ class IndexPresenter implements PresenterContract
         ];
         $notification  = app(!strlen($classname) ? Notification::class : $classname);
         $fluent        = new Fluent(array_merge($configuration, array_except($eloquent->toArray(), ['type'])));
+
         if (!is_null($fluent->type)) {
             $fluent->type = $type;
         }
@@ -123,6 +124,7 @@ class IndexPresenter implements PresenterContract
         publish('notifications', 'scripts.resources-default');
         Event::fire('antares.forms', 'notification.' . $fluent->form_name);
         $fluent->type = $fluent->type == '' ? 'email' : $fluent->type;
+
         return new Form($notification, $fluent);
     }
 

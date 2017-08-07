@@ -308,8 +308,7 @@ class VariablesAdapter
                 continue;
             }
             list($component, $var) = explode('::', trim($match));
-            $name = $this->findExtensionName($component);
-
+            $name      = $this->findExtensionName($component);
             $variables = isset($notifications[$name]['variables']) ? $notifications[$name]['variables'] : [];
             event('notifications:notification.variables', [&$variables]);
             $value     = $this->resolveValue($var, $variables);

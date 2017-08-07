@@ -141,7 +141,7 @@ class NotificationsServiceProvider extends ModuleServiceProvider
      */
     protected function listenEvents()
     {
-        $this->app->make(NotificationsListener::class)->listen();
+//        $this->app->make(NotificationsListener::class)->listen();
     }
 
 }

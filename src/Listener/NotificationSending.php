@@ -43,10 +43,11 @@ class NotificationSending
      */
     public function handle(LaravelNotificationSending $event)
     {
+
         if ($event->channel === 'mail') {
+
             $message = $event->notification->toMail($event->notifiable);
-            $swift   = $this->mailer->createMessageContent($message->view, $message->viewData)->getSwiftMessage();
-            $this->synchronizer->syncDatabase($event->notification, $swift->getBody(), $message->subject);
+            $this->synchronizer->syncDatabase(get_class($event->notification), $message);
         }
     }
 

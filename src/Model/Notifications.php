@@ -53,7 +53,7 @@ class Notifications extends Eloquent
      *
      * @var array
      */
-    protected $fillable = ['severity_id', 'event', 'category_id', 'type_id', 'active', 'classname'];
+    protected $fillable = ['severity_id', 'event', 'category_id', 'type_id', 'active', 'classname', 'checksum'];
 
     /**
      * Indicates if the model should be timestamped.
