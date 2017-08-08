@@ -61,11 +61,29 @@ class SidebarItemDecorator
         return view($view, [
                     'id'         => $item->id,
                     'author'     => $item->author,
-                    'title'      => $item->content[0]->title,
+                    'title'      => $this->replaceVariables($item->content[0]->title, $item->variables),
                     'value'      => $content,
                     'priority'   => priority_label($item->notification->severity->name),
                     'created_at' => $item->created_at
                 ])->render();
+    }
+
+    /**
+     * Replace variables in content
+     * 
+     * @param String $content
+     * @param array $variables
+     * @return String
+     */
+    protected function replaceVariables($content, array $variables = [])
+    {
+        $values = collect($variables)->flatMap(function($item, $key) {
+                    return [':' . $key => $item];
+                })->toArray();
+
+
+
+        return str_replace(array_keys($values), array_values($values), $content);
     }
 
 }

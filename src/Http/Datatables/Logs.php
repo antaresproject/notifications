@@ -21,15 +21,14 @@ declare(strict_types = 1);
 
 namespace Antares\Notifications\Http\Datatables;
 
-use Antares\Notifications\Model\NotificationTypes;
-use Antares\Datatables\Services\DataTable;
-use Illuminate\Database\Eloquent\Builder;
-use Antares\Support\Facades\Form;
 use Antares\Notifications\Filter\DateRangeNotificationLogsFilter;
 use Antares\Notifications\Filter\NotificationNameFilter;
 use Antares\Notifications\Filter\NotificationLangFilter;
 use Antares\Notifications\Filter\NotificationAreaFilter;
 use Antares\Notifications\Repository\StackRepository;
+use Antares\Notifications\Model\NotificationTypes;
+use Antares\Datatables\Services\DataTable;
+use Illuminate\Database\Eloquent\Builder;
 
 class Logs extends DataTable
 {

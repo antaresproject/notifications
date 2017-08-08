@@ -335,7 +335,7 @@ class StackRepository extends AbstractRepository
                             'tbl_notifications_stack.variables as variables',
                             'tbl_notifications_stack.created_at as created_at',
                             'tbl_notifications_stack.author_id as author_id',
-                            'tbl_notifications.event as name',
+                            'tbl_notifications.classname as name',
                             'tbl_notification_contents.title as title',
                             'tbl_notification_types.title as type',
                             'tbl_languages.code as lang_code',

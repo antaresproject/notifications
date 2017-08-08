@@ -129,6 +129,9 @@ class Notifications extends DataTable
                         ->editColumn('type', function ($model) {
                             return $model->type->title;
                         })
+                        ->editColumn('classname', function ($model) {
+                            return last(explode('\\', $model->classname));
+                        })
                         ->editColumn('title', function ($model) {
                             $first = $model->contents->first();
                             return !is_null($first) ? $first->title : '';
@@ -148,17 +151,19 @@ class Notifications extends DataTable
     public function html()
     {
         publish('notifications', ['js/notifications-table.js']);
+        $categories = $this->categories();
+        $types      = $this->types();
         return $this->setName('Notifications List')
                         ->addColumn(['data' => 'id', 'name' => 'id', 'data' => 'id', 'title' => 'Id'])
                         ->addColumn(['data' => 'title', 'name' => 'title', 'title' => trans('antares/notifications::messages.title'), 'className' => 'bolded'])
-                        ->addColumn(['data' => 'event', 'name' => 'event', 'title' => trans('Event')])
+                        ->addColumn(['data' => 'classname', 'name' => 'classname', 'title' => trans('Event')])
                         ->addColumn(['data' => 'category', 'name' => 'category', 'title' => trans('Category')])
                         ->addColumn(['data' => 'type', 'name' => 'type', 'title' => trans('Type')])
                         ->addColumn(['data' => 'active', 'name' => 'active', 'title' => trans('Enabled')])
                         ->addAction(['name' => 'edit', 'title' => '', 'class' => 'mass-actions dt-actions', 'orderable' => false, 'searchable' => false])
-                        ->setDeferedData()
-                        ->addGroupSelect($this->categories(), 3, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'class' => 'mr24', 'id' => 'datatables-notification-category'])
-                        ->addGroupSelect($this->types(), 4, null, ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type']);
+                        ->addGroupSelect($categories, 3, $categories->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'class' => 'mr24', 'id' => 'datatables-notification-category'])
+                        ->addGroupSelect($this->types(), 4, $types->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type'])
+                        ->ajax(handles('antares::notifications/index'));
     }
 
     /**

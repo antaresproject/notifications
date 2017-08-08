@@ -2,12 +2,12 @@
 
 namespace Antares\Notifications;
 
-use Antares\Notifications\Messages\MailMessage;
 use Antares\Notifications\Model\NotificationContents;
 use Antares\Notifications\Model\NotificationSeverity;
 use Antares\Notifications\Model\NotificationCategory;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Model\Notifications;
+use Antares\Notifications\Contracts\Message;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use ReflectionClass;
@@ -20,35 +20,20 @@ class Synchronizer
      * Synchronize notification with entry in database
      * 
      * @param String $classname
-     * @param MailMessage $message
+     * @param Message $message
      * @return boolean
      */
-    public function syncDatabase($classname, MailMessage $message)
+    public function syncDatabase($classname, Message $message)
     {
 
         DB::beginTransaction();
         try {
-            $model      = Notifications::query()->firstOrCreate([
-                'classname' => $classname,
-            ]);
-            $reflection = new ReflectionClass($classname);
-            $checksum   = md5_file($reflection->getFileName());
-            if (!is_null($model->checksum)) {
-
-                if ($model->checksum === $checksum) {
-                    return;
+            if (is_array($message->type)) {
+                foreach ($message->type as $type) {
+                    $this->save($classname, $type, $message);
                 }
-            }
-            $model->fill([
-                'severity_id' => $this->severity($message->severity)->id,
-                'category_id' => $this->category($message->category)->id,
-                'type_id'     => $this->type($message->type)->id,
-                'checksum'    => $checksum
-            ]);
-            $model->save();
-            $langs = langs();
-            foreach ($langs as $lang) {
-                $this->saveNotificationContent($model->id, $lang->code, $message->rawSubject, view($message->view)->render());
+            } else {
+                $this->save($classname, $message->type, $message);
             }
         } catch (Exception $ex) {
             DB::rollback();
@@ -58,6 +43,41 @@ class Synchronizer
 
         DB::commit();
         return true;
+    }
+
+    /**
+     * Saves notification in database
+     * 
+     * @param String $classname
+     * @param String $type
+     * @param Message $message
+     * @return void
+     */
+    protected function save($classname, $type, Message $message)
+    {
+        $model      = Notifications::query()->firstOrCreate([
+            'classname' => $classname,
+            'type_id'   => $this->type($type)->id,
+        ]);
+        $reflection = new ReflectionClass($classname);
+        $checksum   = md5_file($reflection->getFileName());
+        if (!is_null($model->checksum)) {
+
+            if ($model->checksum === $checksum) {
+                return;
+            }
+        }
+        $model->fill([
+            'severity_id' => $this->severity($message->severity)->id,
+            'category_id' => $this->category($message->category)->id,
+            'checksum'    => $checksum
+        ]);
+        $model->save();
+        $langs = langs();
+        foreach ($langs as $lang) {
+            $content = ($message->type === 'sms') ? $message->content : view($message->view)->render();
+            $this->saveNotificationContent($model->id, $lang->code, $message->rawSubject, $content);
+        }
     }
 
     /**

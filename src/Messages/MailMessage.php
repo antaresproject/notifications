@@ -21,8 +21,9 @@
 namespace Antares\Notifications\Messages;
 
 use Illuminate\Notifications\Messages\MailMessage as LaravelMailMessage;
+use Antares\Notifications\Contracts\Message;
 
-class MailMessage extends LaravelMailMessage
+class MailMessage extends LaravelMailMessage implements Message
 {
 
     /**

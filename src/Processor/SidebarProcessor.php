@@ -18,7 +18,6 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Processor;
 
 use Antares\Notifications\Decorator\SidebarItemDecorator;
@@ -100,9 +99,11 @@ class SidebarProcessor extends Processor
     public function get()
     {
         $notifications = $this->stack->getNotifications()->get();
-        $alerts        = $this->stack->getAlerts()->get();
-        $count         = $this->stack->getCount();
-        $return        = [
+
+        $alerts = $this->stack->getAlerts()->get();
+        $count  = $this->stack->getCount();
+
+        $return = [
             'notifications' => [
                 'items' => $this->decorator->decorate($notifications),
                 'count' => array_get($count, 'notifications', 0),
