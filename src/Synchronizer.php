@@ -61,6 +61,7 @@ class Synchronizer
         ]);
         $reflection = new ReflectionClass($classname);
         $checksum   = md5_file($reflection->getFileName());
+
         if (!is_null($model->checksum)) {
 
             if ($model->checksum === $checksum) {
@@ -75,7 +76,7 @@ class Synchronizer
         $model->save();
         $langs = langs();
         foreach ($langs as $lang) {
-            $content = ($message->type === 'sms') ? $message->content : view($message->view)->render();
+            $content = ($message->type === 'sms') ? $message->content : file_get_contents(view($message->view)->getPath());
             $this->saveNotificationContent($model->id, $lang->code, $message->rawSubject, $content);
         }
     }
