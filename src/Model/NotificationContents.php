@@ -23,7 +23,6 @@ namespace Antares\Notifications\Model;
 
 use Antares\Translations\Models\Languages;
 use Antares\Model\Eloquent;
-use Illuminate\Support\Arr;
 
 /**
  * Class NotificationContents

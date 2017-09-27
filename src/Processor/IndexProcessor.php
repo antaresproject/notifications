@@ -24,7 +24,6 @@ use Antares\Notifications\Contracts\IndexPresenter as Presenter;
 use Antares\Notifications\Decorator\MailDecorator;
 use Antares\Notifications\Model\NotificationContents;
 use Antares\Notifications\PreviewNotification;
-use Antares\Support\Facades\Memory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Antares\Notifications\Adapter\VariablesAdapter;
 use Antares\Notifications\Contracts\IndexListener;

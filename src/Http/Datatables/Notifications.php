@@ -27,7 +27,6 @@ use Antares\Notifications\Filter\NotificationFilter;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Datatables\Services\DataTable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;

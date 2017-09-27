@@ -68,7 +68,7 @@ class Form extends FormBuilder
         $grid         = app(Grid::class);
         $variables    = app(Variables::class);
 
-        parent::__construct($grid, $clientScript, app());
+        parent::__construct($grid);
 
 
 

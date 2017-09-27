@@ -5,7 +5,6 @@ namespace Antares\Notifications\Services;
 use Antares\Notifications\BindParameter;
 use Antares\Notifications\ModelVariableDefinitions;
 use Antares\Notifications\Variable;
-use Illuminate\Support\Arr;
 use Closure;
 
 class ModuleVariables {

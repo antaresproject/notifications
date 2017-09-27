@@ -26,7 +26,6 @@ use Antares\Foundation\Http\Controllers\AdminController;
 use Antares\Notifications\Contracts\IndexListener;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\MessageBag;
 use Illuminate\View\View;
 
 class IndexController extends AdminController implements IndexListener
@@ -66,18 +65,6 @@ class IndexController extends AdminController implements IndexListener
      */
     public function index($type = null)
     {
-        $user       = auth()->user();
-        $dateTime   = \Carbon\Carbon::now();
-        $params = [
-            'location' => [
-                'city' => 'City AAA',
-                'country' => 'Poland',
-            ],
-            'ip_address' => 'dupa IP',
-        ];
-
-        //\Event::dispatch(new \Antares\Logger\Events\NewDeviceDetected($user, $dateTime, $params));
-
         return $this->processor->index($type);
     }
 
