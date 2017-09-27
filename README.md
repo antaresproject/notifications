@@ -1,13 +1,13 @@
 # Antares Notifications Module
 
 [![Laravel 5.4](https://img.shields.io/badge/Laravel-5.4-orange.svg)](http://laravel.com)
-[![Coverage Status](https://coveralls.io/repos/github/antaresproject/project/badge.svg?branch=master)](https://coveralls.io/github/antaresproject/project?branch=master)
-[![Build Status](https://travis-ci.org/antaresproject/project.svg?branch=master)](https://travis-ci.org/antaresproject/project)
-[![Code Climate](https://codeclimate.com/github/antaresproject/project/badges/gpa.svg)](https://codeclimate.com/github/antaresproject/project)
-[![GitHub issues](https://img.shields.io/github/issues/antaresproject/project.svg)](https://github.com/antaresproject/project/issues)
-[![GitHub forks](https://img.shields.io/github/forks/antaresproject/project.svg)](https://github.com/antaresproject/project/network)
-[![GitHub stars](https://img.shields.io/github/stars/antaresproject/project.svg)](https://github.com/antaresproject/project/stargazers)
-[![GitHub license](https://img.shields.io/badge/license-New%20BSD-blue.svg)](https://raw.githubusercontent.com/antaresproject/project/master/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/antaresproject/notifications/badge.svg?branch=0.9.2)](https://coveralls.io/github/antaresproject/notifications?branch=0.9.2)
+[![Build Status](https://travis-ci.org/antaresproject/notifications.svg?branch=0.9.2)](https://travis-ci.org/antaresproject/notifications)
+[![Code Climate](https://codeclimate.com/github/antaresproject/notifications/badges/gpa.svg)](https://codeclimate.com/github/antaresproject/notifications)
+[![GitHub issues](https://img.shields.io/github/issues/antaresproject/notifications.svg)](https://github.com/antaresproject/notifications/issues)
+[![GitHub forks](https://img.shields.io/github/forks/antaresproject/notifications.svg)](https://github.com/antaresproject/notifications/network)
+[![GitHub stars](https://img.shields.io/github/stars/antaresproject/notifications.svg)](https://github.com/antaresproject/notifications/stargazers)
+[![GitHub license](https://img.shields.io/badge/license-New%20BSD-blue.svg)](https://raw.githubusercontent.com/antaresproject/notifications/0.9.2/LICENSE)
 
 
 Notifications module is responsible for configuration interface of notification templates and sending notifications to users in the system. It handles email and sms notifications, but also displays alerts (the bell icon) to the users. It allows administrator to set up their own text and supports multi-language.
@@ -16,26 +16,26 @@ Notifications module is responsible for configuration interface of notification 
 
 ## Documentation
 
-Antares Notifications Module documentation [antaresproject.io/docs/core_modules/notifications](http://antaresproject.io/docs/site/core_modules/notifications/).
+Antares Notifications Module documentation [docs.antaresproject.io/php-framework/core-modules/notifications](http://www.docs.antaresproject.io/php-framework/core-modules/notifications).
 
-Full Antares documentation can be found at [antaresproject.io/docs](http://antaresproject.io/docs).
+Full Antares documentation can be found at [docs.antaresproject.io/php-framework](http://www.docs.antaresproject.io/php-framework).
 
 
 ## Changelog
 
-Antares Notifications changelog can be found in release notes [antaresproject.io/docs/site/getting_started/changelog/#notifications](http://antaresproject.io/docs/site/getting_started/changelog/index.html#notifications).
+Antares Notifications changelog can be found in release notes [docs.antaresproject.io/php-framework/getting-started/changelog#notifications](http://www.docs.antaresproject.io/php-framework/getting-started/changelog#notifications).
 
-You can find full Antares changelog in Antares Documentation [antaresproject.io/docs/site/getting_started/changelog](http://antaresproject.io/docs/site/getting_started/changelog/index.html).
+You can find full Antares changelog in Antares Documentation [docs.antaresproject.io/php-framework/getting-started/changelog](http://www.docs.antaresproject.io/php-framework/getting-started/changelog).
 
 ## Issues
 
 The issue list of this repo is **exclusively** for bug reports and feature requests.
 
-Please follow [Issue Reporting Guide](http://antaresproject.io/docs/site/getting_started/issues_reporting_guide/index.html) before opening an issue. Issues not following the guide will be closed without further investigation.
+Please follow [Issue Reporting Guide](http://www.docs.antaresproject.io/php-framework/getting-started/issues-reporting-guide) before opening an issue. Issues not following the guide will be closed without further investigation.
 
 ## Contribution
 
-Please follow [Contribution Guide](http://antaresproject.io/docs/site/getting_started/contributing/index.html) before making a pull request.
+Please follow [Contribution Guide](http://www.docs.antaresproject.io/php-framework/getting-started/contribution-guide) before making a pull request.
 
 ## Community
 

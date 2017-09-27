@@ -141,8 +141,7 @@ class Repository extends AbstractRepository
             'category_id' => array_get($data, 'category'),
             'type_id'     => $typeId,
             'active'      => array_get($data, 'active', 1),
-            'severity_id' => NotificationSeverity::medium()->first()->id,
-            'event'       => config('antares/notifications::default.custom_event')
+            'severity_id' => NotificationSeverity::medium()->first()->id
         ]);
         $model->save();
         return $model;
