@@ -45,7 +45,8 @@ class Contents
                     'tbl_notification_contents.id',
                     'tbl_languages.code',
                     'tbl_notification_contents.title',
-                    'tbl_notification_contents.content'
+                    'tbl_notification_contents.content',
+                    'tbl_notifications.classname',
                 ])
                 ->leftJoin('tbl_notifications', 'tbl_notification_contents.notification_id', '=', 'tbl_notifications.id')
                 ->leftJoin('tbl_languages', 'tbl_notification_contents.lang_id', '=', 'tbl_languages.id')
@@ -60,14 +61,28 @@ class Contents
     /**
      * Finds notification content by title and locale
      * 
-     * @param type $operation
-     * @param type $locale
-     * @return type
+     * @param String $operation
+     * @param String $locale
+     * @return Contents
      */
     public function find($operation, $locale)
     {
         $model = $this->notifications->first(function ($value, $key) use($operation, $locale) {
             return $value->code == $locale && ($value->title == $operation or $value->name == $operation);
+        });
+        return !is_null($model) ? $model->content : false;
+    }
+
+    /**
+     * Finds notification content by message classname
+     * 
+     * @param String $classname
+     * @return Contents
+     */
+    public function findByClassname($classname)
+    {
+        $model = $this->notifications->first(function ($value, $key) use($classname) {
+            return $value->classname == $classname;
         });
         return !is_null($model) ? $model->content : false;
     }

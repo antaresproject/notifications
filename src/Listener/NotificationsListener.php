@@ -75,7 +75,7 @@ class NotificationsListener
      * Runs notification listener
      * 
      * @param String $event
-     * @param Model\Notifications $notification
+     * @param \Antares\Notifications\Model\Notifications $notification
      */
     protected function runNotificationListener($event, $notification)
     {

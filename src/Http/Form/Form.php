@@ -22,6 +22,7 @@ namespace Antares\Notifications\Http\Form;
 
 use Antares\Notifications\Model\NotificationCategory;
 use Antares\Notifications\Model\NotificationTypes;
+use Antares\Notifications\Variables;
 use Antares\Html\Form\ClientScript;
 use Antares\Html\Form\FormBuilder;
 use Antares\Html\Form\Fieldset;
@@ -65,14 +66,18 @@ class Form extends FormBuilder
         $this->fluent = $fluent;
         $clientScript = app(ClientScript::class);
         $grid         = app(Grid::class);
+        $variables    = app(Variables::class);
 
         parent::__construct($grid, $clientScript, app());
 
-        $this->name             = "antares.notification: " . $fluent->form_name;
+
+
+        $this->name = "antares.notification: " . $fluent->form_name;
         $this->grid->simple(handles('antares::notifications/update/'), ['class' => 'form--hor'], $fluent);
+
         $this->layoutAttributes = [
-            'variables'    => $notification->getVariables(),
-            'instructions' => $notification->getInstructions(),
+            'variables'    => $variables->variables(),
+            'instructions' => $variables->instructions(),
             'rich'         => true
         ];
         $this->bindScripts();

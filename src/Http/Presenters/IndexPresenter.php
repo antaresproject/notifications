@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -93,7 +93,7 @@ class IndexPresenter implements PresenterContract
      * @return FormBuilder
      * @throws Exception
      */
-    public function getForm($eloquent, $type = null)
+    public function getForm($eloquent, $locale = null)
     {
         $classname     = $eloquent->classname;
         $model         = $eloquent->contents->first();
@@ -101,13 +101,12 @@ class IndexPresenter implements PresenterContract
             'content'   => $model !== null ? $model->content : null,
             'title'     => !is_null($model) ? $model->title : '',
             'type'      => ($eloquent->exists ? $eloquent->type->name : ''),
-            'form_name' => $eloquent->name
+            'type_id'   => ($eloquent->exists ? $eloquent->type_id : null),
+            'form_name' => $eloquent->name,
         ];
         $notification  = app(!strlen($classname) ? Notification::class : $classname);
-        $fluent        = new Fluent(array_merge($configuration, array_except($eloquent->toArray(), ['type'])));
-        if (!is_null($fluent->type)) {
-            $fluent->type = $type;
-        }
+        $fluent        = new Fluent(array_merge($configuration, $eloquent->toArray()));
+
         return $this->form($fluent, $notification);
     }
 
@@ -123,6 +122,7 @@ class IndexPresenter implements PresenterContract
         publish('notifications', 'scripts.resources-default');
         Event::fire('antares.forms', 'notification.' . $fluent->form_name);
         $fluent->type = $fluent->type == '' ? 'email' : $fluent->type;
+
         return new Form($notification, $fluent);
     }
 

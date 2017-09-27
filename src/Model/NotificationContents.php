@@ -23,7 +23,20 @@ namespace Antares\Notifications\Model;
 
 use Antares\Translations\Models\Languages;
 use Antares\Model\Eloquent;
+use Illuminate\Support\Arr;
 
+/**
+ * Class NotificationContents
+ * @package Antares\Notifications\Model
+ *
+ * @property integer $id
+ * @property integer $notification_id
+ * @property integer $lang_id
+ * @property string $title
+ * @property string $content
+ * @property Notifications $notification
+ * @property Languages $lang
+ */
 class NotificationContents extends Eloquent
 {
 
@@ -72,12 +85,15 @@ class NotificationContents extends Eloquent
      */
     protected function fires()
     {
-        $classname = isset($this->notification->classname) ? snake_case(class_basename($this->notification->classname)) : false;
-        if (!$classname) {
-            return;
+        $className = isset($this->notification->classname) ? snake_case(class_basename($this->notification->classname)) : false;
+
+        if (!$className) {
+            return [];
         }
-        $before = event('notifications:' . $classname . '.render.before');
-        $after  = event('notifications:' . $classname . '.render.after');
+
+        $before = event('notifications:' . $className . '.render.before');
+        $after  = event('notifications:' . $className . '.render.after');
+
         return [
             'before' => !empty($before) ? current($before) : '',
             'after'  => !empty($after) ? current($after) : ''
@@ -103,15 +119,20 @@ class NotificationContents extends Eloquent
 
     /**
      * saves notification content without data from fired events
-     * 
+     *
      * @param array $options
+     * @return bool
      */
     public function save(array $options = array())
     {
-        $fired                       = $this->fires();
-        $content                     = str_replace([$fired['before'], $fired['after']], '', $this->content);
-        $this->setAttribute('content', $content);
-        $this->attributes['content'] = $content;
+        $fired = $this->fires();
+
+        if( count($fired) ) {
+            $content = str_replace([$fired['before'], $fired['after']], '', $this->content);
+
+            $this->setAttribute('content', $content);
+        }
+
         parent::save($options);
     }
 

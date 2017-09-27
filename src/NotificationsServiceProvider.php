@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -20,16 +20,21 @@
 
 namespace Antares\Notifications;
 
+use Antares\Notifications\Contracts\RendererContract;
 use Antares\Notifications\Http\Handlers\NotificationsBreadcrumbMenu;
 use Antares\Foundation\Http\Handlers\NotificationsTopMenuHandler;
 use Antares\Notifications\Console\NotificationCategoriesCommand;
 use Antares\Notifications\Console\NotificationSeveritiesCommand;
 use Antares\Foundation\Support\Providers\ModuleServiceProvider;
+use Antares\Notifications\Console\NotificationsImportCommand;
 use Antares\Notifications\Console\NotificationTypesCommand;
-use Antares\Notifications\Listener\NotificationsListener;
 use Antares\Notifications\Listener\ConfigurationListener;
+use Antares\Notifications\Renderers\TwigRenderer;
+use Antares\Notifications\Services\VariablesService;
+use Illuminate\Contracts\Mail\Mailer as MailerContract;
 use Antares\Notifications\Console\NotificationsRemover;
 use Antares\Acl\Http\Handlers\ControlPane;
+use Antares\Notifier\Mail\Mailer;
 use Antares\Memory\Model\Option;
 
 class NotificationsServiceProvider extends ModuleServiceProvider
@@ -55,37 +60,39 @@ class NotificationsServiceProvider extends ModuleServiceProvider
      * @var array
      */
     protected $listen = [
-        "antares.form: foundation.settings" => ConfigurationListener::class,
+        'antares.form: foundation.settings' => ConfigurationListener::class,
     ];
 
     /**
-     * Register service provider.
-     *
-     * @return void
+     * {@inheritdoc}
      */
     public function register()
     {
-
         $this->bindContracts();
-        $this->app->singleton('notifications.contents', function ($app) {
+
+        $this->app->singleton('notifications.contents', function () {
             return new Contents();
         });
+
         $this->commands([
             NotificationCategoriesCommand::class,
             NotificationSeveritiesCommand::class,
-            NotificationTypesCommand::class
+            NotificationTypesCommand::class,
+            NotificationsRemover::class,
+            NotificationsImportCommand::class
         ]);
-    }
 
-    /**
-     * Boot extension routing.
-     *
-     * @return void
-     */
-    protected function loadRoutes()
-    {
-        $path = __DIR__;
-        $this->loadBackendRoutesFrom("{$path}/Http/backend.php");
+        $this->app->singleton(ChannelManager::class, function ($app) {
+            return new ChannelManager($app);
+        });
+
+        $this->app->singleton(Mailer::class, function () {
+            return $this->app->make('antares.support.mail');
+        });
+
+        $this->app->singleton(VariablesService::class);
+
+        $this->app->bind(RendererContract::class, TwigRenderer::class);
     }
 
     /**
@@ -100,35 +107,35 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         $this->addLanguageComponent('antares/notifications', 'antares/notifications', "{$path}/resources/lang");
         $this->addViewComponent('antares/notifications', 'antares/notifications', "{$path}/resources/views");
         $this->bootMemory();
-        $this->listenEvents();
         $this->attachMenu(NotificationsTopMenuHandler::class);
-        if (config('antares/notifications::sockets')) {
-            publish('notifications', 'scripts.default');
-        }
         $this->attachMenu(NotificationsBreadcrumbMenu::class);
         $this->app->make('view')->composer('antares/notifications::admin.logs.config', ControlPane::class);
-        $this->commands([
-            NotificationsRemover::class
-        ]);
+
         Option::observe(new ConfigurationListener());
+
+        $this->app->alias(Mailer::class, MailerContract::class);
     }
 
     /**
-     * booting events
+     * Boot extension routing.
+     *
+     * @return void
+     */
+    protected function loadRoutes()
+    {
+        $path = __DIR__;
+        $this->loadBackendRoutesFrom("{$path}/Http/backend.php");
+        $this->loadFrontendRoutesFrom("{$path}/Http/frontend.php");
+    }
+
+    /**
+     * Booting events
      */
     protected function bootMemory()
     {
         $this->app->make('antares.acl')->make($this->routeGroup)->attach(
                 $this->app->make('antares.platform.memory')
         );
-    }
-
-    /**
-     * Component event listeners
-     */
-    protected function listenEvents()
-    {
-        $this->app->make(NotificationsListener::class)->listen();
     }
 
 }

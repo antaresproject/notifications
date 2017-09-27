@@ -21,6 +21,7 @@
 namespace Antares\Notifications\Decorator;
 
 use Antares\Notifications\Adapter\VariablesAdapter;
+use Antares\Notifications\Parsers\StringParser;
 use Illuminate\Database\Eloquent\Collection;
 use RuntimeException;
 
@@ -61,7 +62,7 @@ class SidebarItemDecorator
         return view($view, [
                     'id'         => $item->id,
                     'author'     => $item->author,
-                    'title'      => $item->content[0]->title,
+                    'title'      => StringParser::parse($item->content[0]->title, $item->variables),
                     'value'      => $content,
                     'priority'   => priority_label($item->notification->severity->name),
                     'created_at' => $item->created_at

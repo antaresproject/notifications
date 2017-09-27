@@ -21,6 +21,8 @@
 
 namespace Antares\Notifications\Contracts;
 
+use Illuminate\Http\Request;
+
 interface IndexListener
 {
 
@@ -61,8 +63,11 @@ interface IndexListener
 
     /**
      * preview notification
+     *
+     * @param Request $request
+     * @return mixed
      */
-    public function preview();
+    public function preview(Request $request);
 
     /**
      * changes notification status

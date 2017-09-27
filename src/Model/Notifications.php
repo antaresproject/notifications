@@ -18,13 +18,34 @@
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Model;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Antares\Model\Eloquent;
 
+/**
+ * Class Notifications
+ * @package Antares\Notifications\Model
+ *
+ * @property integer $id
+ * @property integer $severity_id
+ * @property integer $category_id
+ * @property integer $type_id
+ * @property boolean $active
+ * @property string $classname
+ * @property string $checksum
+ * @property string $event
+ * @method static Builder|Notifications active()
+ * @property NotificationTypes $type
+ * @property NotificationCategory $category
+ * @property NotificationSeverity $severity
+ * @property-read Collection|NotificationContents[] $contents
+ * @property-read Collection|NotificationsStack[] $stack
+ *
+ */
 class Notifications extends Eloquent
 {
 
@@ -54,7 +75,7 @@ class Notifications extends Eloquent
      *
      * @var array
      */
-    protected $fillable = ['severity_id', 'event', 'category_id', 'type_id', 'active'];
+    protected $fillable = ['severity_id', 'category_id', 'type_id', 'active', 'classname', 'checksum'];
 
     /**
      * Indicates if the model should be timestamped.
