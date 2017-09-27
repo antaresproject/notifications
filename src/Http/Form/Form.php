@@ -27,6 +27,7 @@ use Antares\Html\Form\ClientScript;
 use Antares\Html\Form\FormBuilder;
 use Antares\Html\Form\Fieldset;
 use Antares\Html\Form\Grid;
+use Antares\Support\Fluent;
 
 class Form extends FormBuilder
 {
@@ -56,15 +57,12 @@ class Form extends FormBuilder
     protected $fluent = null;
 
     /**
-     * cosntructing
-     * 
-     * @param \Antares\View\Notification\Notification $notification
-     * @param \Antares\Support\Fluent $fluent
+     * Form constructor.
+     * @param \Antares\Contracts\Html\Grid $fluent
      */
-    public function __construct($notification, $fluent)
+    public function __construct($fluent)
     {
         $this->fluent = $fluent;
-        $clientScript = app(ClientScript::class);
         $grid         = app(Grid::class);
         $variables    = app(Variables::class);
 
@@ -85,7 +83,7 @@ class Form extends FormBuilder
         $this->grid->hidden('id');
         $this->grid->name('Notification form');
 
-        $this->grid->fieldset(function (Fieldset $fieldset) use($fluent, $notification) {
+        $this->grid->fieldset(function (Fieldset $fieldset) use($fluent) {
 
             $fieldset->legend('Notification parameters');
 
@@ -126,7 +124,7 @@ class Form extends FormBuilder
         $langs = langs();
         foreach ($langs as $lang) {
 
-            $this->grid->fieldset(function (Fieldset $fieldset) use($fluent, $notification, $lang) {
+            $this->grid->fieldset(function (Fieldset $fieldset) use($fluent, $lang) {
                 $fieldset->legend(trans('antares/notifications::messages.notification_content_legend', ['lang' => $lang->name]));
                 $fieldset->control('input:text', 'title')
                         ->label(trans('antares/notifications::messages.notification_content_title'))
