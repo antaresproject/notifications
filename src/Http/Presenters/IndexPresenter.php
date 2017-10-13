@@ -123,6 +123,7 @@ class IndexPresenter implements PresenterContract
     {
         publish('notifications', 'scripts.resources-default');
         Event::fire('antares.forms', 'notification.' . $fluent->form_name);
+        Event::fire(new \Antares\Events\Form\Form('notification.' . $fluent->form_name));
         $fluent->type = $fluent->type == '' ? 'email' : $fluent->type;
 
         return new Form($notification, $fluent);
