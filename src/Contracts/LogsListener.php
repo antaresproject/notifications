@@ -20,7 +20,7 @@
 
 namespace Antares\Notifications\Contracts;
 
-use Illuminate\Support\MessageBag;
+use Illuminate\Http\RedirectResponse;
 
 interface LogsListener
 {

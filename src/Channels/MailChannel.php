@@ -20,15 +20,18 @@
 
 namespace Antares\Notifications\Channels;
 
+use Antares\Notifications\Contracts\NotificationEditable;
+use Antares\Notifications\Decorator\MailDecorator;
+use Antares\Notifications\Parsers\ContentParser;
+use Antares\Notifications\Services\TemplateBuilderService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
 use Antares\Notifications\Model\NotificationContents;
-use Antares\Notifications\Adapter\VariablesAdapter;
 use Antares\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Mail\Mailable;
-use Twig_Loader_String;
-use Twig_Environment;
+use Log;
 
 class MailChannel extends BaseMailChannel
 {
@@ -41,32 +44,22 @@ class MailChannel extends BaseMailChannel
     protected $mailer;
 
     /**
-     * Instance of NotificationContents
+     * Instance of ContentParser
      *
-     * @var NotificationContents 
+     * @var ContentParser
      */
-    protected $contents;
+    protected $contentParser;
 
     /**
-     * Instance of VariablesAdapter
-     *
-     * @var VariablesAdapter 
+     * MailChannel constructor.
+     * @param Mailer $mailer
+     * @param ContentParser $contentParser
      */
-    protected $variablesAdapter;
-
-    /**
-     * Create a new mail channel instance.
-     *
-     * @param  \Illuminate\Contracts\Mail\Mailer  $mailer
-     * @param NotificationContents $contents
-     * @param VariablesAdapter $variablesAdapter
-     * @return void
-     */
-    public function __construct(Mailer $mailer, NotificationContents $contents, VariablesAdapter $variablesAdapter)
+    public function __construct(Mailer $mailer, ContentParser $contentParser)
     {
-        $this->mailer           = $mailer;
-        $this->contents         = $contents;
-        $this->variablesAdapter = $variablesAdapter;
+        parent::__construct($mailer);
+
+        $this->contentParser = $contentParser;
     }
 
     /**
@@ -83,77 +76,83 @@ class MailChannel extends BaseMailChannel
         }
 
         $message = $notification->toMail($notifiable);
+
+        (new TemplateBuilderService($notification))->build($message);
+
         if ($message instanceof Mailable) {
-            return $message->send($this->mailer);
+            $message->send($this->mailer);
+            return;
         }
 
-        $this->mailer->send($this->view($message, $notification), $message->data(), function ($mailMessage) use ($notifiable, $notification, $message) {
-            $this->buildMessage($mailMessage, $notifiable, $notification, $message);
-        });
+        if($message instanceof MailMessage) {
+            $this->mailer->send($this->view($message, $notification), $message->data(), function ($mailMessage) use ($notifiable, $notification, $message) {
+                $this->buildMessage($mailMessage, $notifiable, $notification, $message);
+            });
+        }
     }
 
     /**
      * Creates message view
-     * 
+     *
      * @param MailMessage $message
      * @param Notification $notification
-     * @return String
+     * @return array
+     * @throws \Exception
      */
     protected function view(MailMessage $message, Notification $notification)
     {
+        try {
+            $notificationContent = $this->findNotification($message, $notification);
 
-        if (!is_null($content = $this->findNotification($message, $notification))) {
-            $twig = new Twig_Environment(new Twig_Loader_String());
+            if($notificationContent === null) {
+                return parent::buildView($message);
+            }
 
+            $rendered = $this->contentParser->parse($notificationContent->content, $message->viewData);
+            $rendered = MailDecorator::decorate($rendered);
 
+            $message->view($rendered, $message->data());
 
-
-            $html = $this->variablesAdapter->fill($content->content);
-
-            preg_match_all('/\[\[(.*?)\]\]/', $content, $matches);
-            $html = str_replace($matches[0], $matches[1], $html);
-
-            $rendered = $twig->render($html, $message->viewData);
-
-
-
-            $message->view($rendered);
-            $values = collect($message->subjectParams)->flatMap(function($item, $key) {
-                        return [':' . $key => $item];
-                    })->toArray();
-
-
-
-            $subject = str_replace(array_keys($values), array_values($values), $content->title);
-            $message->subject($subject);
             return ['raw' => $rendered];
         }
-        return parent::buildView($message);
+        catch(\Exception $e) {
+            Log::emergency($e);
+
+            throw $e;
+        }
+
     }
 
     /**
      * Finds notification content
-     * 
+     *
      * @param MailMessage $message
      * @param Notification $notification
      * @return NotificationContents
      */
     protected function findNotification(MailMessage $message, Notification $notification)
     {
-        return $this->contents->newQuery()->where([
-                    'lang_id' => lang_id()
-                ])->whereHas('notification', function($subquery) use($message, $notification) {
-                    $subquery->where([
-                        'classname' => get_class($notification),
-                        'active'    => 1
-                    ])->whereHas('category', function($query) use($message) {
-                        $query->where('name', $message->category);
-                    })->whereHas('type', function($query) use($message) {
-                        $query->where('name', $message->type);
-                    })->whereHas('severity', function($query) use($message) {
-                        $query->where('name', $message->severity);
-                    });
-                })->first();
+        if(! $notification instanceof NotificationEditable) {
+            return null;
+        }
+
+        /* @var $notificationContent NotificationContents */
+        $notificationContent =  NotificationContents::query()
+            ->where('lang_id', lang_id())
+            ->whereHas('notification', function(Builder $query) use($message, $notification) {
+                $query->where([
+                    'classname' => get_class($notification),
+                    'active'    => 1
+                ])->whereHas('category', function(Builder $query) use($message) {
+                    $query->where('name', $message->category);
+                })->whereHas('type', function(Builder $query) use($message) {
+                    $query->whereIn('name', $message->types);
+                })->whereHas('severity', function(Builder $query) use($message) {
+                    $query->where('name', $message->severity);
+                });
+            })->first();
+
+        return $notificationContent;
     }
 
 }

@@ -28,7 +28,8 @@
                             <span class="error col-dt-14  col-13  col-mb-11 ">
                                 {{ errors.first(control.name, format)|raw }}
                             </span>
-                        </div>      
+                        </div>
+
                         {% set control=fieldset.field('content') %}
                         {% if sms %}
                             {% include 'antares/notifications::admin.partials._sms' %}

@@ -21,10 +21,22 @@
 
 namespace Antares\Notifications\Model;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Antares\Model\User;
 
+/**
+ * Class NotificationsStackRead
+ * @package Antares\Notifications\Model
+ *
+ * @property integer $id
+ * @property integer $stack_id
+ * @property integer $user_id
+ * @property Carbon $deleted_at
+ * @property NotificationsStack $stack
+ * @property User $user
+ */
 class NotificationsStackRead extends Model
 {
 

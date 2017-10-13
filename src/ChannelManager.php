@@ -20,8 +20,8 @@ class ChannelManager extends BaseChannelManager
     protected function createMailDriver()
     {
         return $this->app->make(MailChannel::class)->setMarkdownResolver(function () {
-                    return $this->app->make(Markdown::class);
-                });
+            return $this->app->make(Markdown::class);
+        });
     }
 
     /**
@@ -42,7 +42,7 @@ class ChannelManager extends BaseChannelManager
      */
     protected function createAlertDriver()
     {
-        return new NotificationChannel();
+        return $this->app->make(NotificationChannel::class);
     }
 
     /**
@@ -52,7 +52,7 @@ class ChannelManager extends BaseChannelManager
      */
     protected function createNotificationDriver()
     {
-        return new NotificationChannel();
+        return $this->app->make(NotificationChannel::class);
     }
 
 }

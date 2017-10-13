@@ -93,40 +93,37 @@ class IndexPresenter implements PresenterContract
      * @return FormBuilder
      * @throws Exception
      */
-    public function getForm($eloquent, $type = null)
+    public function getForm($eloquent, $locale = null)
     {
-        $classname     = $eloquent->classname;
-        $model         = $eloquent->contents->first();
+        $model = $eloquent->contents->first();
+
         $configuration = [
             'content'   => $model !== null ? $model->content : null,
             'title'     => !is_null($model) ? $model->title : '',
             'type'      => ($eloquent->exists ? $eloquent->type->name : ''),
-            'form_name' => $eloquent->name
+            'type_id'   => ($eloquent->exists ? $eloquent->type_id : null),
+            'form_name' => $eloquent->name,
         ];
-        $notification  = app(!strlen($classname) ? Notification::class : $classname);
-        $fluent        = new Fluent(array_merge($configuration, array_except($eloquent->toArray(), ['type'])));
 
-        if (!is_null($fluent->type)) {
-            $fluent->type = $type;
-        }
-        return $this->form($fluent, $notification);
+        $fluent = new Fluent(array_merge($configuration, $eloquent->toArray()));
+
+        return $this->form($fluent);
     }
 
     /**
      * gets instance of command form
-     * 
+     *
      * @param Fluent $fluent
-     * @param mixed $notification
-     * @return FormBuilder
+     * @return Form
      */
-    protected function form(Fluent $fluent, $notification = null)
+    protected function form(Fluent $fluent)
     {
         publish('notifications', 'scripts.resources-default');
         Event::fire('antares.forms', 'notification.' . $fluent->form_name);
         Event::fire(new \Antares\Events\Form\Form('notification.' . $fluent->form_name));
         $fluent->type = $fluent->type == '' ? 'email' : $fluent->type;
 
-        return new Form($notification, $fluent);
+        return new Form($fluent);
     }
 
     /**

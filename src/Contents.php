@@ -21,7 +21,6 @@
 namespace Antares\Notifications;
 
 use Antares\Notifications\Model\NotificationContents;
-use Antares\Logger\Model\Logs;
 
 class Contents
 {
@@ -34,9 +33,7 @@ class Contents
     protected $notifications;
 
     /**
-     * name of repositroy model
-     * 
-     * @return Logs
+     * Contents constructor.
      */
     public function __construct()
     {

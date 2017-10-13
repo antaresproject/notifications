@@ -56,6 +56,7 @@ return [
     'notification_content_legend'         => 'Notification content for ":lang"',
     'notification_content_title'          => 'Title',
     'notification_content_content'        => 'Content',
+    'notification_content_subject'        => 'Subject',
     'notification_content_enabled'        => 'Enabled',
     'instructions'                        => [
         'description' => [

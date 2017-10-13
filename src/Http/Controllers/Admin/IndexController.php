@@ -25,7 +25,7 @@ use Antares\Notifications\Processor\IndexProcessor as Processor;
 use Antares\Foundation\Http\Controllers\AdminController;
 use Antares\Notifications\Contracts\IndexListener;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\MessageBag;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class IndexController extends AdminController implements IndexListener
@@ -70,10 +70,10 @@ class IndexController extends AdminController implements IndexListener
 
     /**
      * notification edit form
-     * 
-     * @param mixed $id
-     * @param String $locale
-     * @return RedirectResponse
+     *
+     * @param $id
+     * @param string $locale
+     * @return View
      */
     public function edit($id, $locale = 'en')
     {
@@ -82,8 +82,7 @@ class IndexController extends AdminController implements IndexListener
 
     /**
      * update single job
-     * 
-     * @param mixed $id
+     *
      * @return RedirectResponse
      */
     public function update()
@@ -93,8 +92,10 @@ class IndexController extends AdminController implements IndexListener
 
     /**
      * Response when storing command failed on validation.
-     * @param  MessageBag|array  $errors
-     * @return mixed
+     *
+     * @param $id
+     * @param $errors
+     * @return RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function updateValidationFailed($id, $errors)
     {
@@ -125,13 +126,13 @@ class IndexController extends AdminController implements IndexListener
 
     /**
      * sends test notification
-     * 
-     * @param mixed $id
-     * @return View
+     *
+     * @param null $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function sendtest($id = null)
     {
-        return $this->processor->sendtest($this, $id);
+        return $this->processor->sendTest($this, $id);
     }
 
     /**
@@ -158,12 +159,13 @@ class IndexController extends AdminController implements IndexListener
 
     /**
      * preview notification
-     * 
+     *
+     * @param Request $request
      * @return View
      */
-    public function preview()
+    public function preview(Request $request)
     {
-        return $this->processor->preview();
+        return $this->processor->preview($request->all());
     }
 
     /**
@@ -232,8 +234,7 @@ class IndexController extends AdminController implements IndexListener
 
     /**
      * when creation notification notification completed successfully
-     * 
-     * @param String $level
+     *
      * @return RedirectResponse
      */
     public function createSuccess()
