@@ -20,6 +20,7 @@
 
 namespace Antares\Notifications;
 
+use Antares\Notifications\Contracts\RendererContract;
 use Antares\Notifications\Http\Handlers\NotificationsBreadcrumbMenu;
 use Antares\Foundation\Http\Handlers\NotificationsTopMenuHandler;
 use Antares\Notifications\Console\NotificationCategoriesCommand;
@@ -28,6 +29,8 @@ use Antares\Foundation\Support\Providers\ModuleServiceProvider;
 use Antares\Notifications\Console\NotificationsImportCommand;
 use Antares\Notifications\Console\NotificationTypesCommand;
 use Antares\Notifications\Listener\ConfigurationListener;
+use Antares\Notifications\Renderers\TwigRenderer;
+use Antares\Notifications\Services\VariablesService;
 use Illuminate\Contracts\Mail\Mailer as MailerContract;
 use Antares\Notifications\Console\NotificationsRemover;
 use Antares\Acl\Http\Handlers\ControlPane;
@@ -57,10 +60,7 @@ class NotificationsServiceProvider extends ModuleServiceProvider
      * @var array
      */
     protected $listen = [
-        "antares.form: foundation.settings"                   => ConfigurationListener::class,
-        'Illuminate\Notifications\Events\NotificationSending' => [
-            'Antares\Notifications\Listener\NotificationSending',
-        ],
+        'antares.form: foundation.settings' => ConfigurationListener::class,
     ];
 
     /**
@@ -68,11 +68,12 @@ class NotificationsServiceProvider extends ModuleServiceProvider
      */
     public function register()
     {
-
         $this->bindContracts();
-        $this->app->singleton('notifications.contents', function ($app) {
+
+        $this->app->singleton('notifications.contents', function () {
             return new Contents();
         });
+
         $this->commands([
             NotificationCategoriesCommand::class,
             NotificationSeveritiesCommand::class,
@@ -85,9 +86,13 @@ class NotificationsServiceProvider extends ModuleServiceProvider
             return new ChannelManager($app);
         });
 
-        $this->app->singleton(Mailer::class, function ($app) {
-            return $app->make('antares.support.mail');
+        $this->app->singleton(Mailer::class, function () {
+            return $this->app->make('antares.support.mail');
         });
+
+        $this->app->singleton(VariablesService::class);
+
+        $this->app->bind(RendererContract::class, TwigRenderer::class);
     }
 
     /**
@@ -108,9 +113,7 @@ class NotificationsServiceProvider extends ModuleServiceProvider
 
         Option::observe(new ConfigurationListener());
 
-        $this->app->alias(
-                Mailer::class, MailerContract::class
-        );
+        $this->app->alias(Mailer::class, MailerContract::class);
     }
 
     /**
@@ -122,6 +125,7 @@ class NotificationsServiceProvider extends ModuleServiceProvider
     {
         $path = __DIR__;
         $this->loadBackendRoutesFrom("{$path}/Http/backend.php");
+        $this->loadFrontendRoutesFrom("{$path}/Http/frontend.php");
     }
 
     /**

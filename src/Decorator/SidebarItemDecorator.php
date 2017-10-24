@@ -28,6 +28,21 @@ class SidebarItemDecorator
 {
 
     /**
+     * Variables adapter instance.
+     *
+     * @var VariablesAdapter
+     */
+    protected $variablesAdapter;
+
+    /**
+     * SidebarItemDecorator constructor.
+     * @param VariablesAdapter $variablesAdapter
+     */
+    public function __construct(VariablesAdapter $variablesAdapter) {
+        $this->variablesAdapter = $variablesAdapter;
+    }
+
+    /**
      * Decorates notifications of alerts
      * 
      * @param Collection $items
@@ -57,33 +72,19 @@ class SidebarItemDecorator
      */
     public function item($item, $view)
     {
-        $content = app(VariablesAdapter::class)->get($item->content[0]->content, (array) $item->variables);
+        /* @var $variablesAdapter VariablesAdapter */
+        $firstContent       = $item->content[0];
+        $title              = $this->variablesAdapter->get($firstContent->title, (array) $item->variables);
+        $content            = $this->variablesAdapter->get($firstContent->content, (array) $item->variables);
+
         return view($view, [
-                    'id'         => $item->id,
-                    'author'     => $item->author,
-                    'title'      => $this->replaceVariables($item->content[0]->title, $item->variables),
-                    'value'      => $content,
-                    'priority'   => priority_label($item->notification->severity->name),
-                    'created_at' => $item->created_at
-                ])->render();
-    }
-
-    /**
-     * Replace variables in content
-     * 
-     * @param String $content
-     * @param array $variables
-     * @return String
-     */
-    protected function replaceVariables($content, array $variables = [])
-    {
-        $values = collect($variables)->flatMap(function($item, $key) {
-                    return [':' . $key => $item];
-                })->toArray();
-
-
-
-        return str_replace(array_keys($values), array_values($values), $content);
+            'id'         => $item->id,
+            'author'     => $item->author,
+            'title'      => $title,
+            'value'      => $content,
+            'priority'   => priority_label($item->notification->severity->name),
+            'created_at' => $item->created_at
+        ])->render();
     }
 
 }

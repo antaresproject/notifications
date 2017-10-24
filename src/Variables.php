@@ -2,15 +2,30 @@
 
 namespace Antares\Notifications;
 
+use Antares\Notifications\Services\VariablesService;
+
 class Variables
 {
 
     /**
+     * @var VariablesService
+     */
+    protected $variablesService;
+
+    /**
+     * Variables constructor.
+     * @param VariablesService $variablesService
+     */
+    public function __construct(VariablesService $variablesService) {
+        $this->variablesService = $variablesService;
+    }
+
+    /**
      * Gets available variable instructions
      * 
-     * @return array
+     * @return array[]
      */
-    public function instructions()
+    public function instructions() : array
     {
         return [
             'foreach' => [
@@ -29,28 +44,20 @@ class Variables
      * 
      * @return array
      */
-    public function variables()
+    public function variables() : array
     {
-        $variables  = app('antares.notifications')->all();
-        $extensions = app('antares.memory')->make('component')->get('extensions.active');
+        $variables = [];
 
-        if (empty($variables)) {
-            return [];
+        foreach($this->variablesService->all() as $name => $module) {
+            $variables[$name] = array_map(function(Variable $variable) {
+                return [
+                    'name'          => $variable->getCode(),
+                    'description'   => $variable->getLabel(),
+                ];
+            }, $module->all());
         }
-        $return = [];
-        foreach ($variables as $extension => $config) {
-            $name = ucfirst($extension == 'foundation' ? $extension : array_get($extensions, $extension . '.name'));
-            $vars = $config['variables'];
-            if (empty($vars)) {
-                continue;
-            }
-            foreach ($vars as $key => $variable) {
-                $return[$name][] = ['name' => $key, 'description' => isset($variable['description']) ? $variable['description'] : ''];
-            }
-        }
-        event('notifications:' . snake_case(class_basename($this)) . '.variables', [&$return]);
 
-        return $return;
+        return $variables;
     }
 
 }

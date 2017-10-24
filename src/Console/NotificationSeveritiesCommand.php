@@ -48,7 +48,7 @@ class NotificationSeveritiesCommand extends BaseCommand
      */
     public function fire()
     {
-        $severities = NotificationSeverity::orderBy('id', 'asc')->get();
+        $severities = NotificationSeverity::query()->orderBy('id', 'asc')->get();
         $flatten    = [];
         foreach ($severities as $severity) {
             $flatten[] = ['<info>' . $severity->id . '</info>', '<fg=red>' . $severity->name . '</fg=red>'];

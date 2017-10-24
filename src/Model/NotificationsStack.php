@@ -21,9 +21,27 @@
 
 namespace Antares\Notifications\Model;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Antares\Model\User;
 
+/**
+ * Class NotificationsStack
+ * @package Antares\Notifications\Model
+ *
+ * @property integer $id
+ * @property integer $notification_id
+ * @property integer $author_id
+ * @property array $variables
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Notifications $notification
+ * @property User $author
+ * @property-read Collection|NotificationContents[] $content
+ * @property-read Collection|NotificationsStackParams[] $params
+ * @property-read Collection|NotificationsStackRead[] $read
+ */
 class NotificationsStack extends Model
 {
 

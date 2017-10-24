@@ -23,6 +23,13 @@ namespace Antares\Notifications\Model;
 
 use Antares\Model\Eloquent;
 
+/**
+ * Class NotificationSeverity
+ * @package Antares\Notifications\Model
+ *
+ * @property integer $id
+ * @property string $name
+ */
 class NotificationSeverity extends Eloquent
 {
 

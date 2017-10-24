@@ -23,6 +23,15 @@ namespace Antares\Notifications\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class NotificationsStackParams
+ * @package Antares\Notifications\Model
+ *
+ * @property integer $id
+ * @property integer $stack_id
+ * @property integer $model_id
+ * @property NotificationsStack $stack
+ */
 class NotificationsStackParams extends Model
 {
 

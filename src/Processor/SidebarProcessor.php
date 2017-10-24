@@ -113,6 +113,7 @@ class SidebarProcessor extends Processor
                 'count' => array_get($count, 'alerts', 0)
             ],
         ];
+
         return new JsonResponse($return, 200);
     }
 

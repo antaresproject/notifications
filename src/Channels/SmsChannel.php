@@ -21,6 +21,7 @@
 namespace Antares\Notifications\Channels;
 
 use Antares\Notifications\Messages\SmsMessage;
+use Antares\Notifications\Services\TemplateBuilderService;
 use Antares\Notifier\Adapter\FastSmsAdapter;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
@@ -37,10 +38,8 @@ class SmsChannel
     protected $adapter;
 
     /**
-     * Create a new FastSmsAdapter channel instance.
-     *
-     * @param  FastSmsAdapter  $adapter
-     * @return void
+     * SmsChannel constructor.
+     * @param FastSmsAdapter $adapter
      */
     public function __construct(FastSmsAdapter $adapter)
     {
@@ -48,28 +47,29 @@ class SmsChannel
     }
 
     /**
-     * Send the given notification.
-     *
-     * @param  mixed  $notifiable
-     * @param  \Illuminate\Notifications\Notification  $notification
-     * @return \Nexmo\Message\Message
+     * @param $notifiable
+     * @param Notification $notification
+     * @return bool
      */
     public function send($notifiable, Notification $notification)
     {
         if (!$to = $notifiable->routeNotificationFor('sms')) {
-            return;
+            return false;
         }
         $message = $notification->toSms($notifiable);
 
         if (is_string($message)) {
             $message = new SmsMessage($message);
         }
+
+        (new TemplateBuilderService($notification))->build($message);
+
         try {
-            $result = $this->adapter->send($message, $to);
-            return $result;
+            return $this->adapter->send($message, $to);
         } catch (Exception $ex) {
             Log::error($ex);
-            return;
+
+            return false;
         }
     }
 

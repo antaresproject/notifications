@@ -20,17 +20,13 @@
 
 namespace Antares\Notifications\Messages;
 
-use Antares\Notifications\Contracts\Message;
+use Antares\Notifications\Contracts\MessageContract;
+use Antares\Notifications\Contracts\TemplateMessageContract;
+use Antares\Notifications\Traits\DeliveredTemplateTrait;
 
-class SmsMessage extends SimpleMessage implements Message
-{
+class SmsMessage implements MessageContract, TemplateMessageContract {
 
-    /**
-     * Message type
-     *
-     * @var String 
-     */
-    public $type = 'sms';
+    use DeliveredTemplateTrait;
 
     /**
      * The message content.
@@ -47,13 +43,17 @@ class SmsMessage extends SimpleMessage implements Message
     public $from;
 
     /**
-     * Create a new message instance.
+     * The message type.
      *
-     * @param  string  $content
-     * @return void
+     * @var string
      */
-    public function __construct($content = '')
-    {
+    public $type = 'text';
+
+    /**
+     * SmsMessage constructor.
+     * @param string $content
+     */
+    public function __construct(string $content = '') {
         $this->content = $content;
     }
 
@@ -63,9 +63,9 @@ class SmsMessage extends SimpleMessage implements Message
      * @param  string  $content
      * @return $this
      */
-    public function content($content)
-    {
+    public function content(string $content) : self {
         $this->content = $content;
+
         return $this;
     }
 
@@ -75,24 +75,20 @@ class SmsMessage extends SimpleMessage implements Message
      * @param  string  $from
      * @return $this
      */
-    public function from($from)
-    {
+    public function from($from) : self {
         $this->from = $from;
+
         return $this;
     }
 
     /**
-     * Subject setter
-     * 
-     * @param String $subject
-     * @param array $params
+     * Set the message type.
+     *
      * @return $this
      */
-    public function subject($subject, array $params = [])
-    {
-        $this->rawSubject    = trans($subject);
-        $this->subjectParams = $params;
-        $this->subject       = trans($subject, $params);
+    public function unicode() : self {
+        $this->type = 'unicode';
+
         return $this;
     }
 

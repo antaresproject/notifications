@@ -2,12 +2,14 @@
 
 namespace Antares\Notifications;
 
+use Antares\Notifications\Collections\TemplatesCollection;
 use Antares\Notifications\Model\NotificationContents;
 use Antares\Notifications\Model\NotificationSeverity;
 use Antares\Notifications\Model\NotificationCategory;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Model\Notifications;
-use Antares\Notifications\Contracts\Message;
+use Antares\Notifications\Model\Template;
+use Antares\Translations\Models\Languages;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use ReflectionClass;
@@ -17,93 +19,103 @@ class Synchronizer
 {
 
     /**
-     * Synchronize notification with entry in database
-     * 
-     * @param String $classname
-     * @param Message $message
-     * @return boolean
+     * @var \Illuminate\Database\Eloquent\Collection|Languages[]
      */
-    public function syncDatabase($classname, Message $message)
-    {
+    protected $languages;
 
-        DB::beginTransaction();
-        try {
-            if (is_array($message->type)) {
-                foreach ($message->type as $type) {
-                    $this->save($classname, $type, $message);
-                }
-            } else {
-                $this->save($classname, $message->type, $message);
-            }
-        } catch (Exception $ex) {
-            DB::rollback();
-            Log::error($ex);
-            return false;
-        }
+    /**
+     * @var bool
+     */
+    protected $forceMode = false;
 
-        DB::commit();
-        return true;
+    /**
+     * Synchronizer constructor.
+     */
+    public function __construct() {
+        $this->languages = Languages::all();
     }
 
     /**
-     * Saves notification in database
-     * 
-     * @param String $classname
-     * @param String $type
-     * @param Message $message
-     * @return void
+     * @param bool $state
      */
-    protected function save($classname, $type, Message $message)
+    public function setForceMode(bool $state) {
+        $this->forceMode = $state;
+    }
+
+    /**
+     * @param string $notificationClassName
+     * @param TemplatesCollection $templates
+     */
+    public function syncTemplates(string $notificationClassName, TemplatesCollection $templates) {
+        foreach($templates->all() as $template) {
+            $this->syncTemplate($notificationClassName, $template);
+        }
+    }
+
+    /**
+     * @param string $notificationClassName
+     * @param Template $template
+     * @throws Exception
+     */
+    public function syncTemplate(string $notificationClassName, Template $template) {
+        DB::beginTransaction();
+
+        try {
+            foreach($template->getTypes() as $type) {
+                $this->save($notificationClassName, $type, $template);
+            }
+
+            DB::commit();
+        }
+        catch(Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * @param string $className
+     * @param string $type
+     * @param Template $template
+     */
+    protected function save(string $className, string $type, Template $template)
     {
+        /* @var $model Notifications */
         $model      = Notifications::query()->firstOrCreate([
-            'classname' => $classname,
+            'classname' => $className,
             'type_id'   => $this->type($type)->id,
         ]);
-        $reflection = new ReflectionClass($classname);
+
+        $reflection = new ReflectionClass($className);
         $checksum   = md5_file($reflection->getFileName());
 
-        if (!is_null($model->checksum)) {
-
-            if ($model->checksum === $checksum) {
-                return;
-            }
+        if( ! ($this->forceMode || $model->checksum !== $checksum) ) {
+            return;
         }
+
         $model->fill([
-            'severity_id' => $this->severity($message->severity)->id,
-            'category_id' => $this->category($message->category)->id,
+            'severity_id' => $this->severity($template->getSeverity())->id,
+            'category_id' => $this->category($template->getCategory())->id,
             'checksum'    => $checksum
         ]);
+
         $model->save();
-        $langs = langs();
-        foreach ($langs as $lang) {
-            $content = ($message->type === 'sms') ? $message->content : file_get_contents(view($message->view)->getPath());
-            $this->saveNotificationContent($model->id, $lang->code, $message->rawSubject, $content);
-        }
-    }
 
-    /**
-     * Saves notification message
-     * 
-     * @param mixed $id
-     * @param String $locale
-     * @param String $subject
-     * @param String $view
-     * @return boolean
-     */
-    private function saveNotificationContent($id, $locale, $subject, $view)
-    {
-        $lang = lang($locale);
+        $title          = $template->getSubject();
+        $viewContent    = $template->getViewContent();
 
-        if (is_null($lang)) {
-            return false;
+        foreach ($this->languages as $lang) {
+            $content = NotificationContents::query()->firstOrCreate([
+                'notification_id' => $model->id,
+                'lang_id'         => $lang->id,
+            ]);
+
+            $content->title   = $title;
+            $content->content = $viewContent;
+            $content->save();
         }
-        $content          = NotificationContents::query()->firstOrCreate([
-            'notification_id' => $id,
-            'lang_id'         => $lang->id
-        ]);
-        $content->title   = $subject;
-        $content->content = $view;
-        return $content->save();
     }
 
     /**
@@ -112,10 +124,9 @@ class Synchronizer
      * @param String $category
      * @return NotificationCategory
      */
-    private function category($category = null)
+    private function category(string $category = null)
     {
-        $value = is_null($category) ? 'default' : $category;
-        return NotificationCategory::where('name', $value)->firstOrFail();
+        return NotificationCategory::query()->where('name', $category ?: 'default')->firstOrFail();
     }
 
     /**
@@ -124,10 +135,9 @@ class Synchronizer
      * @param String $type
      * @return NotificationTypes
      */
-    private function type($type = null)
+    private function type(string $type = null)
     {
-        $value = is_null($type) ? 'admin' : $type;
-        return NotificationTypes::where('name', $value)->firstOrFail();
+        return NotificationTypes::query()->where('name', $type ?: 'admin')->firstOrFail();
     }
 
     /**
@@ -138,8 +148,7 @@ class Synchronizer
      */
     private function severity($severity = null)
     {
-        $value = is_null($severity) ? 'medium' : $severity;
-        return NotificationSeverity::where('name', $value)->firstOrFail();
+        return NotificationSeverity::query()->where('name', $severity ?: 'medium')->firstOrFail();
     }
 
 }

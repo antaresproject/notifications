@@ -20,14 +20,18 @@
 
 namespace Antares\Notifications\Console;
 
-use Illuminate\Database\Console\Migrations\BaseCommand;
-use Illuminate\Notifications\Notification;
+use Antares\Extension\Contracts\ExtensionContract;
+use Antares\Notifications\Contracts\NotificationEditable;
+use Antares\Notifications\Synchronizer;
+use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Symfony\Component\Finder\Finder;
 use Antares\Foundation\Application;
 use Antares\Extension\Manager;
-use Exception;
+use Symfony\Component\Finder\SplFileInfo;
+use ReflectionClass;
 
-class NotificationsImportCommand extends BaseCommand
+class NotificationsImportCommand extends Command
 {
 
     /**
@@ -35,7 +39,7 @@ class NotificationsImportCommand extends BaseCommand
      *
      * @var string
      */
-    protected $name = 'notifications:import';
+    protected $signature = 'notifications:import {extension? : Extension full name} {--force}';
 
     /**
      * The console command description.
@@ -59,16 +63,30 @@ class NotificationsImportCommand extends BaseCommand
     protected $app;
 
     /**
-     * Construct
-     * 
+     * Synchronizer instance
+     *
+     * @var Synchronizer
+     */
+    protected $synchronizer;
+
+    /**
+     * @var ExtensionContract|null
+     */
+    private $extension;
+
+    /**
+     * NotificationsImportCommand constructor.
      * @param Manager $manager
      * @param Application $app
+     * @param Synchronizer $synchronizer
      */
-    public function __construct(Manager $manager, Application $app)
+    public function __construct(Manager $manager, Application $app, Synchronizer $synchronizer)
     {
         parent::__construct();
-        $this->manager = $manager;
-        $this->app     = $app;
+
+        $this->manager      = $manager;
+        $this->app          = $app;
+        $this->synchronizer = $synchronizer;
     }
 
     /**
@@ -76,69 +94,118 @@ class NotificationsImportCommand extends BaseCommand
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
+        $forceMode      = $this->option('force');
+        $extensionName  = $this->argument('extension');
+
+        $this->synchronizer->setForceMode($forceMode);
+
+        if ($extensionName) {
+            $extension = $this->manager->getAvailableExtensions()->findByName($extensionName);
+
+            if ($extension instanceof ExtensionContract) {
+                $this->extension = $extension;
+            }
+        }
+
         $files = $this->getFiles();
-        foreach ($files as $file) {
-            try {
-                $message = $this->app->make($file);
-            } catch (Exception $ex) {
-                continue;
-            }
-            if (!isset($message->templates)) {
-                continue;
-            }
-            foreach ($message->templates as $lang => $templates) {
-                if (!isset($templates['subject'])) {
-                    continue;
-                }
+
+        /* @var $file string */
+        foreach($files->all() as $file) {
+            $reflection = new ReflectionClass($file);
+
+            if( $this->hasDesiredInterface($reflection) ) {
+                $templates = call_user_func(array($file, 'templates'));
+
+                $this->synchronizer->syncTemplates($file, $templates);
             }
         }
     }
 
     /**
-     * Gets message files in application filesystem
+     * Determines if the given class reflection has desired interface.
+     *
+     * @param ReflectionClass $class
+     * @return bool
+     */
+    protected function hasDesiredInterface(ReflectionClass $class) : bool
+    {
+        return ! $class->isAbstract() && in_array(NotificationEditable::class, $class->getInterfaceNames(), true);
+    }
+
+    /**
+     * Gets message files in application filesystem.
      * 
-     * @return \Illuminate\Support\Collection
+     * @return Collection|string[]
      */
     protected function getFiles()
     {
         $autoload = require_once base_path('vendor/composer/autoload_classmap.php');
-        $dirs     = $this->getDirs();
-        return $dirs->flatMap(function($finder, $key) use($autoload) {
-                    $files = [];
-                    foreach ($finder as $file) {
-                        if (!($key = array_search($file->getRealPath(), $autoload))) {
-                            continue;
-                        }
-                        if (!class_exists($key)) {
-                            continue;
-                        }
-                        array_push($files, $key);
-                    }
-                    return $files;
-                });
+        $dirs     = $this->extension ? $this->getExtensionDirs($this->extension) : $this->getExtensionsDirs();
+
+        if( ! $dirs) {
+            return new Collection();
+        }
+
+        if($dirs instanceof Finder) {
+            $dirs = new Collection([$dirs]);
+        }
+
+        /* @var $file SplFileInfo */
+
+        return $dirs->flatMap(function(Finder $finder) use($autoload) {
+            $files = [];
+
+            foreach ($finder as $file) {
+                if (!($key = array_search($file->getRealPath(), $autoload))) {
+                    continue;
+                }
+                if (!class_exists($key)) {
+                    continue;
+                }
+
+                array_push($files, $key);
+            }
+
+            return $files;
+        });
     }
 
     /**
-     * Gets directories with notifications
+     * Gets directories with notifications.
      * 
-     * @return \Illuminate\Support\Collection
+     * @return Collection|Finder[]
      */
-    protected function getDirs()
+    protected function getExtensionsDirs() : Collection
     {
         $extensions = $this->manager->getAvailableExtensions()->filterByActivated();
-
         $collection = collect();
+
         foreach ($extensions as $extension) {
-            $path = $extension->getPath() . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Notifications';
-            if (!is_dir($path)) {
-                continue;
+            $finder = $this->getExtensionDirs($extension);
+
+            if($finder) {
+                $collection->push($finder);
             }
-            $finder = new Finder();
-            $collection->push($finder->files()->in($path)->name('*.php'));
         }
+
         return $collection;
+    }
+
+    /**
+     * @param ExtensionContract $extension
+     * @return null|Finder
+     */
+    protected function getExtensionDirs(ExtensionContract $extension) : ?Finder
+    {
+        $path = $extension->getPath() . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Notifications';
+
+        if (is_dir($path)) {
+            return Finder::create()->files()->in($path)->name('*.php');
+        }
+
+        return null;
     }
 
 }

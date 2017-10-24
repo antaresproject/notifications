@@ -20,66 +20,13 @@
 
 namespace Antares\Notifications\Messages;
 
-use Illuminate\Notifications\Messages\MailMessage as LaravelMailMessage;
-use Antares\Notifications\Contracts\Message;
+use Antares\Notifications\Contracts\MessageContract;
+use Antares\Notifications\Contracts\TemplateMessageContract;
+use Antares\Notifications\Traits\DeliveredTemplateTrait;
+use Illuminate\Notifications\Messages\MailMessage as BaseMailMessage;
 
-class MailMessage extends LaravelMailMessage implements Message
-{
+class MailMessage extends BaseMailMessage implements MessageContract, TemplateMessageContract {
 
-    /**
-     * Message category
-     *
-     * @var String
-     */
-    public $category = 'default';
-
-    /**
-     * Message severity
-     *
-     * @var String 
-     */
-    public $severity = 'medium';
-
-    /**
-     * Message type
-     *
-     * @var String 
-     */
-    public $type = 'mail';
-
-    /**
-     * Raw subject without translation
-     *
-     * @var String 
-     */
-    public $rawSubject;
-
-    /**
-     * Subject params
-     *
-     * @var array
-     */
-    public $subjectParams = [];
-
-    /**
-     * {@inheritdoc}
-     */
-    public function subject($subject, array $params = [])
-    {
-        $this->rawSubject    = trans($subject);
-        $this->subjectParams = $params;
-        return parent::subject(trans($subject, $params));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __call($name, $arguments)
-    {
-        if (isset($this->$name)) {
-            $this->$name = $arguments[0];
-            return $this;
-        }
-    }
+    use DeliveredTemplateTrait;
 
 }

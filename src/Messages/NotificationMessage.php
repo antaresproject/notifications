@@ -2,26 +2,21 @@
 
 namespace Antares\Notifications\Messages;
 
-use Antares\Notifications\Contracts\Message;
-
-class NotificationMessage extends SimpleMessage implements Message
-{
+class NotificationMessage extends AbstractMessage {
 
     /**
-     * Message type
-     *
-     * @var String 
+     * @var string[]
      */
-    public $type = 'antares';
+    public $types = ['admin'];
 
     /**
-     * {@inheritdoc}
+     * @param string[] $types
+     * @return NotificationMessage
      */
-    public function subject($subject, array $params = [])
-    {
-        $this->rawSubject    = trans($subject);
-        $this->subjectParams = $params;
-        return parent::subject(trans($subject, $params));
+    public function types(array $types) : self {
+        $this->types = $types;
+
+        return $this;
     }
 
 }

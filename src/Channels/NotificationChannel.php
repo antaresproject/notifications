@@ -20,97 +20,138 @@
 
 namespace Antares\Notifications\Channels;
 
+use Antares\Notifications\Contracts\NotificationEditable;
 use Antares\Notifications\Model\NotificationsStackParams;
 use Antares\Notifications\Messages\NotificationMessage;
 use Antares\Notifications\Model\NotificationsStack;
 use Antares\Notifications\Model\Notifications;
+use Antares\Notifications\Services\TemplateBuilderService;
+use Antares\Notifications\Synchronizer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Log;
 
 class NotificationChannel
 {
 
     /**
+     * @var Synchronizer
+     */
+    protected $synchronizer;
+
+    /**
+     * NotificationChannel constructor.
+     * @param Synchronizer $synchronizer
+     */
+    public function __construct(Synchronizer $synchronizer) {
+        $this->synchronizer = $synchronizer;
+    }
+
+    /**
      * Send the given notification.
      *
-     * @param  mixed  $notifiable
-     * @param  \Illuminate\Notifications\Notification  $notification
-     * @return boolean
+     * @param $notifiable
+     * @param Notification $notification
      */
     public function send($notifiable, Notification $notification)
     {
         DB::beginTransaction();
+
         try {
             $via     = $notification->via($notifiable);
-            $message = array_search('alert', $via) !== false ? $notification->toAlert($notifiable) : $notification->toNotification($notifiable);
+            $message = array_search('alert', $via) !== false
+                ? $notification->toAlert($notifiable)
+                : $notification->toNotification($notifiable);
+
+            (new TemplateBuilderService($notification))->build($message);
+
             $this->sendNotification($message, $notification, $notifiable->id);
-        } catch (Exception $ex) {
-            DB::rollback();
-            return false;
+
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::emergency($e);
         }
-        DB::commit();
-        return true;
     }
 
     /**
-     * Sends notification - add row to database
-     * 
+     * Sends notification - add row to database.
+     *
      * @param NotificationMessage $message
      * @param Notification $notification
-     * @param mixed $uid
+     * @param int $modelId
+     * @return Notifications
      */
-    protected function sendNotification(NotificationMessage $message, Notification $notification, $uid)
+    protected function sendNotification(NotificationMessage $message, Notification $notification, int $modelId)
     {
-        if (is_array($message->type)) {
-            foreach ($message->type as $type) {
-                $model     = $this->notification($message, $type, get_class($notification));
-                $variables = array_merge($message->subjectParams, $message->viewData);
-                $this->saveInStack($model, $uid, $variables);
+        $notificationClassName = get_class($notification);
+
+        foreach ($message->types as $type) {
+            $model     = $this->findNotification($message, $type, $notificationClassName);
+            $variables = array_merge($message->subjectData, $message->viewData);
+
+            if( ! $model && $notification instanceof NotificationEditable) {
+                $this->synchronizer->syncTemplates(get_class($notification), $notification::templates());
+
+                $model = $this->findNotification($message, $type, $notificationClassName);
+            }
+
+            if($model) {
+                $this->saveInStack($model, $modelId, $variables);
             }
         }
-        return $this->notification($message, $message->type, get_class($notification));
     }
 
     /**
-     * Saves notification in stack
-     * 
+     * Saves notification in stack.
+     *
      * @param Notifications $model
-     * @param mixed $uid
+     * @param int $modelId
      * @param array $variables
-     * @return Notifications
      */
-    protected function saveInStack(Notifications $model, $uid, array $variables = [])
+    protected function saveInStack(Notifications $model, int $modelId, array $variables = [])
     {
-        $stack       = new NotificationsStack([
+        $stack = new NotificationsStack([
             'notification_id' => $model->id,
             'author_id'       => auth()->guest() ? null : user()->id,
             'variables'       => $variables,
         ]);
+
         $stack->save();
-        $stackParams = new NotificationsStackParams(['stack_id' => $stack->id, 'model_id' => $uid]);
-        return $stack->params()->save($stackParams);
+
+        $stackParams = new NotificationsStackParams([
+            'stack_id' => $stack->id,
+            'model_id' => $modelId
+        ]);
+
+        $stack->params()->save($stackParams);
     }
 
     /**
      * Finds notification entry
-     * 
+     *
      * @param NotificationMessage $message
-     * @param String $type
-     * @param String $classname
+     * @param string $type
+     * @param string $className
      * @return Notifications
      */
-    protected function notification(NotificationMessage $message, $type, $classname)
+    protected function findNotification(NotificationMessage $message, string $type, string $className)
     {
-        return Notifications::query()->whereHas('type', function($subquery) use($type) {
-                            $subquery->where('name', $type);
-                        })->whereHas('severity', function($subquery) use($message) {
-                            $subquery->where('name', $message->severity);
-                        })->whereHas('category', function($subquery) use($message) {
-                            $subquery->where('name', $message->category);
-                        })
-                        ->where(['classname' => $classname])
-                        ->first();
+        /* @var $notification Notifications */
+        $notification = Notifications::query()
+            ->whereHas('type', function(Builder $query) use($type) {
+                $query->where('name', $type);
+            })->whereHas('severity', function(Builder $query) use($message) {
+                $query->where('name', $message->severity);
+            })->whereHas('category', function(Builder $query) use($message) {
+                $query->where('name', $message->category);
+            })
+            ->where('classname', $className)
+            ->first();
+
+        return $notification;
     }
 
 }

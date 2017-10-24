@@ -21,17 +21,21 @@
 namespace Antares\Notifications\Processor;
 
 use Antares\Notifications\Contracts\IndexPresenter as Presenter;
+use Antares\Notifications\Decorator\MailDecorator;
+use Antares\Notifications\Model\NotificationContents;
+use Antares\Notifications\PreviewNotification;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Antares\Notifications\Adapter\VariablesAdapter;
 use Antares\Notifications\Contracts\IndexListener;
-use Antares\View\Notification\NotificationHandler;
 use Antares\Notifications\Repository\Repository;
 use Antares\Foundation\Processor\Processor;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Exception;
+use Antares\Notifications\Facade\Notification;
 
 class IndexProcessor extends Processor
 {
@@ -84,13 +88,13 @@ class IndexProcessor extends Processor
      */
     public function edit($id, $locale, IndexListener $listener)
     {
-
         app('antares.asset')->container('antares/foundation::application')
-                ->add('view_brand_settings', '/js/view_brand_settings.js', ['app-cache'])
-                ->add('ckeditor', '/js/ckeditor_base/ckeditor.js', ['view_brand_settings']);
+            ->add('ckeditor', 'https://cdn.ckeditor.com/4.6.2/full-all/ckeditor.js', ['app_cache']);
 
+        //app('antares.asset')->container('antares/foundation::application')->add('ckeditor', '/public/ckeditor/ckeditor.js', ['webpack_forms_basic']);
 
         $model = $this->repository->findByLocale($id, $locale);
+
         if (is_null($model)) {
             throw new ModelNotFoundException('Model not found');
         }
@@ -127,48 +131,39 @@ class IndexProcessor extends Processor
      * @param mixed $id
      * @return JsonResponse
      */
-    public function sendtest(IndexListener $listener, $id = null)
+    public function sendTest(IndexListener $listener, $id = null)
     {
-        $notifier = null;
-        $type     = null;
+        $notifier   = null;
+        $content    = null;
+        $type       = null;
 
-        if (app('request')->isMethod('post')) {
-            $inputs   = Input::all();
-            $content  = $this->variablesAdapter->fill($inputs['content']);
-            preg_match_all('/\[\[(.*?)\]\]/', $content, $matches);
-            $content  = str_replace($matches[0], $matches[1], $content);
-            $title    = $inputs['title'];
-            $type     = $inputs['type'];
-            $notifier = app(NotificationHandler::class)->getNotifierAdapter($type);
+        if (request()->isMethod('post')) {
+            $this->variablesAdapter->setPreviewMode(true);
+
+            $inputs     = Input::all();
+            $type       = $inputs['type'];
+            $content    = new NotificationContents($inputs);
+
         } else {
-            $model    = $this->repository->find($id);
-            $notifier = app(NotificationHandler::class)->getNotifierAdapter($model->type->name);
-            $content  = $model->contents->first()->content;
-            $title    = $model->contents->first()->title;
+            $model      = $this->repository->find($id);
+            $type       = $model->type->name;
+            $content    = $model->contents->first();
         }
 
-
         try {
-            if (is_null($notifier)) {
-                throw new Exception('Unable to resolve notifier adapter.');
-            }
-            $notifier->send($content, [], function($m) use($title, $type) {
-                $to = $type == 'sms' ? config('antares/notifications::default.sms') : user()->email;
-                $m->to($to);
-                $m->subject($title);
-            });
-            $result = $notifier->getResultCode();
-            if (!$result) {
-                throw new Exception($notifier->getResultMessage());
-            }
-            if (app('request')->ajax()) {
+            Notification::send(auth()->user(), new PreviewNotification($type, $content));
+
+            if (request()->ajax()) {
                 return new JsonResponse(trans('Message has been sent'), 200);
             }
+
             return $listener->sendSuccess();
-        } catch (Exception $ex) {
-            if (app('request')->ajax()) {
-                return new JsonResponse($ex->getMessage(), 500);
+        }
+        catch(Exception $e) {
+            if (request()->ajax()) {
+                return new JsonResponse($e->getMessage(), 500);
             }
+
             return $listener->sendFailed();
         }
     }
@@ -178,26 +173,17 @@ class IndexProcessor extends Processor
      * 
      * @return View
      */
-    public function preview()
+    public function preview(array $data)
     {
-        $inputs  = Input::all();
-        $content = str_replace("&#39;", '"', $inputs['content']);
-        $content = $this->variablesAdapter->get($content);
+        $this->variablesAdapter->setPreviewMode(true);
 
-        preg_match_all('/\[\[(.*?)\]\]/', $content, $matches);
-        $view = str_replace($matches[0], $matches[1], $content);
+        $data['content'] = $this->variablesAdapter->get(  Arr::get($data, 'content', '') );
 
-        if (array_get($inputs, 'type') == 'email') {
-            event('antares.notifier.before_send_email', [&$view]);
+        if( Arr::get($data, 'type') === 'email') {
+            $data['content'] = MailDecorator::decorate($data['content']);
         }
 
-
-        $brandTemplate = \Antares\Brands\Model\BrandOptions::query()->where('brand_id', brand_id())->first();
-        $header        = str_replace('</head>', '<style>' . $brandTemplate->styles . '</style></head>', $brandTemplate->header);
-        $html          = preg_replace("/<body[^>]*>(.*?)<\/body>/is", '<body>' . $view . '</body>', $header . $brandTemplate->footer);
-
-        array_set($inputs, 'content', $html);
-        return $this->presenter->preview($inputs);
+        return $this->presenter->preview($data);
     }
 
     /**
@@ -227,8 +213,9 @@ class IndexProcessor extends Processor
     public function create($type = null)
     {
         app('antares.asset')->container('antares/foundation::application')
-                ->add('view_brand_settings', '/webpack/view_brand_settings.js', ['app-cache'])
-                ->add('ckeditor', 'https://cdn.ckeditor.com/4.6.2/full-all/ckeditor.js', ['view_brand_settings']);
+            ->add('ckeditor', 'https://cdn.ckeditor.com/4.6.2/full-all/ckeditor.js', ['app_cache']);
+
+        //app('antares.asset')->container('antares/foundation::application')->add('ckeditor', '/ckeditor/ckeditor.js', ['webpack_forms_basic']);
 
         return $this->presenter->create($this->repository->makeModel()->getModel(), $type);
     }
