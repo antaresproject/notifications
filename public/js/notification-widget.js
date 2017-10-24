@@ -31,7 +31,7 @@ Vue.config.debug = !0, Vue.config.devtools = !0, function () {
             },
             lockSelect: function () {
                 this.container.attr('disabled', 'disabled');
-                this.container.closest('.grid-stack-item-content').LoadingOverlay('show');
+                //this.container.closest('.grid-stack-item-content').LoadingOverlay('show');
             },
             onSuccess: function (response) {
                 this.container.html('');
@@ -54,7 +54,7 @@ Vue.config.debug = !0, Vue.config.devtools = !0, function () {
             },
             onComplete: function () {
                 this.container.removeAttr('disabled');
-                this.container.closest('.grid-stack-item-content').LoadingOverlay('hide');
+                //this.container.closest('.grid-stack-item-content').LoadingOverlay('hide');
             }
         },
     });

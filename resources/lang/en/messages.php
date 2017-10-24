@@ -17,6 +17,8 @@
  * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
+
+
 return [
     'notification_templates'              => 'Notification Templates',
     'notification_templates_create'       => 'Create Notification Template',
@@ -56,11 +58,5 @@ return [
     'notification_content_legend'         => 'Notification content for ":lang"',
     'notification_content_title'          => 'Title',
     'notification_content_content'        => 'Content',
-    'notification_content_enabled'        => 'Enabled',
-    'instructions'                        => [
-        'description' => [
-            'foreach' => 'The foreach construct provides an easy way to iterate over arrays. foreach works only on arrays and objects, and will issue an error when you try to use it on a variable with a different data type or an uninitialized variable.',
-            'if'      => 'The if construct is one of the most important features of many languages. It allows for conditional execution of code fragments.'
-        ]
-    ]
+    'notification_content_enabled'        => 'Enabled'
 ];

@@ -22,7 +22,6 @@ namespace Antares\Notifications\Http\Form;
 
 use Antares\Notifications\Model\NotificationCategory;
 use Antares\Notifications\Model\NotificationTypes;
-use Antares\Notifications\Variables;
 use Antares\Html\Form\ClientScript;
 use Antares\Html\Form\FormBuilder;
 use Antares\Html\Form\Fieldset;
@@ -66,19 +65,19 @@ class Form extends FormBuilder
         $this->fluent = $fluent;
         $clientScript = app(ClientScript::class);
         $grid         = app(Grid::class);
-        $variables    = app(Variables::class);
 
         parent::__construct($grid, $clientScript, app());
 
-
-
-        $this->name = "antares.notification: " . $fluent->form_name;
-        $this->grid->simple(handles('antares::notifications/update/'), ['class' => 'form--hor'], $fluent);
-
+        $this->name             = "antares.notification: " . $fluent->form_name;
+        $this->grid->simple(handles('antares::notifications/update/'), ['data-is-sms' => $fluent->type === 'sms'], $fluent);
         $this->layoutAttributes = [
-            'variables'    => $variables->variables(),
-            'instructions' => $variables->instructions(),
-            'rich'         => true
+            'variables'    => $notification->getVariables(),
+            'instructions' => $notification->getInstructions(),
+            'rich'         => true,
+            'sms'          => $fluent->type === 'sms',
+            'langs'        => langs(),
+            'id'           => $fluent->id,
+            'type'         => $fluent->type
         ];
         $this->bindScripts();
         $this->grid->layout('antares/notifications::admin.index.form', $this->layoutAttributes);
@@ -113,10 +112,9 @@ class Form extends FormBuilder
 
 
             $fieldset->control('input:checkbox', 'active')
-                    ->label(trans('antares/notifications::messages.notification_content_enabled'))
-                    ->value(1)
-                    ->checked(function() use($fluent) {
-                        return $fluent->active;
+                    ->field(function() use($fluent) {
+                        $checked = $fluent->active ? 'checked="checked"' : '';
+                        return '<input class="switch-checkbox" ' . $checked . ' name="active" type="checkbox" value="1" >';
                     });
 
             $this->buttons($fluent, $fieldset);
@@ -124,23 +122,25 @@ class Form extends FormBuilder
 
 
         $langs = langs();
-        foreach ($langs as $lang) {
+        foreach ($langs as $index => $lang) {
 
-            $this->grid->fieldset(function (Fieldset $fieldset) use($fluent, $notification, $lang) {
-                $fieldset->legend(trans('antares/notifications::messages.notification_content_legend', ['lang' => $lang->name]));
+            $this->grid->fieldset(function (Fieldset $fieldset) use($fluent, $notification, $lang, $index) {
+                $fieldset->legend($lang->name);
                 $fieldset->control('input:text', 'title')
                         ->label(trans('antares/notifications::messages.notification_content_title'))
                         ->name('title[' . $lang->id . ']')
-                        ->attributes(['class' => 'notification-title'])
+                        ->attributes(['rel' => $lang->code, 'class' => 'notification-title ' . (($index > 0) ? 'hidden' : '')])
                         ->value($this->getNotificationContentData($fluent, $lang->id));
 
-                $fieldset->control('ckeditor', 'content')
+
+                $fieldset->control('textarea', 'content')
                         ->label(trans('antares/notifications::messages.notification_content_content'))
-                        ->attributes(['scripts' => false, 'class' => 'richtext'])
+                        ->attributes(['rel' => $lang->code, 'class' => 'richtext has-ckeditor hidden', 'rows' => 10, 'cols' => 80])
                         ->name('content[' . $lang->id . ']')
                         ->value($this->getNotificationContentData($fluent, $lang->id, 'content'));
             });
         }
+
         $this->grid->ajaxable();
         if (!in_array($fluent->type, ['sms', 'email'])) {
             unset($this->rules['title']);
@@ -161,29 +161,6 @@ class Form extends FormBuilder
                     return app('html')->link(handles("antares::notifications/"), trans('Cancel'), ['class' => 'btn btn--md btn--default mdl-button mdl-js-button']);
                 });
 
-        $acl = app('antares.acl')->make('antares/notifications');
-
-        if ($acl->can('notifications-preview')) {
-            $fieldset->control('button', 'preview')
-                    ->attributes([
-                        'type'       => 'button',
-                        'value'      => trans('Preview'),
-                        'class'      => 'btn btn-default notification-template-preview',
-                        'url'        => handles('antares::notifications/preview/' . $fluent->id),
-                        'data-title' => trans('antares/notifications::messages.generating_notification_preview')
-                    ])
-                    ->value(trans('Preview'));
-        }
-
-        if ($acl->can('notifications-test') && in_array($this->fluent->type, ['email', 'sms'])) {
-            $fieldset->control('button', 'sendtest')
-                    ->attributes([
-                        'type'  => 'button',
-                        'class' => 'btn btn-default send-test-notification',
-                        'rel'   => handles('antares::notifications/sendtest', ['csrf' => true])
-                    ])
-                    ->value(trans('Send test'));
-        }
         $fieldset->control('button', 'button')
                 ->attributes(['type' => 'submit', 'class' => 'btn btn-primary'])
                 ->value($fluent->id ? trans('antares/foundation::label.save_changes') : trans('Save'));
@@ -196,8 +173,8 @@ class Form extends FormBuilder
      */
     protected function bindScripts()
     {
-        //publish('notifications', 'scripts.resources-rich');
-        $scripts = ($this->fluent->type == 'sms') ? ['js/ckeditor-notifications-sms.js'] : ['js/ckeditor-notifications.js'];
+        //$scripts = ($this->fluent->type == 'sms') ? ['js/ckeditor-notifications-sms.js'] : ['js/ckeditor-notifications.js'];
+        $scripts = ['js/ckeditor-notifications.js'];
         return publish('notifications', $scripts);
     }
 

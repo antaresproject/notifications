@@ -46,7 +46,6 @@ class Contents
                     'tbl_languages.code',
                     'tbl_notification_contents.title',
                     'tbl_notification_contents.content',
-                    'tbl_notifications.event',
                     'tbl_notifications.classname',
                 ])
                 ->leftJoin('tbl_notifications', 'tbl_notification_contents.notification_id', '=', 'tbl_notifications.id')

@@ -6,7 +6,7 @@ $(document).ready(function () {
     });
     $('.notification-select-type').on('change', function (e) {
         e.preventDefault();
-        $('body').LoadingOverlay('show');
+        //$('body').LoadingOverlay('show');
         window.location.href = $(this).attr('url') + '/' + $(this).val();
         return true;
     });
@@ -31,11 +31,11 @@ $(document).ready(function () {
         form = handler.parents('form:first');
         container.html('<h1>' + handler.attr('data-title') + '</h1>');
         $.ajax({
-            url: handler.attr('url'),
+            url: handler.attr('href'),
             data: {title: form.find('.notification-title:first').val(), content: dataProvider.getContent(), type: $('.notification-select-type').val()},
             type: 'POST',
             success: function (response) {
-                modalBody.LoadingOverlay('hide');
+                //modalBody.LoadingOverlay('hide');
                 container.html(response);
                 height = container.find('.preview-response').height();
                 targetHeight = height + 50;
@@ -67,7 +67,7 @@ $(document).ready(function () {
                     cancelButtonText: 'Close',
                     closeOnCancel: true
                 }));
-                modalBody.LoadingOverlay('hide');
+                //modalBody.LoadingOverlay('hide');
             }
         });
 
@@ -79,9 +79,9 @@ $(document).ready(function () {
         e.preventDefault();
         handler = $(this);
         form = $('.send-test-notification').parents('form:first');
-        form.LoadingOverlay('show');
+        //form.LoadingOverlay('show');
         $.ajax({
-            url: handler.attr('rel'),
+            url: handler.attr('href'),
             data: {
                 title: form.find('.notification-title:first').val(),
                 content: dataProvider.getContent(),
@@ -89,10 +89,10 @@ $(document).ready(function () {
             },
             type: 'POST',
             success: function (response) {
-                form.LoadingOverlay('hide');
+                //form.LoadingOverlay('hide');
                 swal($.extend({}, APP.swal.cb1Success(), {
-                    title: response,
-                    text: '',
+                    title: '',
+                    text: response,
                     showConfirmButton: false,
                     showCancelButton: true,
                     cancelButtonText: 'Close',
@@ -101,14 +101,14 @@ $(document).ready(function () {
             },
             error: function (error) {
                 swal($.extend({}, APP.swal.cb1Error(), {
-                    title: error.responseText,
-                    text: '',
+                    title: '',
+                    text: error.responseText,
                     showConfirmButton: false,
                     showCancelButton: true,
                     cancelButtonText: 'Close',
                     closeOnCancel: true
                 }));
-                form.LoadingOverlay('hide');
+                //form.LoadingOverlay('hide');
 
             }
         });

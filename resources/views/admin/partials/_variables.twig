@@ -2,7 +2,7 @@
 {% if variables is not empty %}
     <ul class="mdl-list">
         {% for extension, variables_container in variables %}
-            <li class="mdl-list__item col-8">
+            <li class="mdl-list__item col-12">
                 <div class="ddown-multi">
                     <div id="{{ extension }}"
                          class="ddown-multi__init btn--dropdown btn btn--md btn--default mdl-js-button mdl-js-ripple-effect">
@@ -35,7 +35,7 @@
 {% if instructions is not empty %}
     <ul class="mdl-list">
         {% for name, instruction in instructions %}
-            <li class="mdl-list__item col-8">
+            <li class="mdl-list__item col-12">
                 <button type="button" data-toggle="tooltip" data-placement="top"
                         title="{{ instruction.instruction }}"
                         class="btn btn--s-small btn--primary mdl-button mdl-js-button mdl-js-ripple-effect insert-instruction">

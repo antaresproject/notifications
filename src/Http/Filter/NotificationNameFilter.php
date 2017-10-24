@@ -55,7 +55,7 @@ class NotificationNameFilter extends SelectFilter implements DataTableScopeContr
      */
     protected function options()
     {
-        return Notifications::query()->get(['id', 'event'])->pluck('event', 'id')->toArray();
+        return Notifications::query()->get(['id', 'classname'])->pluck('classname', 'id')->toArray();
     }
 
     /**
