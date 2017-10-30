@@ -62,16 +62,17 @@ class NotificationFilter extends SelectFilter implements DataTableScopeContract
     }
 
     /**
-     * filters data by parameters from memory
-     * 
-     * @param mixed $builder
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder $builder
+     * @return void
      */
     public function apply($builder)
     {
         $values = $this->getValues();
+
         if (empty($values)) {
-            return $builder;
+            return;
         }
+
         $builder->whereIn('active', $values);
     }
 

@@ -20,7 +20,8 @@
 
 namespace Antares\Notifications\Http\Datatables;
 
-use Antares\Notifications\Model\NotificationContents;
+use Antares\Authorization\Authorization;
+use Antares\Modules\BillevioBase\Helpers\DataTableActionsHelper;
 use Antares\Notifications\Model\Notifications as NotificationsModel;
 use Antares\Notifications\Model\NotificationCategory;
 use Antares\Notifications\Filter\NotificationFilter;
@@ -32,7 +33,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Closure;
 
-class Notifications extends DataTable
+class NotificationsDataTable extends DataTable
 {
 
     /**
@@ -52,15 +53,21 @@ class Notifications extends DataTable
     public $perPage = 25;
 
     /**
+     * @var int|null
+     */
+    protected $currentCategoryId;
+
+    /**
+     * @var int|null
+     */
+    protected $currentTypeId;
+
+    /**
      * @return Builder
      */
     public function query()
     {
-        return NotificationsModel::query()
-            ->with('category', 'contents')
-            ->whereHas('contents', function (Builder $query) {
-                $query->where('lang_id', lang_id());
-            });
+        return NotificationsModel::query()->with('category', 'contents');
     }
 
     /**
@@ -70,10 +77,6 @@ class Notifications extends DataTable
     {
         $request         = request();
         $acl             = app('antares.acl')->make('antares/notifications');
-        $canUpdate       = $acl->can('notifications-edit');
-        $canTest         = $acl->can('notifications-test');
-        $canChangeStatus = $acl->can('notifications-change-status');
-        $canDelete       = $acl->can('notifications-delete');
 
         return $this->prepare()
             ->filter($this->setupSearchFilter($request))
@@ -89,19 +92,15 @@ class Notifications extends DataTable
             ->editColumn('type', function (NotificationsModel $model) {
                 return $model->type->title;
             })
-            ->editColumn('classname', function (NotificationsModel $model) {
-                return last(explode('\\', $model->classname));
-            })
-            ->editColumn('title', function (NotificationsModel $model) {
-                $first = $model->contents->first();
-                return ($first instanceof NotificationContents) ? $first->title : '';
+            ->editColumn('event', function (NotificationsModel $model) {
+                return $model->event_label;
             })
             ->editColumn('active', function (NotificationsModel $model) {
                 return ((int) $model->active) ?
                     '<span class="label-basic label-basic--success">' . trans('Yes') . '</span>' :
                     '<span class="label-basic label-basic--danger">' . trans('No') . '</span>';
             })
-            ->addColumn('action', $this->getActionsColumn($canUpdate, $canTest, $canChangeStatus, $canDelete))
+            ->addColumn('action', $this->getActionsColumn($acl))
             ->make(true);
     }
 
@@ -110,21 +109,19 @@ class Notifications extends DataTable
      */
     public function html()
     {
-        publish('notifications', ['js/notifications-table.js']);
-
         $categories = $this->categories();
         $types      = $this->types();
 
         return $this->setName('Notifications List')
             ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'Id'])
-            ->addColumn(['data' => 'title', 'name' => 'title', 'title' => trans('antares/notifications::messages.title'), 'className' => 'bolded'])
-            ->addColumn(['data' => 'classname', 'name' => 'classname', 'title' => trans('Event')])
+            ->addColumn(['data' => 'name', 'name' => 'name', 'title' => trans('antares/notifications::messages.title'), 'className' => 'bolded'])
+            ->addColumn(['data' => 'event', 'name' => 'event_model', 'title' => trans('Event')])
             ->addColumn(['data' => 'category', 'name' => 'category_id', 'title' => trans('Category')])
             ->addColumn(['data' => 'type', 'name' => 'type_id', 'title' => trans('Type')])
             ->addColumn(['data' => 'active', 'name' => 'active', 'title' => trans('Enabled')])
             ->addAction(['name' => 'edit', 'title' => '', 'class' => 'mass-actions dt-actions', 'orderable' => false, 'searchable' => false])
-            ->addGroupSelect($categories, 3, $categories->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'class' => 'mr24', 'id' => 'datatables-notification-category'])
-            ->addGroupSelect($types, 4, $types->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type'])
+            ->addGroupSelect($categories, 3, $this->currentCategoryId ?: $categories->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'class' => 'mr24', 'id' => 'datatables-notification-category'])
+            ->addGroupSelect($types, 4, $this->currentTypeId ?: $types->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type'])
             ->setDeferedData();
     }
 
@@ -136,33 +133,31 @@ class Notifications extends DataTable
         return function(Builder $query) use($request) {
             $searchKeyword  = Arr::get($request->get('search'), 'value');
             $columns        = (array) $request->get('columns', []);
-            $typeId         = null;
-            $categoryId     = null;
 
             array_walk($columns, function($item) use(&$typeId, &$categoryId) {
                 $itemData = Arr::get($item, 'data');
 
                 if ($itemData === 'type') {
-                    $typeId = Arr::get($item, 'search.value');
+                    $this->currentTypeId = Arr::get($item, 'search.value');
                 }
                 if ($itemData === 'category') {
-                    $categoryId = Arr::get($item, 'search.value');
+                    $this->currentCategoryId = Arr::get($item, 'search.value');
                 }
 
                 return false;
             });
 
-            if (!$categoryId) {
-                $categoryId = NotificationCategory::query()->where('name', 'default')->first()->id;
+            if (!$this->currentCategoryId) {
+                $this->currentCategoryId = NotificationCategory::query()->where('name', 'default')->first()->id;
             }
 
-            $query->where('category_id', $categoryId);
+            $query->where('category_id', $this->currentCategoryId);
 
-            if (!$typeId) {
-                $typeId = NotificationTypes::query()->where('name', 'email')->first()->id;
+            if (!$this->currentTypeId) {
+                $this->currentTypeId = NotificationTypes::query()->where('name', 'mail')->first()->id;
             }
 
-            $query->where('type_id', $typeId);
+            $query->where('type_id', $this->currentTypeId);
 
             if ($searchKeyword !== '') {
                 $searchKeyword = '%' . $searchKeyword . '%';
@@ -185,8 +180,7 @@ class Notifications extends DataTable
      * 
      * @return Collection
      */
-    protected function categories(): Collection
-    {
+    protected function categories(): Collection {
         return NotificationCategory::query()->pluck('title', 'id');
     }
 
@@ -195,41 +189,65 @@ class Notifications extends DataTable
      * 
      * @return Collection
      */
-    protected function types(): Collection
-    {
+    protected function types(): Collection {
         return NotificationTypes::query()->pluck('title', 'id');
     }
 
     /**
-     * Get actions column for table builder.
-     * @return callable
+     * @param Authorization $acl
+     * @return Closure
      */
-    protected function getActionsColumn($canUpdate, $canTest, $canChangeStatus, $canDelete)
+    protected function getActionsColumn(Authorization $acl)
     {
-        return function (NotificationsModel $row) use($canUpdate, $canTest, $canChangeStatus, $canDelete) {
-            $btns = [];
-            $html = app('html');
-            if ($canUpdate) {
-                $btns[] = $html->create('li', $html->link(handles("antares::notifications/edit/" . $row->id), trans('Edit'), ['data-icon' => 'edit']));
+        return function (NotificationsModel $notification) use($acl) {
+            $contextMenu = DataTableActionsHelper::make();
+
+            if($acl->can('notifications-edit')) {
+                $contextMenu->addAction(
+                    handles('antares::notifications/' . $notification->id . '/edit'),
+                    trans('Edit'), [
+                        'data-icon' => 'edit',
+                    ]
+                );
             }
 
-            if ($canChangeStatus) {
-                $btns[] = $html->create('li', $html->link(handles("antares::notifications/changeStatus/" . $row->id), $row->active ? trans('Disable') : trans('Enable'), ['class' => "triggerable confirm", 'data-icon' => $row->active ? 'minus-circle' : 'check-circle', 'data-title' => trans("Are you sure?"), 'data-description' => trans('Changing status of notification') . ' #' . $row->contents[0]->title]));
-            }
-            if ($canTest && in_array($row->type->name, ['email', 'sms'])) {
-                $btns[] = $html->create('li', $html->link(handles("antares::notifications/sendtest/" . $row->id), trans('Send preview'), ['class' => "triggerable confirm", 'data-icon' => 'desktop-windows', 'data-title' => trans("Are you sure?"), 'data-description' => trans('Sending preview notification with item') . ' #' . $row->contents[0]->title]));
+            if($acl->can('notifications-change-status')) {
+                $contextMenu->addAction(
+                    handles('antares::notifications/' . $notification->id . '/changeStatus'),
+                    $notification->active ? trans('Disable') : trans('Enable'), [
+                        'class'             => 'triggerable confirm',
+                        'data-http-method'  => 'POST',
+                        'data-icon'         => $notification->active ? 'minus-circle' : 'check-circle',
+                        'data-title'        => trans('Are you sure?'),
+                        'data-description'  => trans('Changing status of notification') . ' #' . $notification->id,
+                    ]
+                );
             }
 
-            if ($canDelete and ( ( $row->event == config('antares/notifications::default.custom_event')))) {
-                $btns[] = $html->create('li', $html->link(handles("antares::notifications/delete/" . $row->id), trans('Delete'), ['class' => "triggerable confirm", 'data-icon' => 'delete', 'data-title' => trans("Are you sure?"), 'data-description' => trans('Deleting item #') . ' #' . $row->id]));
-            }
-            if (empty($btns)) {
-                return '';
+            if($acl->can('notifications-test')) {
+                $contextMenu->addAction(
+                    handles('antares::notifications/' . $notification->id . '/sendTest'),
+                    trans('Send preview'), [
+                        'class'             => 'triggerable confirm',
+                        'data-http-method'  => 'POST',
+                        'data-icon'         => 'desktop-windows',
+                        'data-title'        => trans('Are you sure?'),
+                        'data-description'  => trans('Sending preview notification with item') . $notification->lang( lang() )->title,
+                    ]
+                );
             }
 
-            $section = $html->create('div', $html->create('section', $html->create('ul', $html->raw(implode('', $btns)))), ['class' => 'mass-actions-menu'])->get();
+            if ( $acl->can('notifications-delete') ) {
+                $contextMenu->addDeleteAction(
+                    handles('antares::notifications/' . $notification->id),
+                    trans('Delete'), [
+                        'data-title'        => trans('Are you sure?'),
+                        'data-description'  => trans('Deleting Item') .' #' . $notification->id,
+                    ]
+                );
+            }
 
-            return '<i class="zmdi zmdi-more"></i>' . $html->raw($section)->get();
+            return $contextMenu->build($notification->id);
         };
     }
 

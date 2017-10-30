@@ -48,37 +48,37 @@ class NotificationAreaFilter extends SelectFilter implements DataTableScopeContr
      */
     protected $pattern = 'antares/notifications::logs.filter.areas';
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     /**
      * Filter instance dataprovider
      * 
-     * @return Collection
+     * @return array
      */
     protected function options()
     {
-        $areas   = app(AreaManager::class)->getAreas();
-        $options = [];
+        /* @var $areaManager AreaManager */
+        $areaManager    = app()->make(AreaManager::class);
+        $areas          = $areaManager->getAreas();
+        $options        = [];
+
         foreach ($areas as $area) {
             array_set($options, $area->getId(), $area->getLabel());
         }
+
         return $options;
     }
 
     /**
-     * filters data by parameters from memory
-     * 
-     * @param mixed $builder
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder $builder
+     * @return void
      */
     public function apply($builder)
     {
         $values = $this->getValues();
+
         if (empty($values)) {
-            return false;
+            return;
         }
+
         $builder->whereIn('tbl_roles.area', $values);
     }
 

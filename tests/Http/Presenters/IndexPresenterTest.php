@@ -24,13 +24,13 @@ use Antares\Notifications\Http\Datatables\Notifications as Datatables;
 use Antares\Notifications\Http\Presenters\IndexPresenter;
 use Antares\Notifications\Http\Presenters\Breadcrumb;
 use Antares\Notifications\Model\Notifications;
-use Antares\Testing\ApplicationTestCase;
 use Antares\Html\Form\FormBuilder;
+use Antares\Testing\TestCase;
 use Illuminate\View\View;
 use Mockery as m;
 use Exception;
 
-class IndexPresenterTest extends ApplicationTestCase
+class IndexPresenterTest extends TestCase
 {
 
     /**

@@ -2,13 +2,13 @@
 
 namespace Antares\Notifications;
 
-use Antares\Notifications\Model\NotificationContents;
+use Antares\Notifications\Model\SimpleContent;
 use Antares\Notifications\Parsers\ContentParser;
 use Illuminate\Notifications\Notification;
 use Antares\Notifications\Messages\NotificationMessage;
 use Antares\Notifications\Messages\MailMessage;
 
-class PreviewNotification extends Notification {
+class SimpleNotification extends Notification {
 
     /**
      * @var string
@@ -16,30 +16,18 @@ class PreviewNotification extends Notification {
     protected $type;
 
     /**
-     * @var NotificationContents
-     */
-    protected $notificationContent;
-
-    /**
      * @var ContentParser
      */
-    protected $contentParser;
+    protected $content;
 
     /**
-     * PreviewNotification constructor.
+     * EventNotification constructor.
      * @param string $type
-     * @param NotificationContents $notificationContent
+     * @param SimpleContent $content
      */
-    public function __construct(string $type, NotificationContents $notificationContent) {
-        if($type === 'email') {
-            $type = 'mail';
-        }
-
-        $this->type = $type;
-        $this->notificationContent = $notificationContent;
-        $this->contentParser = app()->make(ContentParser::class);
-
-        $this->contentParser->setPreviewMode(true);
+    public function __construct(string $type, SimpleContent $content) {
+        $this->type     = $type;
+        $this->content  = $content;
     }
 
     /**
@@ -56,14 +44,14 @@ class PreviewNotification extends Notification {
      * @return string
      */
     protected function getSubject() : string {
-        return $this->contentParser->parse($this->notificationContent->title);
+        return $this->content->title;
     }
 
     /**
      * @return string
      */
     protected function getContent() : string {
-        return $this->contentParser->parse($this->notificationContent->content);
+        return $this->content->content;
     }
 
     /**
@@ -76,22 +64,22 @@ class PreviewNotification extends Notification {
     {
         return (new MailMessage)
             ->subject( $this->getSubject() )
-            ->view('antares/notifications::notification.preview', [
+            ->view('antares/notifications::notification.simple', [
                 'content' => $this->getContent()
             ]);
     }
 
     /**
-     * Get the alert representation of the notification.
+     * Get the notification representation of the notification.
      *
-     * @param  mixed  $notifiable
-     * @return NotificationMessage
+     * @param $notifiable
+     * @return $this|Messages\AbstractMessage
      */
     public function toNotification($notifiable)
     {
         return (new NotificationMessage)
             ->subject( $this->getSubject() )
-            ->view('antares/notifications::notification.preview', [
+            ->view('antares/notifications::notification.simple', [
                 'content' => $this->getContent()
             ]);
     }

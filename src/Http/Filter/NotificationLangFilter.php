@@ -50,25 +50,26 @@ class NotificationLangFilter extends SelectFilter implements DataTableScopeContr
     /**
      * Filter instance dataprovider
      * 
-     * @return Collection
+     * @return array
      */
     protected function options()
     {
-        return app('languages')->langs()->pluck('name', 'id')->toArray();
+        return langs()->pluck('name', 'id')->toArray();
     }
 
     /**
-     * filters data by parameters from memory
-     * 
-     * @param mixed $builder
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder $builder
+     * @return void
      */
     public function apply($builder)
     {
         $values = $this->getValues();
+
         if (empty($values)) {
-            return false;
+            return;
         }
         $builder->whereIn('tbl_languages.id', $values);
     }
+
 
 }

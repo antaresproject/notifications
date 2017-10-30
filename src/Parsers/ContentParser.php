@@ -107,7 +107,9 @@ class ContentParser {
             }
         }
 
-        return $this->renderer->render($this->getCompiled($content), $data);
+        $content = $this->renderer->render($this->getCompiled($content), $data);
+
+        return StringParser::parse($content, $data);
     }
 
     /**
@@ -170,9 +172,9 @@ class ContentParser {
             if($this->previewMode) {
                 $data[$variableName] = $modelVariableDefinitions->getDefault();
             }
-            else {
-               // throw new \Exception('Model variable bind [' . $variableName . '] was not found or has invalid value.');
-            }
+//            else {
+//                throw new \Exception('Model variable bind [' . $variableName . '] was not found or has invalid value.');
+//            }
         }
     }
 

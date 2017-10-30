@@ -20,13 +20,10 @@
 
 namespace Antares\Notifications\Channels;
 
-use Antares\Notifications\Contracts\NotificationEditable;
+use Antares\Notifications\Contracts\TemplateMessageContract;
 use Antares\Notifications\Decorator\MailDecorator;
-use Antares\Notifications\Parsers\ContentParser;
 use Antares\Notifications\Services\TemplateBuilderService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
-use Antares\Notifications\Model\NotificationContents;
 use Antares\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Mail\Mailer;
@@ -44,22 +41,22 @@ class MailChannel extends BaseMailChannel
     protected $mailer;
 
     /**
-     * Instance of ContentParser
+     * Template builder service instance.
      *
-     * @var ContentParser
+     * @var TemplateBuilderService
      */
-    protected $contentParser;
+    protected $templateBuilderService;
 
     /**
      * MailChannel constructor.
      * @param Mailer $mailer
-     * @param ContentParser $contentParser
+     * @param TemplateBuilderService $templateBuilderService
      */
-    public function __construct(Mailer $mailer, ContentParser $contentParser)
+    public function __construct(Mailer $mailer, TemplateBuilderService $templateBuilderService)
     {
         parent::__construct($mailer);
 
-        $this->contentParser = $contentParser;
+        $this->templateBuilderService = $templateBuilderService;
     }
 
     /**
@@ -77,7 +74,7 @@ class MailChannel extends BaseMailChannel
 
         $message = $notification->toMail($notifiable);
 
-        (new TemplateBuilderService($notification))->build($message);
+        $this->templateBuilderService->setNotification($notification)->build($message);
 
         if ($message instanceof Mailable) {
             $message->send($this->mailer);
@@ -102,14 +99,11 @@ class MailChannel extends BaseMailChannel
     protected function view(MailMessage $message, Notification $notification)
     {
         try {
-            $notificationContent = $this->findNotification($message, $notification);
-
-            if($notificationContent === null) {
+            if( ! $message instanceof TemplateMessageContract) {
                 return parent::buildView($message);
             }
 
-            $rendered = $this->contentParser->parse($notificationContent->content, $message->viewData);
-            $rendered = MailDecorator::decorate($rendered);
+            $rendered = MailDecorator::decorate($message->content);
 
             $message->view($rendered, $message->data());
 
@@ -121,38 +115,6 @@ class MailChannel extends BaseMailChannel
             throw $e;
         }
 
-    }
-
-    /**
-     * Finds notification content
-     *
-     * @param MailMessage $message
-     * @param Notification $notification
-     * @return NotificationContents
-     */
-    protected function findNotification(MailMessage $message, Notification $notification)
-    {
-        if(! $notification instanceof NotificationEditable) {
-            return null;
-        }
-
-        /* @var $notificationContent NotificationContents */
-        $notificationContent =  NotificationContents::query()
-            ->where('lang_id', lang_id())
-            ->whereHas('notification', function(Builder $query) use($message, $notification) {
-                $query->where([
-                    'classname' => get_class($notification),
-                    'active'    => 1
-                ])->whereHas('category', function(Builder $query) use($message) {
-                    $query->where('name', $message->category);
-                })->whereHas('type', function(Builder $query) use($message) {
-                    $query->whereIn('name', $message->types);
-                })->whereHas('severity', function(Builder $query) use($message) {
-                    $query->where('name', $message->severity);
-                });
-            })->first();
-
-        return $notificationContent;
     }
 
 }

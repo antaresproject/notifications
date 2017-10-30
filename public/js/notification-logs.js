@@ -25,7 +25,7 @@ ready('.preview-notification-log', function (element) {
             iframe.src = $(this).attr('href');
             APP.modal.init({
                 element: modal,
-                title: '',
+                title: ''
             });
             modal.find('.modal-body').html(iframe);
         }

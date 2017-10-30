@@ -78,7 +78,8 @@ class SidebarController extends AdminController
 
     /**
      * Clears notifications
-     * 
+     *
+     * @param string|null $type
      * @return \Illuminate\Http\JsonResponse
      */
     public function clear($type = null)

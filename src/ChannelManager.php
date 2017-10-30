@@ -2,6 +2,8 @@
 
 namespace Antares\Notifications;
 
+use Antares\Notifications\Channels\TemplateChannel;
+use Antares\Notifications\Services\TemplateBuilderService;
 use Illuminate\Notifications\ChannelManager as BaseChannelManager;
 use Antares\Notifications\Channels\NotificationChannel;
 use Antares\Notifications\Channels\MailChannel;
@@ -11,6 +13,16 @@ use Illuminate\Mail\Markdown;
 
 class ChannelManager extends BaseChannelManager
 {
+
+    /**
+     * Create an instance of the Notify Event driver.
+     *
+     * @return \Illuminate\Notifications\Channels\MailChannel
+     */
+    protected function createTemplateDriver()
+    {
+        return $this->app->make(TemplateChannel::class);
+    }
 
     /**
      * Create an instance of the mail driver.
@@ -32,7 +44,8 @@ class ChannelManager extends BaseChannelManager
     protected function createSmsDriver()
     {
         $adapter = new FastSmsAdapter(config('antares/notifier::sms.adapters.fastSms'));
-        return new SmsChannel($adapter);
+        $templateBuilderService = $this->app->make(TemplateBuilderService::class);
+        return new SmsChannel($adapter, $templateBuilderService);
     }
 
     /**

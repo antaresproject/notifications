@@ -35,7 +35,7 @@ class Menu extends MenuHandler
     protected $menu = [
         'id'    => 'notifications',
         'title' => 'Notifications',
-        'link'  => 'antares::notifications/index',
+        'link'  => 'antares::notifications',
         'icon'  => 'zmdi-email',
     ];
 

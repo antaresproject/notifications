@@ -1,5 +1,7 @@
 {% extends "antares/foundation::layouts.antares.index" %}
-{% block content %}    
+{% block content %}
+    <script src="https://unpkg.com/vue-select@latest"></script>
+
     {{ form|raw }}
     {% include 'antares/notifications::admin.partials._modal' %}
 {% endblock %}

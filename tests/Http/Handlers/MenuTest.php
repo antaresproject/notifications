@@ -22,10 +22,10 @@ namespace Antares\Notifications\Http\Handlers\TestCase;
 
 use Antares\Notifications\Http\Handlers\Menu as NotificationsMenu;
 use Antares\Foundation\Support\MenuHandler;
-use Antares\Testing\ApplicationTestCase;
+use Antares\Testing\TestCase;
 use Mockery as m;
 
-class MenuTest extends ApplicationTestCase
+class MenuTest extends TestCase
 {
 
     /**

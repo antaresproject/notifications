@@ -8,15 +8,37 @@ use Illuminate\Support\Arr;
 class TemplatesCollection {
 
     /**
+     * @var string
+     */
+    protected $title;
+
+    /**
+     * @var string
+     */
+    protected $notifiableEvent;
+
+    /**
      * @var Template[]
      */
     protected $templates = [];
 
     /**
+     * TemplatesCollection constructor.
+     * @param string $title
+     * @param string $notifiableEvent
+     */
+    public function __construct(string $title, string $notifiableEvent = '') {
+        $this->title = $title;
+        $this->notifiableEvent = $notifiableEvent;
+    }
+
+    /**
+     * @param string $title
+     * @param string $notifiableEvent
      * @return TemplatesCollection
      */
-    public static function make() : TemplatesCollection {
-        return new TemplatesCollection;
+    public static function make(string $title, string $notifiableEvent = '') : TemplatesCollection {
+        return new TemplatesCollection($title, $notifiableEvent);
     }
 
     /**
@@ -43,6 +65,20 @@ class TemplatesCollection {
      */
     public function all() : array {
         return $this->templates;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNotifiableEvent() : string {
+        return $this->notifiableEvent;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle() : string {
+        return $this->title;
     }
 
 }

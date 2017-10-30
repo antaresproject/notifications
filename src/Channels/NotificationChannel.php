@@ -20,13 +20,11 @@
 
 namespace Antares\Notifications\Channels;
 
-use Antares\Notifications\Contracts\NotificationEditable;
 use Antares\Notifications\Model\NotificationsStackParams;
 use Antares\Notifications\Messages\NotificationMessage;
 use Antares\Notifications\Model\NotificationsStack;
 use Antares\Notifications\Model\Notifications;
 use Antares\Notifications\Services\TemplateBuilderService;
-use Antares\Notifications\Synchronizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
@@ -37,16 +35,18 @@ class NotificationChannel
 {
 
     /**
-     * @var Synchronizer
+     * Template builder service instance.
+     *
+     * @var TemplateBuilderService
      */
-    protected $synchronizer;
+    protected $templateBuilderService;
 
     /**
      * NotificationChannel constructor.
-     * @param Synchronizer $synchronizer
+     * @param TemplateBuilderService $templateBuilderService
      */
-    public function __construct(Synchronizer $synchronizer) {
-        $this->synchronizer = $synchronizer;
+    public function __construct(TemplateBuilderService $templateBuilderService) {
+        $this->templateBuilderService = $templateBuilderService;
     }
 
     /**
@@ -60,12 +60,20 @@ class NotificationChannel
         DB::beginTransaction();
 
         try {
-            $via     = $notification->via($notifiable);
-            $message = array_search('alert', $via) !== false
+            $via = $notification->via($notifiable);
+
+            if( array_search(TemplateChannel::class, $via) !== false ) {
+                $type = TemplateChannel::getViaType($notification);
+            }
+            else {
+                $type = array_search('alert', $via) !== false ? 'alert' : 'notification';
+            }
+
+            $message = $type === 'alert'
                 ? $notification->toAlert($notifiable)
                 : $notification->toNotification($notifiable);
 
-            (new TemplateBuilderService($notification))->build($message);
+            $this->templateBuilderService->setNotification($notification)->build($message);
 
             $this->sendNotification($message, $notification, $notifiable->id);
 
@@ -82,21 +90,14 @@ class NotificationChannel
      * @param NotificationMessage $message
      * @param Notification $notification
      * @param int $modelId
-     * @return Notifications
      */
     protected function sendNotification(NotificationMessage $message, Notification $notification, int $modelId)
     {
-        $notificationClassName = get_class($notification);
+        $source = get_class($notification);
 
         foreach ($message->types as $type) {
-            $model     = $this->findNotification($message, $type, $notificationClassName);
+            $model     = $this->findNotification($message, $type, $source);
             $variables = array_merge($message->subjectData, $message->viewData);
-
-            if( ! $model && $notification instanceof NotificationEditable) {
-                $this->synchronizer->syncTemplates(get_class($notification), $notification::templates());
-
-                $model = $this->findNotification($message, $type, $notificationClassName);
-            }
 
             if($model) {
                 $this->saveInStack($model, $modelId, $variables);
@@ -134,11 +135,15 @@ class NotificationChannel
      *
      * @param NotificationMessage $message
      * @param string $type
-     * @param string $className
-     * @return Notifications
+     * @param string $source
+     * @return Notifications|null
      */
-    protected function findNotification(NotificationMessage $message, string $type, string $className)
+    protected function findNotification(NotificationMessage $message, string $type, string $source)
     {
+        if( ! property_exists($message, 'severity') || ! property_exists($message, 'category')) {
+            return null;
+        }
+
         /* @var $notification Notifications */
         $notification = Notifications::query()
             ->whereHas('type', function(Builder $query) use($type) {
@@ -148,7 +153,7 @@ class NotificationChannel
             })->whereHas('category', function(Builder $query) use($message) {
                 $query->where('name', $message->category);
             })
-            ->where('classname', $className)
+            ->where('source', $source)
             ->first();
 
         return $notification;

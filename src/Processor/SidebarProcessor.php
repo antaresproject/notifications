@@ -46,6 +46,14 @@ class SidebarProcessor extends Processor
     protected $decorator;
 
     /**
+     * Runtime notification cache.
+     *
+     * @var array
+     */
+    protected static $cachedNotifications = [];
+
+
+    /**
      * Construct
      * 
      * @param StackRepository $stack
@@ -69,6 +77,8 @@ class SidebarProcessor extends Processor
                 throw new Exception('Invalid notification id provided');
             }
             $this->stack->deleteById($id);
+
+            return new JsonResponse();
         } catch (Exception $ex) {
             Log::alert($ex);
             return new JsonResponse(['message' => trans('antares/notifications::messages.sidebar.unable_to_delete_notification_item')], 500);
@@ -98,21 +108,26 @@ class SidebarProcessor extends Processor
      */
     public function get()
     {
-        $notifications = $this->stack->getNotifications()->get();
+        if( count(static::$cachedNotifications) ) {
+            $return = static::$cachedNotifications;
+        }
+        else {
+            $notifications  = $this->stack->getNotifications()->get();
+            $alerts         = $this->stack->getAlerts()->get();
 
-        $alerts = $this->stack->getAlerts()->get();
-        $count  = $this->stack->getCount();
+            $return = [
+                'notifications' => [
+                    'items' => $this->decorator->decorate($notifications),
+                    'count' => $notifications->count()
+                ],
+                'alerts'        => [
+                    'items' => $this->decorator->decorate($alerts, 'alert'),
+                    'count' => $alerts->count()
+                ],
+            ];
 
-        $return = [
-            'notifications' => [
-                'items' => $this->decorator->decorate($notifications),
-                'count' => array_get($count, 'notifications', 0),
-            ],
-            'alerts'        => [
-                'items' => $this->decorator->decorate($alerts, 'alert'),
-                'count' => array_get($count, 'alerts', 0)
-            ],
-        ];
+            static::$cachedNotifications = $return;
+        }
 
         return new JsonResponse($return, 200);
     }
@@ -120,7 +135,7 @@ class SidebarProcessor extends Processor
     /**
      * Clears messages depends on type
      * 
-     * @param type $type
+     * @param string|null $type
      * @return JsonResponse
      */
     public function clear($type = null)

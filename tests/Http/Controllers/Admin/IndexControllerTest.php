@@ -42,7 +42,11 @@ class IndexControllerTest extends TestCase
     public function setUp()
     {
         $this->addProvider(NotificationsServiceProvider::class);
+
         parent::setUp();
+
+        $this->app = $this->createApplication();
+
         $this->disableMiddlewareForAllTests();
     }
 
