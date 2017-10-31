@@ -38,12 +38,13 @@
 </fieldset>
 {% if fieldsets[0].types('button') is not empty %}
     <fieldset name="inputs">
-        <div class="col-group">
-            <div class="col-dt-14 col-13 col-mb-11">
-                <div class="separator-medium"></div>
-                {% for button in fieldsets[0].types('button') %}    
-                    {{ button.getField(row, button, [])|raw }}
-                {% endfor %}
+        <div class="form-block">
+            <div class="col-group">
+                <div class="col-mb-24">
+                    {% for button in fieldsets[0].types('button') %}    
+                        {{ button.getField(row, button, [])|raw }}
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </fieldset>

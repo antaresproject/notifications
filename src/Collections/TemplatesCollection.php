@@ -5,7 +5,8 @@ namespace Antares\Notifications\Collections;
 use Antares\Notifications\Model\Template;
 use Illuminate\Support\Arr;
 
-class TemplatesCollection {
+class TemplatesCollection
+{
 
     /**
      * @var Template[]
@@ -15,7 +16,8 @@ class TemplatesCollection {
     /**
      * @return TemplatesCollection
      */
-    public static function make() : TemplatesCollection {
+    public static function make(): TemplatesCollection
+    {
         return new TemplatesCollection;
     }
 
@@ -24,7 +26,8 @@ class TemplatesCollection {
      * @param Template $template
      * @return TemplatesCollection
      */
-    public function define(string $name, Template $template) : self {
+    public function define(string $name, Template $template): self
+    {
         $this->templates[$name] = $template;
 
         return $this;
@@ -34,14 +37,16 @@ class TemplatesCollection {
      * @param string $name
      * @return Template|null
      */
-    public function getByName(string $name) : ?Template {
+    public function getByName(string $name)
+    {
         return Arr::get($this->templates, $name);
     }
 
     /**
      * @return Template[]
      */
-    public function all() : array {
+    public function all(): array
+    {
         return $this->templates;
     }
 

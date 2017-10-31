@@ -2,7 +2,8 @@
 
 namespace Antares\Notifications\Traits;
 
-trait DeliveredTemplateTrait {
+trait DeliveredTemplateTrait
+{
 
     /**
      * Template name.
@@ -31,7 +32,8 @@ trait DeliveredTemplateTrait {
      * @param string $name
      * @return $this
      */
-    public function template(string $name) {
+    public function template(string $name)
+    {
         $this->templateName = $name;
 
         return $this;
@@ -43,7 +45,8 @@ trait DeliveredTemplateTrait {
      * @param array $data
      * @return $this
      */
-    public function subjectData(array $data) {
+    public function subjectData(array $data)
+    {
         $this->subjectData = $data;
 
         return $this;
@@ -55,7 +58,8 @@ trait DeliveredTemplateTrait {
      * @param array $data
      * @return $this
      */
-    public function viewData(array $data) {
+    public function viewData(array $data)
+    {
         $this->viewData = $data;
 
         return $this;
@@ -66,7 +70,8 @@ trait DeliveredTemplateTrait {
      *
      * @return null|string
      */
-    public function getTemplate() : ?string {
+    public function getTemplate()
+    {
         return $this->templateName;
     }
 
@@ -75,7 +80,8 @@ trait DeliveredTemplateTrait {
      *
      * @return array
      */
-    public function getSubjectData() : array {
+    public function getSubjectData(): array
+    {
         return $this->subjectData;
     }
 
@@ -84,7 +90,8 @@ trait DeliveredTemplateTrait {
      *
      * @return array
      */
-    public function getViewData() : array {
+    public function getViewData(): array
+    {
         return $this->viewData;
     }
 

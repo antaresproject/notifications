@@ -7,7 +7,8 @@ use Antares\Notifications\ModelVariableDefinitions;
 use Antares\Notifications\Variable;
 use Closure;
 
-class ModuleVariables {
+class ModuleVariables
+{
 
     /**
      * @var string
@@ -28,7 +29,8 @@ class ModuleVariables {
      * ModuleVariables constructor.
      * @param string $module
      */
-    public function __construct(string $module) {
+    public function __construct(string $module)
+    {
         $this->module = $module;
     }
 
@@ -38,7 +40,8 @@ class ModuleVariables {
      * @param Closure $default
      * @return ModelVariableDefinitions
      */
-    public function modelDefinition(string $name, string $className, Closure $default) : ModelVariableDefinitions {
+    public function modelDefinition(string $name, string $className, Closure $default): ModelVariableDefinitions
+    {
         $definition = new ModelVariableDefinitions(new BindParameter($name, $className), $default);
 
         $this->definitions[$name] = $definition;
@@ -52,7 +55,8 @@ class ModuleVariables {
      * @param $value
      * @return ModuleVariables
      */
-    public function set(string $code, string $label, $value) : self {
+    public function set(string $code, string $label, $value): self
+    {
         $this->variables[$code] = new Variable($code, $label, $value);
 
         return $this;
@@ -62,9 +66,10 @@ class ModuleVariables {
      * @param string $code
      * @return Variable|null
      */
-    public function get(string $code) : ?Variable {
-        foreach($this->all() as $variable) {
-            if($variable->getCode() === $code) {
+    public function get(string $code)
+    {
+        foreach ($this->all() as $variable) {
+            if ($variable->getCode() === $code) {
                 return $variable;
             }
         }
@@ -75,18 +80,20 @@ class ModuleVariables {
     /**
      * @return ModelVariableDefinitions[]
      */
-    public function getModelDefinitions() : array {
+    public function getModelDefinitions(): array
+    {
         return $this->definitions;
     }
 
     /**
      * @return Variable[]
      */
-    public function all() : array {
+    public function all(): array
+    {
         $variables = [];
 
-        foreach($this->definitions as $definition) {
-            foreach($definition->toVariables() as $variable) {
+        foreach ($this->definitions as $definition) {
+            foreach ($definition->toVariables() as $variable) {
                 $variables[] = $variable;
             }
         }
@@ -97,10 +104,11 @@ class ModuleVariables {
     /**
      * @return array
      */
-    public function getNamedVariables() : array {
+    public function getNamedVariables(): array
+    {
         $data = [];
 
-        foreach($this->all() as $variable) {
+        foreach ($this->all() as $variable) {
             $placeholder = $this->module . '::' . $variable->getCode();
 
             $data[$placeholder] = $variable;

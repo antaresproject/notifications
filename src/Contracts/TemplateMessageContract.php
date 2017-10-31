@@ -2,7 +2,8 @@
 
 namespace Antares\Notifications\Contracts;
 
-interface TemplateMessageContract {
+interface TemplateMessageContract
+{
 
     /**
      * @param string $name
@@ -25,16 +26,15 @@ interface TemplateMessageContract {
     /**
      * @return null|string
      */
-    public function getTemplate() : ?string;
+    public function getTemplate();
 
     /**
      * @return array
      */
-    public function getSubjectData() : array;
+    public function getSubjectData(): array;
 
     /**
      * @return array
      */
-    public function getViewData() : array;
-
+    public function getViewData(): array;
 }
