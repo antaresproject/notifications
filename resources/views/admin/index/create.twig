@@ -1,7 +1,10 @@
-{% extends "antares/foundation::layouts.antares.index" %}
-{% block content %}
-    <script src="https://unpkg.com/vue-select@latest"></script>
+{% extends app.request.isXmlHttpRequest() ? "antares/foundation::layouts.antares..clear" : "antares/foundation::layouts.antares.index" %}
+{% block grid_col__container %}
+    <div class="grid-col grid--notification grid-col--container">
+        {% block content %}
+            <script src="https://unpkg.com/vue-select@latest"></script>
 
-    {{ form|raw }}
-    {% include 'antares/notifications::admin.partials._modal' %}
+            {{ form|raw }}
+        {% endblock %}
+    </div>
 {% endblock %}

@@ -91,7 +91,6 @@ class Synchronizer
     {
         /* @var $model Notifications */
         $model      = Notifications::query()->firstOrCreate([
-            'name'          => $title,
             'source'        => $className,
             'event'         => $notifiableEvent,
             'type_id'       => $this->type($type)->id,
@@ -107,6 +106,7 @@ class Synchronizer
         }
 
         $model->fill([
+            'name'          => $title,
             'recipients'    => $template->getRecipients(),
             'checksum'      => $checksum
         ]);

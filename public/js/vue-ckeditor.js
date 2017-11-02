@@ -32,7 +32,8 @@ Vue.component('vue-ckeditor', {
 
     data: function() {
         return {
-            destroyed: false
+            destroyed: false,
+            rawData: false
         }
     },
 
@@ -47,6 +48,11 @@ Vue.component('vue-ckeditor', {
             if (this.instance) {
                 this.update(val)
             }
+        },
+
+        config: function() {
+            this.destroy();
+            this.create();
         }
     },
 
@@ -81,14 +87,12 @@ Vue.component('vue-ckeditor', {
             var html = this.instance.getData();
 
             if (html !== val) {
-                this.instance.setData(val)
+                this.instance.setData(val);
             }
         },
 
         destroy: function () {
             if (!this.destroyed) {
-                this.instance.focusManager.blur(true);
-                this.instance.removeAllListeners();
                 this.instance.destroy();
                 this.destroyed = true
             }
@@ -98,15 +102,17 @@ Vue.component('vue-ckeditor', {
             var html = this.instance.getData();
 
             if (html !== this.value) {
-                this.$emit('input', html)
+                this.$emit('input', this.rawData ? this.value : html);
             }
         },
 
         onBlur: function () {
+            this.rawData = true;
             this.$emit('blur', this.instance);
         },
 
         onFocus: function () {
+            this.rawData = false;
             this.$emit('focus', this.instance);
         }
     }

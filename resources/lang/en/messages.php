@@ -49,6 +49,15 @@ return [
     'notification_category'               => 'Category',
     'notification_severity'               => 'Severity',
     'notification_event'                  => 'Event',
+    'notification_published'              => 'Published',
+    'notification_template_info'          => 'Template Info',
+    'notification_template_content'       => 'Template Content',
+    'notification_edit_for'               => 'Edit template for',
+    'notification_available_variables'    => 'Available Variables',
+    'notification_send_test'              => 'Send Test',
+    'notification_preview'                => 'Preview',
+    'notification_insert'                 => 'Insert',
+    'notification_copy'                   => 'Copy',
     'notification_delete_success'         => 'Notification has been deleted.',
     'notification_delete_failed'          => 'Notification has not been deleted.',
     'notification_create_success'         => 'Notification has been created.',
@@ -64,10 +73,5 @@ return [
     'notification_content_content'        => 'Content',
     'notification_content_subject'        => 'Subject',
     'notification_content_enabled'        => 'Enabled',
-    'instructions'                        => [
-        'description' => [
-            'foreach' => 'The foreach construct provides an easy way to iterate over arrays. foreach works only on arrays and objects, and will issue an error when you try to use it on a variable with a different data type or an uninitialized variable.',
-            'if'      => 'The if construct is one of the most important features of many languages. It allows for conditional execution of code fragments.'
-        ]
-    ]
+
 ];

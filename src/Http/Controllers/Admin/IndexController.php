@@ -92,11 +92,15 @@ class IndexController extends AdminController
             'type_id'               => 'required|integer|exists:tbl_notification_types,id',
             'severity_id'           => 'required|integer|exists:tbl_notification_severity,id',
             'contents'              => 'array',
-            'contents.*.title'      => 'required|max:255',
+            'contents.*.title'      => 'required_unless:type_id,2|max:255',
             'contents.*.content'    => 'required',
         ];
 
-        $this->validate($request, $rules);
+        $messages = [
+            'contents.*.title.required_unless' => 'Title is required',
+        ];
+
+        $this->validate($request, $rules, $messages);
 
         return $this->processor->store($request->all())->notify()->resolve($request);
     }
@@ -130,7 +134,11 @@ class IndexController extends AdminController
             'contents.*.content'    => 'required',
         ];
 
-        $this->validate($request, $rules);
+        $messages = [
+            'contents.*.title.required_unless' => 'Title is required',
+        ];
+
+        $this->validate($request, $rules, $messages);
 
         return $this->processor->update($notification, $request->all())->notify()->resolve($request);
     }

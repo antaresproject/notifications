@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Antares\Model\Eloquent;
+use Illuminate\Support\Arr;
 
 /**
  * Class Notifications
@@ -204,9 +205,9 @@ class Notifications extends Eloquent
     public function getEventModelAttribute() {
         /* @var $eventsRegistrarService EventsRegistrarService */
         $eventsRegistrarService = app()->make(EventsRegistrarService::class);
-        $event = $this->attributes['event'];
+        $event = Arr::get($this->attributes, 'event');
 
-        if($notifiableEvent = $eventsRegistrarService->getByClassName($event)) {
+        if($event && $notifiableEvent = $eventsRegistrarService->getByClassName($event)) {
             return $notifiableEvent;
         }
 
@@ -219,9 +220,9 @@ class Notifications extends Eloquent
     public function getEventLabelAttribute() {
         /* @var $eventsRegistrarService EventsRegistrarService */
         $eventsRegistrarService = app()->make(EventsRegistrarService::class);
-        $event = $this->attributes['event'];
+        $event = Arr::get($this->attributes, 'event');
 
-        if($notifiableEvent = $eventsRegistrarService->getByClassName($event)) {
+        if($event && $notifiableEvent = $eventsRegistrarService->getByClassName($event)) {
             return $notifiableEvent->getLabel();
         }
 

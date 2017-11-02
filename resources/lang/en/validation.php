@@ -1,7 +1,8 @@
 <?php
 
 return [
-    'messages' => [
+
+    'custom' => [
         'contents.*.title' => [
             'required_unless' => 'Title is required',
         ]
