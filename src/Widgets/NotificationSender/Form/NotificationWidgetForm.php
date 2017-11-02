@@ -87,13 +87,11 @@ class NotificationWidgetForm
 
                         $fieldset->control('select', 'type')
                                 ->attributes(['class' => 'notification-widget-change-type-select', 'url' => handles('antares::notifications/notifications')])
-                                ->options($this->repository->getDecoratedNotificationTypes())
-                                ->wrapper(['class' => 'w200']);
+                                ->options($this->repository->getDecoratedNotificationTypes());
 
                         $fieldset->control('select', 'notifications')
                                 ->attributes(['class' => 'notification-widget-notifications-select'])
-                                ->options($this->repository->getNotificationContents('email')->pluck('title', 'id'))
-                                ->wrapper(['class' => 'w300']);
+                                ->options($this->repository->getNotificationContents('email')->pluck('title', 'id'));
 
                         if (!is_null(from_route('user'))) {
                             $fieldset->control('button', 'send')
