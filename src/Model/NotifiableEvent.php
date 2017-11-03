@@ -59,16 +59,19 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
-     * @param Closure|string $handler
+     * @param $handler
+     * @return NotifiableEvent
      * @throws InvalidArgumentException
      */
-    public function setHandler($handler) {
+    public function setHandler($handler) : self {
         if($handler instanceof Closure || is_string($handler)) {
             $this->handler = $handler;
         }
         else {
             throw new InvalidArgumentException('The handler has invalid type.');
         }
+
+        return $this;
     }
 
     /**
@@ -80,9 +83,12 @@ class NotifiableEvent implements Arrayable {
 
     /**
      * @param Recipient $recipient
+     * @return NotifiableEvent
      */
-    public function addRecipient(Recipient $recipient) {
+    public function addRecipient(Recipient $recipient) : self {
         $this->recipients[$recipient->getId()] = $recipient;
+
+        return $this;
     }
 
     /**

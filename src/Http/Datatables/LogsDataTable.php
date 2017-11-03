@@ -21,7 +21,7 @@ declare(strict_types = 1);
 
 namespace Antares\Notifications\Http\Datatables;
 
-use Antares\Modules\BillevioBase\Helpers\DataTableActionsHelper;
+use Antares\Datatables\Helpers\DataTableActionsHelper;
 use Antares\Notifications\Filter\DateRangeNotificationLogsFilter;
 use Antares\Notifications\Filter\NotificationNameFilter;
 use Antares\Notifications\Filter\NotificationLangFilter;

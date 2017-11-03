@@ -21,7 +21,7 @@
 namespace Antares\Notifications\Http\Datatables;
 
 use Antares\Authorization\Authorization;
-use Antares\Modules\BillevioBase\Helpers\DataTableActionsHelper;
+use Antares\Datatables\Helpers\DataTableActionsHelper;
 use Antares\Notifications\Model\Notifications as NotificationsModel;
 use Antares\Notifications\Model\NotificationCategory;
 use Antares\Notifications\Filter\NotificationFilter;
