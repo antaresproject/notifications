@@ -11,7 +11,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use ReflectionParameter;
 
-class VariablesService {
+class VariablesService
+{
 
     /**
      * @var Dispatcher
@@ -27,7 +28,8 @@ class VariablesService {
      * VariablesService constructor.
      * @param Dispatcher $dispatcher
      */
-    public function __construct(Dispatcher $dispatcher) {
+    public function __construct(Dispatcher $dispatcher)
+    {
         $this->dispatcher = $dispatcher;
     }
 
@@ -38,14 +40,15 @@ class VariablesService {
      * @param ModelVariablesResoluble|null $model
      * @return ModuleVariables
      */
-    public function register(string $moduleName, ModelVariablesResoluble $model = null) : ModuleVariables {
+    public function register(string $moduleName, ModelVariablesResoluble $model = null): ModuleVariables
+    {
         $module = $this->findByModule($moduleName);
 
-        if($module === null) {
+        if ($module === null) {
             $module = new ModuleVariables($moduleName);
         }
 
-        if($model) {
+        if ($model) {
             $model->applyVariables($module);
         }
 
@@ -57,10 +60,11 @@ class VariablesService {
      *
      * @return Variable[]|array
      */
-    public function getNamedVariables() : array {
+    public function getNamedVariables(): array
+    {
         $data = [];
 
-        foreach(self::$modules as $moduleVariables) {
+        foreach (self::$modules as $moduleVariables) {
             $data[] = $moduleVariables->getNamedVariables();
         }
 
@@ -70,7 +74,8 @@ class VariablesService {
     /**
      * @return ModuleVariables[]|array
      */
-    public function all() : array {
+    public function all(): array
+    {
         return self::$modules;
     }
 
@@ -80,7 +85,8 @@ class VariablesService {
      * @param string $moduleName
      * @return ModuleVariables|null
      */
-    public function findByModule(string $moduleName) : ?ModuleVariables {
+    public function findByModule(string $moduleName)
+    {
         return Arr::get(self::$modules, $moduleName);
     }
 
@@ -91,8 +97,9 @@ class VariablesService {
      * @return Variable|null
      * @throws \InvalidArgumentException
      */
-    public function findByCode(string $code) : ?Variable {
-        if( ! Str::contains($code, '::') ) {
+    public function findByCode(string $code)
+    {
+        if (!Str::contains($code, '::')) {
             throw new \InvalidArgumentException('The given variable code is invalid. Must contains :: chars in the name but the [' . $code . '] has been give.');
         }
 
@@ -100,7 +107,7 @@ class VariablesService {
 
         $moduleVariables = Arr::get(self::$modules, $module);
 
-        if($moduleVariables instanceof ModuleVariables) {
+        if ($moduleVariables instanceof ModuleVariables) {
             return $moduleVariables->get($variable);
         }
 
@@ -111,10 +118,11 @@ class VariablesService {
      * @param ReflectionParameter $parameter
      * @return mixed|null
      */
-    public function getDefault(ReflectionParameter $parameter) {
-        foreach(static::$modules as $module) {
-            foreach($module->getModelDefinitions() as $definition) {
-                if($definition->getBindParameter()->isMatchToParameter($parameter)) {
+    public function getDefault(ReflectionParameter $parameter)
+    {
+        foreach (static::$modules as $module) {
+            foreach ($module->getModelDefinitions() as $definition) {
+                if ($definition->getBindParameter()->isMatchToParameter($parameter)) {
                     return $definition->getDefault();
                 }
             }

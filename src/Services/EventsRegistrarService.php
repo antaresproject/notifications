@@ -5,7 +5,8 @@ namespace Antares\Notifications\Services;
 use Antares\Notifications\Model\NotifiableEvent;
 use Illuminate\Support\Collection;
 
-class EventsRegistrarService {
+class EventsRegistrarService
+{
 
     /**
      * @var NotifiableEvent[]
@@ -20,14 +21,16 @@ class EventsRegistrarService {
     /**
      * @param NotifiableEvent $event
      */
-    public function register(NotifiableEvent $event) {
+    public function register(NotifiableEvent $event)
+    {
         static::$events[$event->getEventClass()] = $event;
     }
 
     /**
      * @return NotifiableEvent[]
      */
-    public function events() : array {
+    public function events(): array
+    {
         return static::$events;
     }
 
@@ -35,8 +38,9 @@ class EventsRegistrarService {
      * @param string $className
      * @return NotifiableEvent|null
      */
-    public function getByClassName(string $className) : ?NotifiableEvent {
-        if( array_key_exists($className, static::$events) ) {
+    public function getByClassName(string $className)
+    {
+        if (array_key_exists($className, static::$events)) {
             return static::$events[$className];
         }
 
@@ -46,11 +50,12 @@ class EventsRegistrarService {
     /**
      * @return Collection
      */
-    public function getModels() : Collection {
-        if($this->models === null) {
+    public function getModels(): Collection
+    {
+        if ($this->models === null) {
             $this->models = new Collection();
 
-            foreach(static::$events as $notifiableEvent) {
+            foreach (static::$events as $notifiableEvent) {
                 $this->models->push($notifiableEvent->toArray());
             }
 

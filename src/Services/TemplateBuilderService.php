@@ -14,7 +14,8 @@ use Antares\Notifications\Synchronizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notification;
 
-class TemplateBuilderService {
+class TemplateBuilderService
+{
 
     /**
      * @var TemplatesCollection
@@ -46,21 +47,23 @@ class TemplateBuilderService {
      * @param ContentParser $contentParser
      * @param Synchronizer $synchronizer
      */
-    public function __construct(ContentParser $contentParser, Synchronizer $synchronizer) {
-        $this->contentParser    = $contentParser;
-        $this->synchronizer     = $synchronizer;
-        $this->templates        = new TemplatesCollection('');
+    public function __construct(ContentParser $contentParser, Synchronizer $synchronizer)
+    {
+        $this->contentParser = $contentParser;
+        $this->synchronizer  = $synchronizer;
+        $this->templates     = new TemplatesCollection('');
     }
 
     /**
      * @param Notification $notification
      * @return TemplateBuilderService
      */
-    public function setNotification(Notification $notification) : self {
-        if($notification instanceof NotificationEditable) {
-            $this->notification     = $notification;
-            $this->templates        = $notification::templates();
-            $this->source           = get_class($notification);
+    public function setNotification(Notification $notification): self
+    {
+        if ($notification instanceof NotificationEditable) {
+            $this->notification = $notification;
+            $this->templates    = $notification::templates();
+            $this->source       = get_class($notification);
         }
 
         return $this;
@@ -69,8 +72,9 @@ class TemplateBuilderService {
     /**
      * @return bool
      */
-    protected function isTestable() : bool {
-        if(isset($this->notification)) {
+    protected function isTestable(): bool
+    {
+        if (isset($this->notification)) {
             return (isset($this->notification->testable) && $this->notification->testable);
         }
 
@@ -80,8 +84,9 @@ class TemplateBuilderService {
     /**
      * @return Notifications|null
      */
-    protected function getTemplateObject() : ?Notifications {
-        if(isset($this->notification)) {
+    protected function getTemplateObject()
+    {
+        if (isset($this->notification)) {
             return isset($this->notification->template) ? $this->notification->template : null;
         }
 
@@ -91,15 +96,15 @@ class TemplateBuilderService {
     /**
      * @param MessageContract $message
      */
-    public function build(MessageContract $message) {
-        if($message instanceof TemplateMessageContract && $templateName = $message->getTemplate()) {
+    public function build(MessageContract $message)
+    {
+        if ($message instanceof TemplateMessageContract && $templateName = $message->getTemplate()) {
             $template = $this->templates->getByName($templateName);
 
-            if($template) {
-                if($templateObject = $this->getTemplateObject()) {
+            if ($template) {
+                if ($templateObject = $this->getTemplateObject()) {
                     $notification = $templateObject->lang(lang());
-                }
-                else {
+                } else {
                     $notification = $this->syncWithDatabase($template);
                 }
 
@@ -113,10 +118,11 @@ class TemplateBuilderService {
      * @param Template $template
      * @return NotificationContents|null
      */
-    protected function syncWithDatabase(Template $template) : ?NotificationContents {
+    protected function syncWithDatabase(Template $template)
+    {
         $storedNotification = $this->findNotification($template);
 
-        if( ! $storedNotification && $this->notification) {
+        if (!$storedNotification && $this->notification) {
             $this->synchronizer->syncTemplate($this->source, $template);
 
             $storedNotification = $this->findNotification($template);
@@ -130,7 +136,8 @@ class TemplateBuilderService {
      * @param Template $template
      * @param NotificationContents|null $notificationContent
      */
-    protected function passDataFromTemplate(TemplateMessageContract $message, Template $template, NotificationContents $notificationContent = null) {
+    protected function passDataFromTemplate(TemplateMessageContract $message, Template $template, NotificationContents $notificationContent = null)
+    {
         $message->category = $template->getCategory();
         $message->severity = $template->getSeverity();
 
@@ -144,22 +151,23 @@ class TemplateBuilderService {
      * @param Template $template
      * @return NotificationContents|null
      */
-    protected function findNotification(Template $template) : ?NotificationContents {
+    protected function findNotification(Template $template)
+    {
         /* @var $notificationContent NotificationContents */
-        $notificationContent =  NotificationContents::query()
-            ->where('lang_id', lang_id())
-            ->whereHas('notification', function(Builder $query) use($template) {
-                $query->where('source', $this->source);
-                $query->where('active', 1);
+        $notificationContent = NotificationContents::query()
+                        ->where('lang_id', lang_id())
+                        ->whereHas('notification', function(Builder $query) use($template) {
+                            $query->where('source', $this->source);
+                            $query->where('active', 1);
 
-                $query->whereHas('category', function(Builder $query) use($template) {
-                    $query->where('name', $template->getCategory());
-                })->whereHas('type', function(Builder $query) use($template) {
-                    $query->whereIn('name', $template->getTypes());
-                })->whereHas('severity', function(Builder $query) use($template) {
-                    $query->where('name', $template->getSeverity());
-                });
-            })->first();
+                            $query->whereHas('category', function(Builder $query) use($template) {
+                                $query->where('name', $template->getCategory());
+                            })->whereHas('type', function(Builder $query) use($template) {
+                                $query->whereIn('name', $template->getTypes());
+                            })->whereHas('severity', function(Builder $query) use($template) {
+                                $query->where('name', $template->getSeverity());
+                            });
+                        })->first();
 
         return $notificationContent;
     }
