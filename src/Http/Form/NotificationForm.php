@@ -2,7 +2,7 @@
 
 namespace Antares\Notifications\Http\Form;
 
-use Antares\Modules\BillevioBase\Http\Forms\VueFormBuilder;
+use Antares\Form\VueFormBuilder;
 use Antares\Contracts\Html\Builder;
 use Antares\Html\Form\Fieldset;
 use Antares\Html\Form\Grid as FormGrid;
