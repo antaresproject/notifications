@@ -12,7 +12,6 @@ use Antares\Notifications\Model\NotificationSeverity;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Services\EventsRegistrarService;
 use Antares\Notifications\Services\VariablesService;
-use Antares\Translations\Models\Languages;
 
 class NotificationForm {
 
