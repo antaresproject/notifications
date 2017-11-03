@@ -17,7 +17,6 @@
  * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
-declare(strict_types = 1);
 
 namespace Antares\Notifications\Http\Datatables;
 
