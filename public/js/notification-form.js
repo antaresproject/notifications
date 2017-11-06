@@ -257,7 +257,7 @@ new Vue({
                     container.html(response);
 
                     var
-                        height = container.find('.preview-response').height(),
+                        height = container.find('.preview-response').height() || 450,
                         targetHeight = height + 50;
 
                     if (targetHeight > 600) {

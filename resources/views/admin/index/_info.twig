@@ -49,5 +49,23 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-group">
+            <div class="col-mb-24 col-12">
+                <label class="form-block__name">{{ trans('antares/notifications::messages.notification_event') }}</label>
+                <div class="input-field">
+                    <v-select label="label" :on-change="eventChanged" :options="events" v-model="notification.event" ></v-select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-group">
+            <div class="col-mb-24 col-12">
+                <label class="form-block__name">{{ trans('antares/notifications::messages.notification_recipients') }}</label>
+                <div class="input-field">
+                    <v-select multiple label="label" :options.sync="eventRecipients" v-model="notification.recipients"></v-select>
+                </div>
+            </div>
+        </div>
     </div>
 </fieldset>

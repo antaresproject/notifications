@@ -20,6 +20,9 @@
 
 namespace Antares\Notifications\Widgets\NotificationSender\Controller;
 
+use Antares\Model\User;
+use Antares\Notifications\Parsers\ContentParser;
+use Antares\Notifications\Services\NotificationsService;
 use Antares\Notifications\Widgets\NotificationSender\Form\NotificationWidgetForm;
 use Antares\Foundation\Http\Controllers\AdminController;
 use Antares\Notifications\Repository\Repository;
@@ -48,12 +51,12 @@ class NotificationController extends AdminController
     protected $repository;
 
     /**
-     * Construct
-     * 
+     * NotificationController constructor.
      * @param NotificationWidgetForm $form
      * @param Repository $repository
+     * @param ContentParser $contentParser
      */
-    public function __construct(NotificationWidgetForm $form, Repository $repository)
+    public function __construct(NotificationWidgetForm $form, Repository $repository, ContentParser $contentParser)
     {
         parent::__construct();
         $this->repository = $repository;
@@ -66,7 +69,6 @@ class NotificationController extends AdminController
     public function setupMiddleware()
     {
         $this->middleware("web");
-        $this->middleware("antares.widgets");
         $this->middleware("antares.auth");
     }
 
@@ -86,40 +88,31 @@ class NotificationController extends AdminController
     /**
      * Send action
      *
+     * @param ContentParser $contentParser
+     * @param NotificationsService $notificationsService
      * @param Request $request
-     * @return JsonResponse
+     * @return JsonResponse|mixed
      */
-    public function send(Request $request)
+    public function send(ContentParser $contentParser, NotificationsService $notificationsService, Request $request)
     {
         if (!$request->get('afterValidate')) {
             return $this->form->get()->isValid();
         }
-        $this->fire($this->findModel($request->get('notifications')));
+
+        $contentParser->setPreviewMode(true);
+
+        $model      = $this->findModel($request->get('notifications'));
+        $recipient  = $this->getRecipient();
+
+        $notificationsService->handleAsPreview($model, $recipient);
+
         return new JsonResponse(['message' => trans('antares/notifications::messages.widget_notification_added_to_queue')]);
-    }
-
-    /**
-     * Fires notification events
-     * 
-     * @param Model $model
-     * @return void
-     */
-    protected function fire(Model $model)
-    {
-        $recipient = $this->getRecipient();
-
-        if (is_null($recipient->phone)) {
-            $recipient->phone = config('antares/notifications::default.sms');
-        }
-        $params = ['variables' => ['user' => $recipient], 'recipients' => [$recipient]];
-
-        event($model->event, $params);
     }
 
     /**
      * Gets recipient for notification
      * 
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return User
      */
     protected function getRecipient()
     {
@@ -134,13 +127,16 @@ class NotificationController extends AdminController
      * Finds notification model
      *
      * @param $id
-     * @return Model|static
+     * @return Notifications
      */
     protected function findModel($id)
     {
-        return Notifications::query()->whereHas('contents', function(Builder $query) use($id) {
+        /* @var $model Notifications */
+        $model = Notifications::query()->whereHas('contents', function(Builder $query) use($id) {
             $query->where('id', $id);
         })->firstOrFail();
+
+        return $model;
     }
 
 }
