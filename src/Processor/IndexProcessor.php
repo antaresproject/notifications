@@ -182,7 +182,7 @@ class IndexProcessor extends Processor {
             $response   = ResponseHelper::success($message);
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
 
             $message    = trans('antares/notifications::messages.notification_preview_error');
             $response   = ResponseHelper::error($message);

@@ -2,7 +2,6 @@
 
 namespace Antares\Notifications\Http\Form;
 
-use Antares\Form\VueFormBuilder;
 use Antares\Contracts\Html\Builder;
 use Antares\Html\Form\Fieldset;
 use Antares\Html\Form\Grid as FormGrid;

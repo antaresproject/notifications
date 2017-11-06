@@ -28,6 +28,7 @@ use Antares\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Mail\Mailable;
+use Illuminate\Support\Arr;
 use Log;
 
 class MailChannel extends BaseMailChannel
@@ -103,7 +104,14 @@ class MailChannel extends BaseMailChannel
                 return parent::buildView($message);
             }
 
-            $rendered = MailDecorator::decorate($message->content);
+            if( property_exists($message, 'content')) {
+                $content = $message->content;
+            }
+            else {
+                $content = Arr::get($message->getViewData(), 'content', '');
+            }
+
+            $rendered = MailDecorator::decorate($content);
 
             $message->view($rendered, $message->data());
 
