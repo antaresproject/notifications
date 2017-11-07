@@ -49,6 +49,9 @@ return [
     'notification_category'               => 'Category',
     'notification_severity'               => 'Severity',
     'notification_event'                  => 'Event',
+    'notification_enabled'                => 'Enabled',
+    'notification_enable'                 => 'Enable',
+    'notification_disable'                => 'Disable',
     'notification_published'              => 'Published',
     'notification_template_info'          => 'Template Info',
     'notification_template_content'       => 'Template Content',
@@ -56,6 +59,8 @@ return [
     'notification_available_variables'    => 'Available Variables',
     'notification_send_test'              => 'Send Test',
     'notification_preview'                => 'Preview',
+    'notification_send_preview'           => 'Send preview',
+    'notification_delete'                 => 'Delete',
     'notification_insert'                 => 'Insert',
     'notification_copy'                   => 'Copy',
     'notification_delete_success'         => 'Notification has been deleted.',
@@ -73,5 +78,12 @@ return [
     'notification_content_content'        => 'Content',
     'notification_content_subject'        => 'Subject',
     'notification_content_enabled'        => 'Enabled',
+
+    'modals' => [
+        'general_prompt'    => 'Are you sure?',
+        'change_status'     => 'Changing status of notification #:id :name',
+        'send_preview'      => 'Sending preview of notification #:id :name',
+        'delete'            => 'Deleting notification #:id :name'
+    ],
 
 ];

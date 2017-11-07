@@ -115,10 +115,10 @@ class NotificationsDataTable extends DataTable
         return $this->setName('Notifications List')
             ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'Id'])
             ->addColumn(['data' => 'name', 'name' => 'name', 'title' => trans('antares/notifications::messages.title'), 'className' => 'bolded'])
-            ->addColumn(['data' => 'event', 'name' => 'event_model', 'title' => trans('Event')])
-            ->addColumn(['data' => 'category', 'name' => 'category_id', 'title' => trans('Category')])
-            ->addColumn(['data' => 'type', 'name' => 'type_id', 'title' => trans('Type')])
-            ->addColumn(['data' => 'active', 'name' => 'active', 'title' => trans('Enabled')])
+            ->addColumn(['data' => 'event', 'name' => 'event_model', 'title' => trans('antares/notifications::messages.notification_event')])
+            ->addColumn(['data' => 'category', 'name' => 'category_id', 'title' => trans('antares/notifications::messages.notification_category')])
+            ->addColumn(['data' => 'type', 'name' => 'type_id', 'title' => trans('antares/notifications::messages.notification_type')])
+            ->addColumn(['data' => 'active', 'name' => 'active', 'title' => trans('antares/notifications::messages.notification_enabled')])
             ->addAction(['name' => 'edit', 'title' => '', 'class' => 'mass-actions dt-actions', 'orderable' => false, 'searchable' => false])
             ->addGroupSelect($categories, 3, $this->currentCategoryId ?: $categories->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'class' => 'mr24', 'id' => 'datatables-notification-category'])
             ->addGroupSelect($types, 4, $this->currentTypeId ?: $types->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type'])
@@ -214,12 +214,15 @@ class NotificationsDataTable extends DataTable
             if($acl->can('notifications-change-status')) {
                 $contextMenu->addAction(
                     handles('antares::notifications/' . $notification->id . '/changeStatus'),
-                    $notification->active ? trans('Disable') : trans('Enable'), [
+                    $notification->active ? trans('antares/notifications::messages.notification_disable') : trans('antares/notifications::messages.notification_enable'), [
                         'class'             => 'triggerable confirm',
                         'data-http-method'  => 'POST',
                         'data-icon'         => $notification->active ? 'minus-circle' : 'check-circle',
-                        'data-title'        => trans('Are you sure?'),
-                        'data-description'  => trans('Changing status of notification') . ' #' . $notification->id,
+                        'data-title'        => trans('antares/notifications::messages.modals.general_prompt'),
+                        'data-description'  => trans('antares/notifications::messages.modals.change_status', [
+                            'id'    => $notification->id,
+                            'name'  => $notification->name,
+                        ]),
                     ]
                 );
             }
@@ -227,12 +230,15 @@ class NotificationsDataTable extends DataTable
             if($acl->can('notifications-test')) {
                 $contextMenu->addAction(
                     handles('antares::notifications/' . $notification->id . '/sendTest'),
-                    trans('Send preview'), [
+                    trans('antares/notifications::messages.notification_send_preview'), [
                         'class'             => 'triggerable confirm',
                         'data-http-method'  => 'POST',
                         'data-icon'         => 'desktop-windows',
-                        'data-title'        => trans('Are you sure?'),
-                        'data-description'  => trans('Sending preview notification with item') . $notification->lang( lang() )->title,
+                        'data-title'        => trans('antares/notifications::messages.modals.general_prompt'),
+                        'data-description'  => trans('antares/notifications::messages.modals.send_preview', [
+                            'id'    => $notification->id,
+                            'name'  => $notification->name,
+                        ]),
                     ]
                 );
             }
@@ -240,9 +246,12 @@ class NotificationsDataTable extends DataTable
             if ( $acl->can('notifications-delete') ) {
                 $contextMenu->addDeleteAction(
                     handles('antares::notifications/' . $notification->id),
-                    trans('Delete'), [
-                        'data-title'        => trans('Are you sure?'),
-                        'data-description'  => trans('Deleting Item') .' #' . $notification->id,
+                    trans('antares/notifications::messages.notification_delete'), [
+                        'data-title'        => trans('antares/notifications::messages.modals.general_prompt'),
+                        'data-description'  => trans('antares/notifications::messages.modals.delete', [
+                            'id'    => $notification->id,
+                            'name'  => $notification->name,
+                        ]),
                     ]
                 );
             }
