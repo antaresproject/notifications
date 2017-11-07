@@ -101,9 +101,19 @@ class ContentParser {
      * @throws \Exception
      */
     public function parse(string $content, array $data = []) : string {
+        $requiredVariables = array_keys( $this->getRequiredVariables($content) );
+
         foreach($this->variablesService->all() as $moduleVariables) {
+            $moduleName = $moduleVariables->getModuleName();
+
             foreach($moduleVariables->getModelDefinitions() as $modelDefinition) {
-                $this->isSatisfiedDataRequirements($modelDefinition, $data);
+                $placeholders = array_map(function(string $placeholder) use($moduleName) {
+                    return $moduleName . '::' . $placeholder;
+                }, $modelDefinition->getPlaceholders());
+
+                if(count(array_intersect($requiredVariables, $placeholders))) {
+                    $this->isSatisfiedDataRequirements($modelDefinition, $data);
+                }
             }
         }
 
@@ -167,9 +177,9 @@ class ContentParser {
             if($this->previewMode) {
                 $data[$variableName] = $modelVariableDefinitions->getDefault();
             }
-//            else {
-//                throw new \Exception('Model variable bind [' . $variableName . '] was not found or has invalid value.');
-//            }
+            else {
+                throw new \Exception('Model variable bind [' . $variableName . '] was not found or has invalid value.');
+            }
         }
     }
 

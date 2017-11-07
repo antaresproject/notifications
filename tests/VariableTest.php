@@ -52,7 +52,7 @@ class VariableTest extends TestCase
 
     public function testRequiredParameter() {
         $variable = new Variable('test_code', 'Test Code', 'test_value');
-        $parameter = new BindParameter('aaa', 'Aaa');
+        $parameter = new BindParameter('aaa', \stdClass::class);
 
         $variable->setRequiredParameter($parameter);
         $this->assertEquals($parameter, $variable->getRequiredParameter());

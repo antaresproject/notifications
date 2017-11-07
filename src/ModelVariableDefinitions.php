@@ -151,7 +151,7 @@ class ModelVariableDefinitions {
             return $value;
         }
 
-        throw new DomainException('The default value is not match to the declared one.');
+        throw new DomainException('The default value is not match to the declared one. Given [' . $value . '] but expected [' . $this->bindParameter->getClassName() . ']');
     }
 
 }
