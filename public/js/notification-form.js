@@ -229,10 +229,6 @@ new Vue({
             }
         },
 
-        showVariables: function() {
-
-        },
-
         preview: function(url) {
             var
                 modal = $('#notificationTemplatePreview'),

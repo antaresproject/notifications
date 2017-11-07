@@ -132,10 +132,6 @@ class ContentParser {
 
         $mergedBlocks = implode(' | ', $blocks[1]);
 
-//        foreach ($inline[0] as $index => $variable) {
-//            $content = str_replace($variable, '{{ ' . trim($inline[1][$index]) . ' }}', $content);
-//        }
-
         foreach($variables as $code => $variable) {
             $value      = $variable->getValue();
             $search[]   = '[[ ' . $code . ' ]]';
@@ -155,7 +151,6 @@ class ContentParser {
         }
 
         $content = str_replace(["&nbsp;", "&#39;"], ['', '"'], $content);
-        //$content = str_replace(['<p>', '</p>', '<br />', "&nbsp;"], '', $content);
 
         return str_replace($search, $replace, $content);
     }

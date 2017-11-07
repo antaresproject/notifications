@@ -72,7 +72,7 @@ class IndexProcessor extends Processor {
             DB::commit();
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
             DB::rollBack();
 
             $message    = trans('antares/notifications::messages.notification_create_failed');
@@ -115,7 +115,7 @@ class IndexProcessor extends Processor {
             DB::commit();
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
             DB::rollBack();
 
             $message    = trans('antares/notifications::messages.notification_update_failed');
@@ -149,7 +149,7 @@ class IndexProcessor extends Processor {
             DB::commit();
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
             DB::rollBack();
 
             $message    = trans('antares/notifications::messages.notification_delete_failed');
@@ -223,7 +223,7 @@ class IndexProcessor extends Processor {
             $response   = ResponseHelper::success($message, $url);
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
 
             $message    = trans('antares/notifications::messages.notification_change_status_failed');
             $response   = ResponseHelper::error($message);

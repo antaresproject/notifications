@@ -28,7 +28,6 @@ use Antares\Foundation\Http\Controllers\AdminController;
 use Antares\Notifications\Repository\Repository;
 use Antares\Notifications\Model\Notifications;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Http\JsonResponse;

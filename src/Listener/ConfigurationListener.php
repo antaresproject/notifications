@@ -13,7 +13,8 @@ class ConfigurationListener
     /**
      * Handles the security form event.
      *
-     * @param SecurityFormSubmitted $securityFormSubmitted
+     * @param Fluent $model
+     * @param Grid $grid
      */
     public function handle(Fluent $model, Grid $grid)
     {
@@ -33,7 +34,6 @@ class ConfigurationListener
                     ->wrapper(['class' => 'col-dt-24 col-24 col-mb-24'])
                     ->fieldClass('input-field__desc')
                     ->field(function() {
-                        $memory = app('antares.memory')->make('primary');
                         return '<div class="col-group"><div class="col-mb-24">' . trans('antares/notifications::logs.form.notifications_config_days_help') . '</div></div>';
                     });
         });
@@ -44,8 +44,9 @@ class ConfigurationListener
 
     /**
      * Save notifications configuration
-     * 
+     *
      * @param Option $model
+     * @return bool
      */
     public function updated(Option $model)
     {

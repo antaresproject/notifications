@@ -3,6 +3,7 @@
 namespace Antares\Notifications;
 
 use Illuminate\Support\Arr;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionParameter;
 
@@ -30,6 +31,10 @@ class BindParameter {
     public function __construct(string $variableName, string $className) {
         $this->variableName = $variableName;
         $this->className    = $className;
+
+        if( ! class_exists($className) ) {
+            throw new InvalidArgumentException('The given class name does not exists.');
+        }
     }
 
     /**

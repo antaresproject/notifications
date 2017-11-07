@@ -69,7 +69,7 @@ class NotificationChannel
                 $type = array_search('alert', $via) !== false ? 'alert' : 'notification';
             }
 
-            $message = $type === 'alert'
+            $message = ($type === 'alert' && property_exists($notification, 'alert'))
                 ? $notification->toAlert($notifiable)
                 : $notification->toNotification($notifiable);
 

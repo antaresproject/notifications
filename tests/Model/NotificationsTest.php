@@ -68,7 +68,7 @@ class NotificationsTest extends TestCase
      */
     public function testHasTimestamps()
     {
-        $this->assertFalse($this->model->timestamps);
+        $this->assertTrue($this->model->timestamps);
     }
 
     /**
@@ -76,7 +76,7 @@ class NotificationsTest extends TestCase
      * 
      * @test
      */
-    public function testHasValidMorhClass()
+    public function testHasValidMorphClass()
     {
         $this->assertSame($this->model->getMorphClass(), 'Antares\Notifications\Model\Notifications');
     }

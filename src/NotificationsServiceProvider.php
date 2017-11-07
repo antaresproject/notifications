@@ -28,6 +28,7 @@ use Antares\Notifications\Console\NotificationsImportCommand;
 use Antares\Notifications\Console\NotificationTypesCommand;
 use Antares\Notifications\Listener\ConfigurationListener;
 use Antares\Notifications\Listener\NotificationsListener;
+use Antares\Notifications\Parsers\ContentParser;
 use Antares\Notifications\Renderers\TwigRenderer;
 use Antares\Notifications\Services\EventsRegistrarService;
 use Antares\Notifications\Services\NotificationsService;
@@ -95,6 +96,7 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         $this->app->singleton(EventsRegistrarService::class);
         $this->app->singleton(NotificationsService::class);
         $this->app->singleton(NotificationsListener::class);
+        $this->app->singleton(ContentParser::class);
 
         $this->app->bind(RendererContract::class, TwigRenderer::class);
     }
