@@ -291,6 +291,7 @@ new Vue({
 
         sendTest: function(url) {
             var
+                self = this,
                 form = $('.send-test-notification').parents('form:first'),
                 data = this.getPreparedNotification();
 
@@ -314,6 +315,8 @@ new Vue({
                         cancelButtonText: 'Close',
                         closeOnCancel: true
                     }));
+
+                    self.updateSidebar();
                 })
                 .fail(function(error) {
                     swal($.extend({}, APP.swal.cb1Error(), {
@@ -347,6 +350,76 @@ new Vue({
 
         send: function() {
             this.post(this.getPreparedNotification());
+        },
+
+        updateSidebar: function() {
+            var url = $('.sidebar--notifications').data('url');
+            $.ajax({
+                url: url,
+                success: function (response) {
+                    var
+                        $sidebar = $('aside.sidebar--notifications'),
+                        notifications = response.notifications.items,
+                        notificationsCount = response.notifications.count;
+
+                    if (notifications.length > 0) {
+                        $sidebar.find('.sidebar__footer').removeClass('hidden');
+                        $sidebar.find('.sidebar__content .sidebar__list').html('');
+                    }
+                    for (var i = 0; i < notifications.length; ++i) {
+                        $sidebar.find('.sidebar__content .sidebar__list').append(notifications[i]);
+                    }
+
+                    $('.sidebar__header .notification-counter').html(notifications.length);
+
+                    $('#notification-counter')
+                        .html(notificationsCount)
+                        .attr('data-count', notificationsCount);
+
+                    var
+                        $sidebarAlerts = $('.sidebar--alerts'),
+                        alerts = response.alerts.items,
+                        alertsCount = response.alerts.count;
+
+                    $('#main-alerts').parent().find('span.badge').html(alertsCount);
+
+                    $sidebarAlerts.find('.badge').html(alerts.length);
+
+                    if (alerts.length > 0) {
+                        $sidebarAlerts.find('.sidebar__footer').removeClass('hidden');
+                        $sidebarAlerts.find('.sidebar__content .sidebar__list').html('');
+                    }
+                    for (var i = 0; i < alerts.length; ++i) {
+                        $sidebarAlerts.find('.sidebar__content .sidebar__list').append(alerts[i]);
+                    }
+
+                    $('.notification-item .flex-block__close', document).on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var handler = $(this), url = $('.sidebar .sidebar__content:first').data('delete'), id = handler.closest('.notification-item').data('id'), badge = handler.closest('.sidebar').find('.badge');
+                        handler.closest('.flex-block').remove();
+                        var count = parseInt(badge.text());
+                        $.ajax({
+                            url: url,
+                            method: 'POST',
+                            data: {id: id},
+                            success: function (response) {
+                                if (count <= 0) {
+                                    return
+                                }
+                                badge.text(count - 1);
+                                if ((count - 1) <= 0) {
+                                    $('.sidebar__footer').addClass('hidden');
+                                }
+                            }
+                        });
+                    });
+
+                    $('aside.sidebar--notifications .sidebar__header-right .btn-more', document).on('click', function (e) {
+                        $('aside.sidebar--notifications').removeClass('sidebar--open');
+                    });
+                }
+            });
         }
     }
 });

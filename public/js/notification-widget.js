@@ -35,10 +35,12 @@ Vue.config.debug = !0, Vue.config.devtools = !0, function () {
             },
             onSuccess: function (response) {
                 this.container.html('');
-                options = '';
+                var options = '';
+
                 for (var i = 0; i < response.length; i++) {
                     options += '<option value="' + response[i].id + '">' + response[i].title + '</option>'
                 }
+
                 this.container.html(options);
                 this.onComplete();
             },
@@ -56,7 +58,7 @@ Vue.config.debug = !0, Vue.config.devtools = !0, function () {
                 this.container.removeAttr('disabled');
                 //this.container.closest('.grid-stack-item-content').LoadingOverlay('hide');
             }
-        },
+        }
     });
 }.call(this);
 
