@@ -97,7 +97,8 @@ class IndexController extends AdminController
         ];
 
         $messages = [
-            'contents.*.title.required_unless' => 'Title is required',
+            'contents.*.title.required_unless'  => 'Title is required',
+            'contents.*.content.required'       => 'Content is required',
         ];
 
         $this->validate($request, $rules, $messages);
@@ -135,7 +136,8 @@ class IndexController extends AdminController
         ];
 
         $messages = [
-            'contents.*.title.required_unless' => 'Title is required',
+            'contents.*.title.required_unless'  => 'Title is required',
+            'contents.*.content.required'       => 'Content is required',
         ];
 
         $this->validate($request, $rules, $messages);
