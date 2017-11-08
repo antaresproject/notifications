@@ -66,10 +66,12 @@ class NotificationChannel
                 $type = TemplateChannel::getViaType($notification);
             }
             else {
-                $type = array_search('alert', $via) !== false ? 'alert' : 'notification';
+                $type = ((property_exists($notification, 'alert') && array_search('alert', $via) !== false))
+                    ? 'alert'
+                    : 'notification';
             }
 
-            $message = $type === 'alert'
+            $message = ($type === 'alert')
                 ? $notification->toAlert($notifiable)
                 : $notification->toNotification($notifiable);
 

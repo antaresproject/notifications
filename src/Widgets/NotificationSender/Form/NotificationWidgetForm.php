@@ -38,7 +38,7 @@ class NotificationWidgetForm
     /**
      * Assets factory instance
      *
-     * @var type 
+     * @var Factory
      */
     protected $assets;
 
@@ -91,7 +91,7 @@ class NotificationWidgetForm
 
                         $fieldset->control('select', 'notifications')
                                 ->attributes(['class' => 'notification-widget-notifications-select'])
-                                ->options($this->repository->getNotificationContents('email')->pluck('title', 'id'));
+                                ->options($this->repository->getNotificationContents('mail')->pluck('notification.name', 'id'));
 
                         if (!is_null(from_route('user'))) {
                             $fieldset->control('button', 'send')

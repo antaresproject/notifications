@@ -2,11 +2,10 @@
 
 namespace Antares\Notifications\Facade;
 
-use Illuminate\Support\Facades\Facade as LaravelFacade;
+use Illuminate\Support\Facades\Facade;
 use Antares\Notifications\ChannelManager;
-use Antares\Notifications\Messenger;
 
-class Notification extends LaravelFacade
+class Notification extends Facade
 {
 
     /**

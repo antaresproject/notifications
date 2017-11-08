@@ -2,9 +2,7 @@
 
 namespace Antares\Notifications\Services;
 
-use Antares\Modules\BillevioBase\Models\NotificationModuleVariables;
 use Antares\Notifications\Contracts\ModelVariablesResoluble;
-use Antares\Notifications\Parsers\VariableParser;
 use Antares\Notifications\Variable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;

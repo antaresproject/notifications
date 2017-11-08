@@ -158,15 +158,10 @@ class IndexController extends AdminController
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function sendTestOfNotification(Request $request, Notifications $notification) {
-        $content = $notification->lang( lang() );
+        $data = $notification->toArray();
 
-        $data = [
-            'type'      => $notification->type->title,
-            'content'   => [
-                'title'     => $content->title,
-                'content'   => $content->content,
-            ],
-        ];
+        $data['contents'] = [];
+        $data['contents'][] = $notification->lang( lang() )->toArray();
 
         return $this->processor->sendTest($data)->notify()->resolve($request);
     }

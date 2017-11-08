@@ -17,11 +17,10 @@
  * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
-declare(strict_types = 1);
 
 namespace Antares\Notifications\Processor;
 
-use Antares\Modules\BillevioBase\Helpers\ResponseHelper;
+use Antares\Helpers\ResponseHelper;
 use Antares\Notifications\Decorator\MailDecorator;
 use Antares\Notifications\Decorator\SidebarItemDecorator;
 use Antares\Notifications\Parsers\ContentParser;

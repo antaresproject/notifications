@@ -72,6 +72,7 @@ class SidebarItemDecorator
     public function item(NotificationsStack $item, string $view)
     {
         $firstContent       = $item->contents[0];
+
         $title              = $this->contentParser->parse($firstContent->title, (array) $item->variables);
         $content            = $this->contentParser->parse($firstContent->content, (array) $item->variables);
 

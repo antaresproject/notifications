@@ -63,11 +63,9 @@ class Menu extends MenuHandler
     /**
      * Check whether the menu should be displayed.
      *
-     * @param  Guard  $auth
-     *
      * @return bool
      */
-    public function authorize(Guard $auth)
+    public function authorize()
     {
         return app('antares.acl')->make('antares/notifications')->can('notifications-list');
     }

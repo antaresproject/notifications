@@ -155,21 +155,21 @@ class NotificationsImportCommand extends Command
         /* @var $file SplFileInfo */
 
         return $dirs->flatMap(function(Finder $finder) use($autoload) {
-                    $files = [];
+            $files = [];
 
-                    foreach ($finder as $file) {
-                        if (!($key = array_search($file->getRealPath(), $autoload))) {
-                            continue;
-                        }
-                        if (!class_exists($key)) {
-                            continue;
-                        }
+            foreach ($finder as $file) {
+                if (!($key = array_search($file->getRealPath(), $autoload))) {
+                    continue;
+                }
+                if (!class_exists($key)) {
+                    continue;
+                }
 
-                        array_push($files, $key);
-                    }
+                array_push($files, $key);
+            }
 
-                    return $files;
-                });
+            return $files;
+        });
     }
 
     /**

@@ -36,6 +36,7 @@ class Repository {
     public function getNotificationContents($type = null)
     {
         return NotificationContents::query()
+            ->with('notification')
             ->whereHas('lang', function(Builder $query) {
                 $query->where('code', locale());
             })

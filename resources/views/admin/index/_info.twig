@@ -15,7 +15,7 @@
                     <div class="page-notification-templates__switch">
                         <label class="form-block__name">{{ trans('antares/notifications::messages.notification_published') }}</label>
                         <label class="switch">
-                            <input class="switch-checkbox" name="enabled" type="checkbox" v-model="notification.enabled">
+                            <input class="switch-checkbox" name="enabled" type="checkbox" v-model="notification.active">
                             <span class="switch-container"><span class="switch-handle"></span></span>
                         </label>
                     </div>
@@ -46,6 +46,24 @@
                 <label class="form-block__name">{{ trans('antares/notifications::messages.notification_severity') }}</label>
                 <div class="input-field">
                     <v-select label="title" :options="severities" v-model="notification.severity"></v-select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-group">
+            <div class="col-mb-24 col-12">
+                <label class="form-block__name">{{ trans('antares/notifications::messages.notification_event') }}</label>
+                <div class="input-field">
+                    <v-select label="label" :on-change="eventChanged" :options="events" v-model="notification.event" ></v-select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-group">
+            <div class="col-mb-24 col-12">
+                <label class="form-block__name">{{ trans('antares/notifications::messages.notification_recipients') }}</label>
+                <div class="input-field">
+                    <v-select multiple label="label" :options.sync="eventRecipients" v-model="notification.recipients"></v-select>
                 </div>
             </div>
         </div>

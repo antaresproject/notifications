@@ -2,7 +2,6 @@
 
 namespace Antares\Notifications\Http\Form;
 
-use Antares\Modules\BillevioBase\Http\Forms\VueFormBuilder;
 use Antares\Contracts\Html\Builder;
 use Antares\Html\Form\Fieldset;
 use Antares\Html\Form\Grid as FormGrid;
@@ -12,7 +11,6 @@ use Antares\Notifications\Model\NotificationSeverity;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Services\EventsRegistrarService;
 use Antares\Notifications\Services\VariablesService;
-use Antares\Translations\Models\Languages;
 
 class NotificationForm {
 

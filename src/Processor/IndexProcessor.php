@@ -20,7 +20,7 @@
 
 namespace Antares\Notifications\Processor;
 
-use Antares\Modules\BillevioBase\Helpers\ResponseHelper;
+use Antares\Helpers\ResponseHelper;
 use Antares\Notifications\Decorator\MailDecorator;
 use Antares\Notifications\Model\NotificationContents;
 use Antares\Notifications\Model\Notifications;
@@ -72,7 +72,7 @@ class IndexProcessor extends Processor {
             DB::commit();
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
             DB::rollBack();
 
             $message    = trans('antares/notifications::messages.notification_create_failed');
@@ -115,7 +115,7 @@ class IndexProcessor extends Processor {
             DB::commit();
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
             DB::rollBack();
 
             $message    = trans('antares/notifications::messages.notification_update_failed');
@@ -149,7 +149,7 @@ class IndexProcessor extends Processor {
             DB::commit();
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
             DB::rollBack();
 
             $message    = trans('antares/notifications::messages.notification_delete_failed');
@@ -182,7 +182,7 @@ class IndexProcessor extends Processor {
             $response   = ResponseHelper::success($message);
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
 
             $message    = trans('antares/notifications::messages.notification_preview_error');
             $response   = ResponseHelper::error($message);
@@ -223,7 +223,7 @@ class IndexProcessor extends Processor {
             $response   = ResponseHelper::success($message, $url);
         }
         catch(Exception $e) {
-            Log::emergency($e->getMessage());
+            Log::emergency($e);
 
             $message    = trans('antares/notifications::messages.notification_change_status_failed');
             $response   = ResponseHelper::error($message);
