@@ -7,7 +7,7 @@ class NotificationMessage extends AbstractMessage {
     /**
      * @var string[]
      */
-    public $types = ['admin'];
+    public $types = ['notification'];
 
     /**
      * @param string[] $types

@@ -21,11 +21,11 @@
 namespace Antares\Templates\TestCase;
 
 use Antares\Notifications\NotificationsServiceProvider;
+use Antares\Testing\TestCase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
-use Antares\Testing\ApplicationTestCase;
 use Mockery as m;
 
-class NotificationsServiceProviderTest extends ApplicationTestCase
+class NotificationsServiceProviderTest extends TestCase
 {
 
     use WithoutMiddleware;

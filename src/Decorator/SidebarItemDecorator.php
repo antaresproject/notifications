@@ -20,7 +20,8 @@
 
 namespace Antares\Notifications\Decorator;
 
-use Antares\Notifications\Adapter\VariablesAdapter;
+use Antares\Notifications\Model\NotificationsStack;
+use Antares\Notifications\Parsers\ContentParser;
 use Illuminate\Database\Eloquent\Collection;
 use RuntimeException;
 
@@ -28,24 +29,22 @@ class SidebarItemDecorator
 {
 
     /**
-     * Variables adapter instance.
-     *
-     * @var VariablesAdapter
+     * @var ContentParser
      */
-    protected $variablesAdapter;
+    protected $contentParser;
 
     /**
      * SidebarItemDecorator constructor.
-     * @param VariablesAdapter $variablesAdapter
+     * @param ContentParser $contentParser
      */
-    public function __construct(VariablesAdapter $variablesAdapter) {
-        $this->variablesAdapter = $variablesAdapter;
+    public function __construct(ContentParser $contentParser) {
+        $this->contentParser = $contentParser;
     }
 
     /**
      * Decorates notifications of alerts
      * 
-     * @param Collection $items
+     * @param Collection|NotificationsStack[] $items
      * @param String $type
      * @return array
      * @throws RuntimeException
@@ -64,18 +63,17 @@ class SidebarItemDecorator
     }
 
     /**
-     * Decorates single item
-     * 
-     * @param \Illuminate\Database\Eloquent\Model $item
-     * @param String $view
-     * @return String
+     * Decorates single item.
+     *
+     * @param NotificationsStack $item
+     * @param string $view
+     * @return string
      */
-    public function item($item, $view)
+    public function item(NotificationsStack $item, string $view)
     {
-        /* @var $variablesAdapter VariablesAdapter */
-        $firstContent       = $item->content[0];
-        $title              = $this->variablesAdapter->get($firstContent->title, (array) $item->variables);
-        $content            = $this->variablesAdapter->get($firstContent->content, (array) $item->variables);
+        $firstContent       = $item->contents[0];
+        $title              = $this->contentParser->parse($firstContent->title, (array) $item->variables);
+        $content            = $this->contentParser->parse($firstContent->content, (array) $item->variables);
 
         return view($view, [
             'id'         => $item->id,

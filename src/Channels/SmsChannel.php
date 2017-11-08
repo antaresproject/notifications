@@ -38,12 +38,21 @@ class SmsChannel
     protected $adapter;
 
     /**
+     * Template builder service instance.
+     *
+     * @var TemplateBuilderService
+     */
+    protected $templateBuilderService;
+
+    /**
      * SmsChannel constructor.
      * @param FastSmsAdapter $adapter
+     * @param TemplateBuilderService $templateBuilderService
      */
-    public function __construct(FastSmsAdapter $adapter)
+    public function __construct(FastSmsAdapter $adapter, TemplateBuilderService $templateBuilderService)
     {
         $this->adapter = $adapter;
+        $this->templateBuilderService = $templateBuilderService;
     }
 
     /**
@@ -62,7 +71,7 @@ class SmsChannel
             $message = new SmsMessage($message);
         }
 
-        (new TemplateBuilderService($notification))->build($message);
+        $this->templateBuilderService->setNotification($notification)->build($message);
 
         try {
             return $this->adapter->send($message, $to);

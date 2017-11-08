@@ -4,6 +4,7 @@ namespace Antares\Notifications;
 
 use Illuminate\Support\Arr;
 use ReflectionClass;
+use ReflectionParameter;
 
 class BindParameter {
 
@@ -69,6 +70,14 @@ class BindParameter {
         $value = Arr::get($data, $this->variableName);
 
         return !! $value;
+    }
+
+    /**
+     * @param ReflectionParameter $parameter
+     * @return bool
+     */
+    public function isMatchToParameter(ReflectionParameter $parameter) : bool {
+        return $this->getClassName() === $parameter->getType()->getName() && $this->getVariableName() === $parameter->getName();
     }
 
 }

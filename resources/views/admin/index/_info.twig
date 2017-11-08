@@ -1,0 +1,53 @@
+<fieldset class="page-notification-templates__info">
+    <legend>{{ trans('antares/notifications::messages.notification_template_info') }}</legend>
+
+    <div class="form-block page-notification-templates__name">
+        <div class="col-group">
+            <div class="col-mb-24 col-12">
+                <label class="form-block__name">{{ trans('antares/notifications::messages.notification_name') }}</label>
+
+                <div class="input-field">
+                    <input type="text" name="name" v-model="notification.name">
+                    <span class="error nopadding" v-if="errors.has('name')">
+                        <p class="help-block error" v-text="errors.get('name')"></p>
+                    </span>
+
+                    <div class="page-notification-templates__switch">
+                        <label class="form-block__name">{{ trans('antares/notifications::messages.notification_published') }}</label>
+                        <label class="switch">
+                            <input class="switch-checkbox" name="enabled" type="checkbox" v-model="notification.enabled">
+                            <span class="switch-container"><span class="switch-handle"></span></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-group">
+            <div class="col-mb-24 col-12">
+                <label class="form-block__name">{{ trans('antares/notifications::messages.notification_type') }}</label>
+                <div class="input-field">
+                    <v-select label="title" :options="types" v-model="notification.type"></v-select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-group">
+            <div class="col-mb-24 col-12">
+                <label class="form-block__name">{{ trans('antares/notifications::messages.notification_category') }}</label>
+                <div class="input-field">
+                    <v-select label="title" :options="categories" v-model="notification.category"></v-select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-group">
+            <div class="col-mb-24 col-12">
+                <label class="form-block__name">{{ trans('antares/notifications::messages.notification_severity') }}</label>
+                <div class="input-field">
+                    <v-select label="title" :options="severities" v-model="notification.severity"></v-select>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>

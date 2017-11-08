@@ -20,11 +20,14 @@
 
 namespace Antares\Notifications\Model;
 
+use Antares\Notifications\Services\EventsRegistrarService;
+use Antares\Translations\Models\Languages;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Antares\Model\Eloquent;
+use Illuminate\Support\Arr;
 
 /**
  * Class Notifications
@@ -33,11 +36,15 @@ use Antares\Model\Eloquent;
  * @property integer $id
  * @property integer $severity_id
  * @property integer $category_id
+ * @property string $event
+ * @property NotifiableEvent|string|null $event_model
+ * @property string $event_label
  * @property integer $type_id
  * @property boolean $active
- * @property string $classname
  * @property string $checksum
- * @property string $event
+ * @property string $name
+ * @property string $source
+ * @property array $recipients
  * @method static Builder|Notifications active()
  * @property NotificationTypes $type
  * @property NotificationCategory $category
@@ -50,13 +57,6 @@ class Notifications extends Eloquent
 {
 
     /**
-     * Low priority notification
-     *
-     * @var String 
-     */
-    protected $priority = 'low';
-
-    /**
      * The database table used by the model.
      *
      * @var string
@@ -64,34 +64,55 @@ class Notifications extends Eloquent
     protected $table = 'tbl_notifications';
 
     /**
-     * The class name to be used in polymorphic relations.
-     *
-     * @var string
-     */
-    protected $morphClass = 'Notifications';
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = ['severity_id', 'category_id', 'type_id', 'active', 'classname', 'checksum'];
+    protected $fillable = [
+        'source',
+        'severity_id',
+        'category_id',
+        'type_id',
+        'event',
+        'active',
+        'name',
+        'checksum',
+        'recipients',
+    ];
 
     /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
+     * {@inheritdoc}
      */
-    public $timestamps = false;
+    protected $attributes = [
+        'severity_id'   => 3 //medium
+    ];
 
     /**
-     * Query scope for active jobs
-     *
-     * @param  object     $query
-     *
-     * @return void
+     * {@inheritdoc}
      */
-    public function scopeActive($query)
+    protected $casts = [
+        'id'            => 'integer',
+        'severity_id'   => 'integer',
+        'category_id'   => 'integer',
+        'type_id'       => 'integer',
+        'active'        => 'boolean',
+        'recipients'    => 'json',
+    ];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $appends = [
+        'event_label',
+        'event_model',
+    ];
+
+    /**
+     * Query scope for active notifications.
+     *
+     * @param Builder $query
+     */
+    public function scopeActive(Builder $query)
     {
         $query->where('active', 1);
     }
@@ -154,6 +175,58 @@ class Notifications extends Eloquent
     public static function getPatternUrl()
     {
         return handles('antares::notifications/edit/{id}');
+    }
+
+    /**
+     * @param Languages $language
+     * @return NotificationContents
+     */
+    public function lang(Languages $language) {
+        /* @var $content \Antares\Notifications\Model\NotificationContents */
+
+        if( ! $this->relationLoaded('contents')) {
+            $this->with('contents');
+        }
+
+        foreach($this->contents as $content) {
+            if($language->code === $content->lang->code) {
+                return $content;
+            }
+        }
+
+        return new NotificationContents([
+            'lang_id' => $language->id,
+        ]);
+    }
+
+    /**
+     * @return NotifiableEvent|string|null
+     */
+    public function getEventModelAttribute() {
+        /* @var $eventsRegistrarService EventsRegistrarService */
+        $eventsRegistrarService = app()->make(EventsRegistrarService::class);
+        $event = Arr::get($this->attributes, 'event');
+
+        if($event && $notifiableEvent = $eventsRegistrarService->getByClassName($event)) {
+            return $notifiableEvent;
+        }
+
+        return $event;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEventLabelAttribute() {
+        /* @var $eventsRegistrarService EventsRegistrarService */
+        $eventsRegistrarService = app()->make(EventsRegistrarService::class);
+        $event = Arr::get($this->attributes, 'event');
+
+        if($event && $notifiableEvent = $eventsRegistrarService->getByClassName($event)) {
+            return $notifiableEvent->getLabel();
+        }
+
+        return $event;
     }
 
 }

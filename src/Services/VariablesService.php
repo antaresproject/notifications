@@ -9,6 +9,7 @@ use Antares\Notifications\Variable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use ReflectionParameter;
 
 class VariablesService
 {
@@ -108,6 +109,23 @@ class VariablesService
 
         if ($moduleVariables instanceof ModuleVariables) {
             return $moduleVariables->get($variable);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param ReflectionParameter $parameter
+     * @return mixed|null
+     */
+    public function getDefault(ReflectionParameter $parameter)
+    {
+        foreach (static::$modules as $module) {
+            foreach ($module->getModelDefinitions() as $definition) {
+                if ($definition->getBindParameter()->isMatchToParameter($parameter)) {
+                    return $definition->getDefault();
+                }
+            }
         }
 
         return null;

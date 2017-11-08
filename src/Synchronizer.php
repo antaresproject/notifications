@@ -47,22 +47,27 @@ class Synchronizer
      * @param TemplatesCollection $templates
      */
     public function syncTemplates(string $notificationClassName, TemplatesCollection $templates) {
+        $notifiableEvent = $templates->getNotifiableEvent();
+        $title = $templates->getTitle();
+
         foreach($templates->all() as $template) {
-            $this->syncTemplate($notificationClassName, $template);
+            $this->syncTemplate($title, $notificationClassName, $template, $notifiableEvent);
         }
     }
 
     /**
+     * @param string $title
      * @param string $notificationClassName
      * @param Template $template
+     * @param string $notifiableEvent
      * @throws Exception
      */
-    public function syncTemplate(string $notificationClassName, Template $template) {
+    public function syncTemplate(string $title, string $notificationClassName, Template $template, string $notifiableEvent) {
         DB::beginTransaction();
 
         try {
             foreach($template->getTypes() as $type) {
-                $this->save($notificationClassName, $type, $template);
+                $this->save($title, $notificationClassName, $type, $template, $notifiableEvent);
             }
 
             DB::commit();
@@ -76,16 +81,21 @@ class Synchronizer
     }
 
     /**
+     * @param string $title
      * @param string $className
      * @param string $type
      * @param Template $template
+     * @param string $notifiableEvent
      */
-    protected function save(string $className, string $type, Template $template)
+    protected function save(string $title, string $className, string $type, Template $template, string $notifiableEvent)
     {
         /* @var $model Notifications */
         $model      = Notifications::query()->firstOrCreate([
-            'classname' => $className,
-            'type_id'   => $this->type($type)->id,
+            'source'        => $className,
+            'event'         => $notifiableEvent,
+            'type_id'       => $this->type($type)->id,
+            'severity_id'   => $this->severity($template->getSeverity())->id,
+            'category_id'   => $this->category($template->getCategory())->id,
         ]);
 
         $reflection = new ReflectionClass($className);
@@ -96,9 +106,9 @@ class Synchronizer
         }
 
         $model->fill([
-            'severity_id' => $this->severity($template->getSeverity())->id,
-            'category_id' => $this->category($template->getCategory())->id,
-            'checksum'    => $checksum
+            'name'          => $title,
+            'recipients'    => $template->getRecipients(),
+            'checksum'      => $checksum
         ]);
 
         $model->save();
@@ -126,7 +136,10 @@ class Synchronizer
      */
     private function category(string $category = null)
     {
-        return NotificationCategory::query()->where('name', $category ?: 'default')->firstOrFail();
+        /* @var $model NotificationCategory */
+        $model = NotificationCategory::query()->where('name', $category ?: 'default')->firstOrFail();
+
+        return $model;
     }
 
     /**
@@ -137,7 +150,10 @@ class Synchronizer
      */
     private function type(string $type = null)
     {
-        return NotificationTypes::query()->where('name', $type ?: 'admin')->firstOrFail();
+        /* @var $model NotificationTypes */
+        $model = NotificationTypes::query()->where('name', $type ?: 'notification')->firstOrFail();
+
+        return $model;
     }
 
     /**
@@ -148,7 +164,10 @@ class Synchronizer
      */
     private function severity($severity = null)
     {
-        return NotificationSeverity::query()->where('name', $severity ?: 'medium')->firstOrFail();
+        /* @var $model NotificationSeverity */
+        $model = NotificationSeverity::query()->where('name', $severity ?: 'medium')->firstOrFail();
+
+        return $model;
     }
 
 }

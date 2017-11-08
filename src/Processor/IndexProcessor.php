@@ -20,243 +20,216 @@
 
 namespace Antares\Notifications\Processor;
 
-use Antares\Notifications\Contracts\IndexPresenter as Presenter;
+use Antares\Modules\BillevioBase\Helpers\ResponseHelper;
 use Antares\Notifications\Decorator\MailDecorator;
 use Antares\Notifications\Model\NotificationContents;
-use Antares\Notifications\PreviewNotification;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Antares\Notifications\Adapter\VariablesAdapter;
-use Antares\Notifications\Contracts\IndexListener;
-use Antares\Notifications\Repository\Repository;
+use Antares\Notifications\Model\Notifications;
 use Antares\Foundation\Processor\Processor;
-use Illuminate\Http\RedirectResponse;
+use Antares\Notifications\Parsers\ContentParser;
+use Antares\Notifications\Services\NotificationsService;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Input;
-use Illuminate\Http\JsonResponse;
-use Illuminate\View\View;
 use Exception;
-use Antares\Notifications\Facade\Notification;
+use DB;
+use Log;
 
-class IndexProcessor extends Processor
-{
-
-    /**
-     * instance of variables adapter
-     *
-     * @var VariablesAdapter
-     */
-    protected $variablesAdapter;
+class IndexProcessor extends Processor {
 
     /**
-     * repository instance
-     *
-     * @var Repository
+     * @var ContentParser
      */
-    protected $repository;
+    protected $contentParser;
 
     /**
-     * constructing
-     * 
-     * @param Presenter $presenter
-     * @param VariablesAdapter $adapter
-     * @param Repository $repository
+     * IndexProcessor constructor.
+     * @param ContentParser $contentParser
      */
-    public function __construct(Presenter $presenter, VariablesAdapter $adapter, Repository $repository)
-    {
-        $this->presenter        = $presenter;
-        $this->variablesAdapter = $adapter;
-        $this->repository       = $repository;
+    public function __construct(ContentParser $contentParser) {
+        $this->contentParser = $contentParser;
     }
 
     /**
-     * default index action
-     * 
-     * @return String $type
+     * @param array $data
+     * @return ResponseHelper
      */
-    public function index($type = null)
-    {
-        return $this->presenter->table($type);
-    }
-
-    /**
-     * shows edit form
-     * 
-     * @param mixed $id
-     * @param String $locale
-     * @param IndexListener $listener
-     * @return View
-     */
-    public function edit($id, $locale, IndexListener $listener)
-    {
-        app('antares.asset')->container('antares/foundation::application')
-            ->add('ckeditor', 'https://cdn.ckeditor.com/4.6.2/full-all/ckeditor.js', ['app_cache']);
-
-        //app('antares.asset')->container('antares/foundation::application')->add('ckeditor', '/public/ckeditor/ckeditor.js', ['webpack_forms_basic']);
-
-        $model = $this->repository->findByLocale($id, $locale);
-
-        if (is_null($model)) {
-            throw new ModelNotFoundException('Model not found');
-        }
-        return $this->presenter->edit($model, $locale);
-    }
-
-    /**
-     * updates notification notification
-     * 
-     * @param IndexListener $listener
-     * @return RedirectResponse
-     */
-    public function update(IndexListener $listener)
-    {
-        $id    = Input::get('id');
-        $model = $this->repository->find($id);
-        $form  = $this->presenter->getForm($model);
-        if (!$form->isValid()) {
-            return $listener->updateValidationFailed($id, $form->getMessageBag());
-        }
-        try {
-            $this->repository->updateNotification($id, Input::all());
-        } catch (Exception $ex) {
-            return $listener->updateFailed();
-        }
-
-        return $listener->updateSuccess();
-    }
-
-    /**
-     * sends test notification
-     * 
-     * @param IndexListener $listener
-     * @param mixed $id
-     * @return JsonResponse
-     */
-    public function sendTest(IndexListener $listener, $id = null)
-    {
-        $notifier   = null;
-        $content    = null;
-        $type       = null;
-
-        if (request()->isMethod('post')) {
-            $this->variablesAdapter->setPreviewMode(true);
-
-            $inputs     = Input::all();
-            $type       = $inputs['type'];
-            $content    = new NotificationContents($inputs);
-
-        } else {
-            $model      = $this->repository->find($id);
-            $type       = $model->type->name;
-            $content    = $model->contents->first();
-        }
+    public function store(array $data) : ResponseHelper {
+        $url = handles('antares::notifications');
 
         try {
-            Notification::send(auth()->user(), new PreviewNotification($type, $content));
+            DB::beginTransaction();
 
-            if (request()->ajax()) {
-                return new JsonResponse(trans('Message has been sent'), 200);
+            $contents       = Arr::get($data, 'contents', []);
+            $notification   = new Notifications($data);
+
+            $notification->save();
+
+            foreach($contents as $content) {
+                $notification->contents()->save(new NotificationContents($content));
             }
 
-            return $listener->sendSuccess();
+            $message    = trans('antares/notifications::messages.notification_create_success');
+            $response   = ResponseHelper::success($message, $url);
+
+            DB::commit();
         }
         catch(Exception $e) {
-            if (request()->ajax()) {
-                return new JsonResponse($e->getMessage(), 500);
-            }
+            Log::emergency($e->getMessage());
+            DB::rollBack();
 
-            return $listener->sendFailed();
+            $message    = trans('antares/notifications::messages.notification_create_failed');
+            $response   = ResponseHelper::error($message, $url);
         }
+
+        return $response;
     }
 
     /**
-     * preview notification notification
-     * 
-     * @return View
+     * @param Notifications $notification
+     * @param array $data
+     * @return ResponseHelper
      */
-    public function preview(array $data)
-    {
-        $this->variablesAdapter->setPreviewMode(true);
+    public function update(Notifications $notification, array $data) : ResponseHelper {
+        $url = handles('antares::notifications');
 
-        $data['content'] = $this->variablesAdapter->get(  Arr::get($data, 'content', '') );
+        try {
+            DB::beginTransaction();
 
-        if( Arr::get($data, 'type') === 'email') {
+            $contents = Arr::get($data, 'contents', []);
+
+            $notification->load('contents');
+            $notification->fill($data);
+            $notification->save();
+
+            foreach($contents as $content) {
+                if($id = Arr::get($content, 'id')) {
+                    $content = Arr::except($content, ['id', 'lang_id']);
+                    NotificationContents::query()->findOrFail($id)->fill($content)->save();
+                }
+                else {
+                    $notification->contents()->save(new NotificationContents($content));
+                }
+            }
+
+            $message    = trans('antares/notifications::messages.notification_update_success');
+            $response   = ResponseHelper::success($message, $url);
+
+            DB::commit();
+        }
+        catch(Exception $e) {
+            Log::emergency($e->getMessage());
+            DB::rollBack();
+
+            $message    = trans('antares/notifications::messages.notification_update_failed');
+            $response   = ResponseHelper::error($message, $url);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param Notifications $notification
+     * @return ResponseHelper
+     */
+    public function delete(Notifications $notification) : ResponseHelper {
+        $url = handles('antares::notifications');
+
+        try {
+            DB::beginTransaction();
+
+            $notification->load('contents');
+
+            foreach($notification->contents as $content) {
+                $content->delete();
+            }
+
+            $notification->delete();
+
+            $message    = trans('antares/notifications::messages.notification_delete_success');
+            $response   = ResponseHelper::success($message, $url);
+
+            DB::commit();
+        }
+        catch(Exception $e) {
+            Log::emergency($e->getMessage());
+            DB::rollBack();
+
+            $message    = trans('antares/notifications::messages.notification_delete_failed');
+            $response   = ResponseHelper::error($message, $url);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param array $data
+     * @return ResponseHelper
+     */
+    public function sendTest(array $data) : ResponseHelper {
+        try {
+            $this->contentParser->setPreviewMode(true);
+
+            $notification = new Notifications($data);
+
+            foreach(Arr::get($data, 'contents', []) as $content) {
+                $notification->contents->push(new NotificationContents($content));
+            }
+
+            /* @var $service NotificationsService */
+            $service = app()->make(NotificationsService::class);
+
+            $service->handleAsPreview($notification, auth()->user());
+
+            $message    = trans('antares/notifications::messages.notification_preview_sent');
+            $response   = ResponseHelper::success($message);
+        }
+        catch(Exception $e) {
+            Log::emergency($e->getMessage());
+
+            $message    = trans('antares/notifications::messages.notification_preview_error');
+            $response   = ResponseHelper::error($message);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param array $data
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function preview(array $data) {
+        $this->contentParser->setPreviewMode(true);
+
+        $data['title']      = $this->contentParser->parse(  Arr::get($data, 'title', '') );
+        $data['content']    = $this->contentParser->parse(  Arr::get($data, 'content', '') );
+
+        if( Arr::get($data, 'type') === 'mail') {
             $data['content'] = MailDecorator::decorate($data['content']);
         }
 
-        return $this->presenter->preview($data);
+        return view()->make('antares/notifications::admin.index.preview', $data);
     }
 
     /**
-     * change notification notification status
-     * 
-     * @param IndexListener $listener
-     * @param mixed $id
-     * @return RedirectResponse
+     * @param Notifications $notification
+     * @return ResponseHelper
      */
-    public function changeStatus(IndexListener $listener, $id)
-    {
-        $model = $this->repository->find($id);
-        if (is_null($model)) {
-            return $listener->changeStatusFailed();
-        }
-        $model->active = ($model->active) ? 0 : 1;
-        $model->save();
-        return $listener->changeStatusSuccess();
-    }
+    public function changeStatus(Notifications $notification) : ResponseHelper {
+        $url = handles('antares::notifications');
 
-    /**
-     * Create notification notification form
-     * 
-     * @param String $type
-     * @return View
-     */
-    public function create($type = null)
-    {
-        app('antares.asset')->container('antares/foundation::application')
-            ->add('ckeditor', 'https://cdn.ckeditor.com/4.6.2/full-all/ckeditor.js', ['app_cache']);
-
-        //app('antares.asset')->container('antares/foundation::application')->add('ckeditor', '/ckeditor/ckeditor.js', ['webpack_forms_basic']);
-
-        return $this->presenter->create($this->repository->makeModel()->getModel(), $type);
-    }
-
-    /**
-     * store new notification notification
-     * 
-     * @param IndexListener $listener
-     * @return RedirectResponse
-     */
-    public function store(IndexListener $listener)
-    {
-        $model = $this->repository->makeModel()->getModel();
-        $form  = $this->presenter->getForm($model)->onCreate();
-        if (!$form->isValid()) {
-            return $listener->storeValidationFailed($form->getMessageBag());
-        }
         try {
-            $this->repository->store(Input::all());
-        } catch (Exception $ex) {
-            return $listener->createFailed();
-        }
-        return $listener->createSuccess();
-    }
+            $notification->active = ! $notification->active;
+            $notification->save();
 
-    /**
-     * deletes custom notification
-     * 
-     * @param mixed $id
-     * @param IndexListener $listener
-     * @return RedirectResponse
-     */
-    public function delete($id, IndexListener $listener)
-    {
-        try {
-            $model = $this->repository->makeModel()->findOrFail($id);
-            $model->delete();
-            return $listener->deleteSuccess();
-        } catch (Exception $ex) {
-            return $listener->deleteFailed();
+            $message    = trans('antares/notifications::messages.notification_change_status_success');
+            $response   = ResponseHelper::success($message, $url);
         }
+        catch(Exception $e) {
+            Log::emergency($e->getMessage());
+
+            $message    = trans('antares/notifications::messages.notification_change_status_failed');
+            $response   = ResponseHelper::error($message);
+        }
+
+        return $response;
     }
 
 }

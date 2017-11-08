@@ -33,7 +33,7 @@ class NotificationLogsMenu extends MenuHandler
      */
     protected $menu = [
         'id'   => 'notifications-logs',
-        'link' => 'antares::notifications/logs/index'
+        'link' => 'antares::notifications/logs'
     ];
 
     /**

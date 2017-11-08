@@ -61,6 +61,10 @@ class NotificationSeverity extends Eloquent
      */
     public $timestamps = false;
 
+    protected $appends = [
+        'title',
+    ];
+
     /**
      * template belongs to relation
      * 
@@ -79,6 +83,13 @@ class NotificationSeverity extends Eloquent
     public function scopeMedium($query)
     {
         $query->where('name', 'medium');
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitleAttribute() {
+        return ucfirst($this->name);
     }
 
 }

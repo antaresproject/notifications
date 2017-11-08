@@ -30,6 +30,11 @@ class Template {
     protected $view;
 
     /**
+     * @var string[]
+     */
+    protected $recipients = [];
+
+    /**
      * Template constructor.
      * @param array $types
      * @param string $subject
@@ -38,12 +43,7 @@ class Template {
     public function __construct(array $types, string $subject, string $view) {
         $this->subject  = $subject;
         $this->view     = $view;
-
-        foreach($types as $type) {
-            $this->types[] = $type === 'mail' ? 'email' : $type;
-        }
-
-        $this->types = array_unique($this->types);
+        $this->types    = array_unique($types);
     }
 
     /**
@@ -61,6 +61,23 @@ class Template {
      */
     public function getCategory() : string {
         return $this->category;
+    }
+
+    /**
+     * @param array $recipients
+     * @return $this
+     */
+    public function setRecipients(array $recipients) : self {
+        $this->recipients = $recipients;
+
+        return $this;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRecipients() : array {
+        return $this->recipients;
     }
 
     /**

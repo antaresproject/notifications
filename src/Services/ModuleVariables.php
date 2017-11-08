@@ -6,8 +6,9 @@ use Antares\Notifications\BindParameter;
 use Antares\Notifications\ModelVariableDefinitions;
 use Antares\Notifications\Variable;
 use Closure;
+use Illuminate\Contracts\Support\Arrayable;
 
-class ModuleVariables
+class ModuleVariables implements Arrayable
 {
 
     /**
@@ -47,6 +48,16 @@ class ModuleVariables
         $this->definitions[$name] = $definition;
 
         return $definition;
+    }
+
+    /**
+     * Returns module name.
+     *
+     * @return string
+     */
+    public function getModuleName(): string
+    {
+        return $this->module;
     }
 
     /**
@@ -115,6 +126,28 @@ class ModuleVariables
         }
 
         return $data;
+    }
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        $list = [];
+
+        foreach ($this->all() as $variable) {
+            $list[] = [
+                'label' => $variable->getLabel(),
+                'code'  => '[[ ' . $this->module . '::' . $variable->getCode() . ' ]]',
+            ];
+        }
+
+        return [
+            'module' => $this->getModuleName(),
+            'list'   => $list,
+        ];
     }
 
 }

@@ -68,6 +68,19 @@ class NotificationContents extends Eloquent
     public $timestamps = false;
 
     /**
+     * {@inheritdoc}
+     */
+    protected $with = ['lang'];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $attributes = [
+        'title'         => '',
+        'content'       => '',
+    ];
+
+    /**
      * notification belongs to relation
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -75,6 +88,16 @@ class NotificationContents extends Eloquent
     public function notification()
     {
         return $this->belongsTo(Notifications::class, 'notification_id', 'id');
+    }
+
+    /**
+     * Relation to languages table
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function lang()
+    {
+        return $this->hasOne(Languages::class, 'id', 'lang_id');
     }
 
     /**
@@ -113,7 +136,11 @@ class NotificationContents extends Eloquent
         }
         $fired = $this->fires();
 
-        return $fired['before'] . $return . $fired['after'];
+        if(count($fired)) {
+            return $fired['before'] . $return . $fired['after'];
+        }
+
+        return $return;
     }
 
     /**
@@ -132,17 +159,7 @@ class NotificationContents extends Eloquent
             $this->setAttribute('content', $content);
         }
 
-        parent::save($options);
-    }
-
-    /**
-     * Relation to languages table
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function lang()
-    {
-        return $this->hasOne(Languages::class, 'id', 'lang_id');
+       return parent::save($options);
     }
 
 }

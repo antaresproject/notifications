@@ -1,0 +1,70 @@
+<div class="left-tabs">
+    <div class="mdl-tabs__tab-bar">
+        <div class="mdl-tabs__left-content">
+            <a href="#wysiwyg-panel" class="mdl-tabs__tab is-active">WYSIWYG</a>
+            <a href="#html-panel" class="mdl-tabs__tab">HTML</a>
+        </div>
+
+        <div class="left-tabs__mobile-drop-down">
+            <div class="ddown left-tabs__mmobile-dropdown">
+                <div class="mdl-js-button mdl-js-ripple-effect btn-more ddown__init ddown__init--clean"><i class="zmdi zmdi-more-vert"></i></div>
+                <div class="ddown__content">
+                    <div class="ddown__arrow"></div>
+                    <ul class="ddown__menu">
+                        {% if can('antares/notifications::notifications-preview') %}
+                            <li>
+                                <a data-title="{{ trans('antares/notifications::messages.generating_notification_preview') }}" href="{{ handles('antares::notifications/preview/'~id) }}" class="notification-template-preview">
+                                    <i class="zmdi zmdi-search mdl-tabs__icon"></i>
+                                    {{ trans('antares/notifications::messages.notification_preview') }}
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if can('antares/notifications::notifications-test') and type in ['sms','email'] %}
+                            <li>
+                                <a href="{{ handles('antares::notifications/sendTest') }}" class="send-test-notification">
+                                    <i class="zmdi mdl-tabs__icon zmdi-mail-send"></i>
+                                    {{ trans('antares/notifications::messages.notification_send_test') }}
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li>
+                            <a href="#" id="notification-templates-variables" class="mdl-tabs--open-variables-panel">
+                                <i class="zmdi mdl-tabs__icon zmdi-code"></i>
+                                {{ trans('antares/notifications::messages.notification_available_variables') }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="left-tabs__desktop-links">
+            {% if can('antares/notifications::notifications-preview') %}
+                <a data-title="{{ trans('antares/notifications::messages.generating_notification_preview') }}" href="{{ handles('antares::notifications/preview') }}" class="mdl-js-button mdl-js-ripple-effect notification-template-preview">
+                    <i class="zmdi zmdi-search mdl-tabs__icon"></i>
+                    <span class="mdl-tabs__text">{{ trans('antares/notifications::messages.notification_preview') }}</span>
+                </a>
+            {% endif %}
+            {% if can('antares/notifications::notifications-test') %}
+                <a href="{{ handles('antares::notifications/sendTest') }}" class="mdl-js-button mdl-js-ripple-effect send-test-notification">
+                    <i class="zmdi mdl-tabs__icon zmdi-mail-send"></i>
+                    <span class="mdl-tabs__text">{{ trans('antares/notifications::messages.notification_send_test') }}</span>
+                </a>
+            {% endif %}
+            <a href="#" class="mdl-js-button mdl-js-ripple-effect mdl-tabs--open-variables-panel">
+                <i class="zmdi mdl-tabs__icon zmdi-code"></i>
+                <span class="mdl-tabs__text">{{ trans('antares/notifications::messages.notification_available_variables') }}</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="left-tabs__panels">
+        <div class="mdl-tabs__panel is-active" id="wysiwyg-panel">
+            <vue-ckeditor :ref="'editor-wysiwyg-' + lang" :id="'editor-wysiwyg-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :config.sync="ckeConfig"></vue-ckeditor>
+        </div>
+
+        <div class="mdl-tabs__panel" id="html-panel">
+            <codemirror :ref="'editor-html-' + lang" :id="'editor-html-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :options.sync="codeMirrorConfig"></codemirror>
+        </div>
+    </div>
+</div>

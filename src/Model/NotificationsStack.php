@@ -38,7 +38,7 @@ use Antares\Model\User;
  * @property Carbon $updated_at
  * @property Notifications $notification
  * @property User $author
- * @property-read Collection|NotificationContents[] $content
+ * @property-read Collection|NotificationContents[] $contents
  * @property-read Collection|NotificationsStackParams[] $params
  * @property-read Collection|NotificationsStackRead[] $read
  */
@@ -88,7 +88,7 @@ class NotificationsStack extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function content()
+    public function contents()
     {
         return $this->hasMany(NotificationContents::class, 'notification_id', 'notification_id');
     }
@@ -114,9 +114,7 @@ class NotificationsStack extends Model
     }
 
     /**
-     * Relation to stack read table
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function author()
     {
