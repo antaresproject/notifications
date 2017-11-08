@@ -20,7 +20,7 @@ class VariablesService
     /**
      * @var ModuleVariables[]
      */
-    protected static $modules = [];
+    protected $modules = [];
 
     /**
      * VariablesService constructor.
@@ -50,7 +50,7 @@ class VariablesService
             $model->applyVariables($module);
         }
 
-        return self::$modules[$moduleName] = $module;
+        return $this->modules[$moduleName] = $module;
     }
 
     /**
@@ -62,11 +62,11 @@ class VariablesService
     {
         $data = [];
 
-        foreach (self::$modules as $moduleVariables) {
+        foreach ($this->modules as $moduleVariables) {
             $data[] = $moduleVariables->getNamedVariables();
         }
 
-        return array_merge(...$data);
+        return count($data) ? array_merge(...$data) : [];
     }
 
     /**
@@ -74,7 +74,7 @@ class VariablesService
      */
     public function all(): array
     {
-        return self::$modules;
+        return $this->modules;
     }
 
     /**
@@ -85,7 +85,7 @@ class VariablesService
      */
     public function findByModule(string $moduleName)
     {
-        return Arr::get(self::$modules, $moduleName);
+        return Arr::get($this->modules, $moduleName);
     }
 
     /**
@@ -103,7 +103,7 @@ class VariablesService
 
         list($module, $variable) = explode('::', $code);
 
-        $moduleVariables = Arr::get(self::$modules, $module);
+        $moduleVariables = Arr::get($this->modules, $module);
 
         if ($moduleVariables instanceof ModuleVariables) {
             return $moduleVariables->get($variable);
@@ -118,7 +118,7 @@ class VariablesService
      */
     public function getDefault(ReflectionParameter $parameter)
     {
-        foreach (static::$modules as $module) {
+        foreach ($this->modules as $module) {
             foreach ($module->getModelDefinitions() as $definition) {
                 if ($definition->getBindParameter()->isMatchToParameter($parameter)) {
                     return $definition->getDefault();

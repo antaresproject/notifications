@@ -18,7 +18,7 @@
  * @link       http://antaresproject.io
  */
 
-namespace Antares\Templates\TestCase;
+namespace Antares\Notifications\TestCase;
 
 use Antares\Notifications\NotificationsServiceProvider;
 use Antares\Testing\TestCase;

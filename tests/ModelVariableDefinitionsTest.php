@@ -1,6 +1,6 @@
 <?php
 
-namespace Antares\Templates\TestCase;
+namespace Antares\Notifications\TestCase;
 
 use Antares\Notifications\BindParameter;
 use Antares\Notifications\ModelVariableDefinitions;
@@ -23,10 +23,10 @@ class ModelVariableDefinitionsTest extends TestCase
     {
         parent::setUp();
 
-        $this->parameter = new BindParameter('tests', TestParameterObject::class);
+        $this->parameter = new BindParameter('tests', TestParameterObjectStub::class);
 
         $this->default = function() {
-            return new TestParameterObject;
+            return new TestParameterObjectStub;
         };
     }
 
@@ -94,7 +94,7 @@ class ModelVariableDefinitionsTest extends TestCase
     public function testDefaultValue() {
         $model = new ModelVariableDefinitions($this->parameter, $this->default);
 
-        $this->assertInstanceOf(TestParameterObject::class, $model->getDefault());
+        $this->assertInstanceOf(TestParameterObjectStub::class, $model->getDefault());
     }
 
     public function testSatisfiedRequirements() {
@@ -106,4 +106,4 @@ class ModelVariableDefinitionsTest extends TestCase
 
 }
 
-class TestParameterObject {}
+class TestParameterObjectStub {}
