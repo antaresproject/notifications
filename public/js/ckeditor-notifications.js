@@ -1,68 +1,67 @@
 function CKConfiguration(isMobile) {
     this.isMobile = isMobile;
 
-    this.mobileConfig = {
-        full: {
-            height: '100%',
-            width: '100%',
-            fullPage: false,
-            allowedContent: true,
-            skin: 'antares,skins/antares-theme/',
-            protectedSource: [
-                /<\?[\s\S]*?\?>/g,
-                /\{%\s.+\s%\}/g
-            ],
-            toolbar: [
-                ['Bold', 'Italic', 'Underline', 'Strike', 'NumberedList', 'BulletedList', 'SpellChecker', 'Maximize']
-            ],
-
-            toolbarGroups: [],
-            removeButtons: 'Underline,Strike,Subscript,Superscript,Anchor,Styles,Specialchar'
-        },
-        mini: {
-            height: '100%',
-            width: '100%',
-            fullPage: false,
-            allowedContent: true,
-            skin: 'antares,skins/antares-theme/',
-            protectedSource: [
-                /<\?[\s\S]*?\?>/g,
-                /\{%\s.+\s%\}/g
-            ],
-            toolbar: [
-                ['Bold', 'Italic', 'Underline', 'Strike', 'NumberedList', 'BulletedList', 'SpellChecker', 'Maximize']
-            ],
-            toolbarGroups: [],
-            removeButtons: 'Underline,Strike,Subscript,Superscript,Anchor,Styles,Specialchar'
-        }
+    this.common = {
+        width: '100%',
+        fullPage: false,
+        allowedContent: true,
+        extraPlugins: 'placeholder',
+        protectedSource: [
+            /<\?[\s\S]*?\?>/g,
+            /{%\s.+\s%}/g
+        ],
+        toolbar: [
+            {
+                name: 'styles',
+                items : [ 'Format','Font','FontSize' ]
+            },
+            {
+                name: 'colors',
+                items : [ 'TextColor','BGColor' ]
+            },
+            {
+                name: 'basicstyles',
+                items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', 'RemoveFormat']
+            },
+            {
+                name: 'paragraph',
+                items: ['NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote','CreateDiv', '-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','BidiLtr','BidiRtl']
+            },
+            {
+                name: 'links',
+                items : [ 'Link' ]
+            },
+            {
+                name: 'insert',
+                items : [ 'Image','Table','HorizontalRule','SpecialChar','PageBreak' ]
+            }
+        ]
     };
+
+    var mobileConfig = {
+        height: '100%',
+        skin: 'antares,skins/antares-theme/'
+    };
+
+    this.mobileConfig = {full: {}, mini: {}};
 
     this.desktopConfig = {
         full: {
             height: 600,
-            width: '100%',
-            fullPage: false,
-            allowedContent: true,
-            skin: 'antares,/public/ckeditor/skins/antares-theme/',
-            protectedSource: [
-                /<\?[\s\S]*?\?>/g,
-                /\{%\s.+\s%\}/g
-            ]
+            skin: 'antares,/public/ckeditor/skins/antares-theme/'
         },
+
         mini: {
             height: 680,
-            width: '100%',
-            fullPage: false,
-            allowedContent: true,
-            skin: 'antares,skins/antares-theme/',
-            toolbarGroups: [],
-            removeButtons: 'Underline,Strike,Subscript,Superscript,Anchor,Styles,Specialchar',
-            protectedSource: [
-                /<\?[\s\S]*?\?>/g,
-                /\{%\s.+\s%\}/g
-            ]
+            skin: 'antares,skins/antares-theme/'
         }
     };
+
+    _.merge(this.mobileConfig.full, this.common, mobileConfig);
+    _.merge(this.mobileConfig.mini, this.common, mobileConfig);
+
+    _.merge(this.desktopConfig.full, this.common);
+    _.merge(this.desktopConfig.mini, this.common);
 
     this.getFull = function() {
         return this.isMobile ? this.mobileConfig.full : this.desktopConfig.full;

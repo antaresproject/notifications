@@ -3,6 +3,7 @@
 namespace Antares\Notifications\Services;
 
 use Antares\Notifications\Contracts\ModelVariablesResoluble;
+use Antares\Notifications\ModelVariableDefinitions;
 use Antares\Notifications\Variable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
@@ -89,7 +90,7 @@ class VariablesService
     }
 
     /**
-     * Returns the variable object based on full variable code, ex. Shopping::order.id
+     * Returns the variable object based on full variable code, ex. shopping::order.id
      *
      * @param string $code
      * @return Variable|null
@@ -107,6 +108,25 @@ class VariablesService
 
         if ($moduleVariables instanceof ModuleVariables) {
             return $moduleVariables->get($variable);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the first matched module variables by the parameter.
+     *
+     * @param ReflectionParameter $parameter
+     * @return ModuleVariables|null
+     */
+    public function firstModuleVariablesByParameter(ReflectionParameter $parameter) : ?ModuleVariables
+    {
+        foreach ($this->modules as $module) {
+            foreach ($module->getModelDefinitions() as $definition) {
+                if ($definition->getBindParameter()->isMatchToParameter($parameter)) {
+                    return $module;
+                }
+            }
         }
 
         return null;
