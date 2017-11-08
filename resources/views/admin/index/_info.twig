@@ -8,9 +8,6 @@
 
                 <div class="input-field">
                     <input type="text" name="name" v-model="notification.name">
-                    <span class="error nopadding" v-if="errors.has('name')">
-                        <p class="help-block error" v-text="errors.get('name')"></p>
-                    </span>
 
                     <div class="page-notification-templates__switch">
                         <label class="form-block__name">{{ trans('antares/notifications::messages.notification_published') }}</label>
@@ -20,6 +17,10 @@
                         </label>
                     </div>
                 </div>
+
+                <span class="error nopadding" >
+                    <p class="help-block error" v-text="errors.get('name')"></p>
+                </span>
             </div>
         </div>
 

@@ -28,20 +28,21 @@
                         <div class="col-mb-21 col-22">
                             <div class="input-field">
                                 <input type="text" name="name" v-model="content.title" :data-lang-code="lang" v-bind:disabled="disabledContentTitle">
-
-                                <span class="error nopadding" v-if="errors.has('contents.' + lang + '.title')">
-                                    <p class="help-block error" v-text="errors.get('contents.' + lang + '.title')"></p>
-                                </span>
                             </div>
                         </div>
                     </div>
+                    <span class="error nopadding" v-if="errors.has('contents.' + lang + '.title')">
+                        <p class="help-block error" v-text="errors.get('contents.' + lang + '.title')"></p>
+                    </span>
                 </div>
             </div>
 
+            <span class="error nopadding" v-if="errors.has('contents.' + lang + '.content')">
+                <p class="help-block error" v-text="errors.get('contents.' + lang + '.content')"></p>
+            </span>
+
             <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
-                <span class="error nopadding" v-if="errors.has('contents.' + lang + '.content')">
-                    <p class="help-block error" v-text="errors.get('contents.' + lang + '.content')"></p>
-                </span>
+
 
                 {% include 'antares/notifications::admin.index._tabs' %}
                 {% include 'antares/notifications::admin.index._variables' %}
