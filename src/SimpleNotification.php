@@ -2,6 +2,7 @@
 
 namespace Antares\Notifications;
 
+use Antares\Notifications\Messages\SmsMessage;
 use Antares\Notifications\Model\SimpleContent;
 use Antares\Notifications\Parsers\ContentParser;
 use Illuminate\Notifications\Notification;
@@ -70,12 +71,38 @@ class SimpleNotification extends Notification {
     }
 
     /**
+     * Get the SMS representation of the notification.
+     *
+     * @param $notifiable
+     * @return SmsMessage
+     */
+    public function toSms($notifiable)
+    {
+        return new SmsMessage($this->getContent());
+    }
+
+    /**
      * Get the notification representation of the notification.
      *
      * @param $notifiable
      * @return $this|Messages\AbstractMessage
      */
     public function toNotification($notifiable)
+    {
+        return (new NotificationMessage)
+            ->subject( $this->getSubject() )
+            ->view('antares/notifications::notification.simple', [
+                'content' => $this->getContent()
+            ]);
+    }
+
+    /**
+     * Get the alert representation of the notification.
+     *
+     * @param $notifiable
+     * @return $this|Messages\AbstractMessage
+     */
+    public function toAlert($notifiable)
     {
         return (new NotificationMessage)
             ->subject( $this->getSubject() )

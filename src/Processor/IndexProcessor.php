@@ -22,6 +22,7 @@ namespace Antares\Notifications\Processor;
 
 use Antares\Helpers\ResponseHelper;
 use Antares\Notifications\Decorator\MailDecorator;
+use Antares\Notifications\Exceptions\InfoException;
 use Antares\Notifications\Model\NotificationContents;
 use Antares\Notifications\Model\Notifications;
 use Antares\Foundation\Processor\Processor;
@@ -199,6 +200,12 @@ class IndexProcessor extends Processor {
 
             $message    = trans('antares/notifications::messages.notification_preview_sent');
             $response   = ResponseHelper::success($message);
+        }
+        catch(InfoException $e) {
+            Log::emergency($e);
+
+            $message    = $e->getMessage();
+            $response   = ResponseHelper::error($message);
         }
         catch(Exception $e) {
             Log::emergency($e);

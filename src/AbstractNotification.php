@@ -3,6 +3,9 @@
 namespace Antares\Notifications;
 
 use Antares\Notifications\Channels\TemplateChannel;
+use Antares\Notifications\Messages\MailMessage;
+use Antares\Notifications\Messages\NotificationMessage;
+use Antares\Notifications\Messages\SmsMessage;
 use Antares\Notifications\Model\Notifications;
 use Illuminate\Notifications\Notification;
 
@@ -32,6 +35,22 @@ class AbstractNotification extends Notification
     public function via($notifiable)
     {
         return [TemplateChannel::class];
+    }
+
+    public function toMail($notifiable) {
+        return new MailMessage;
+    }
+
+    public function toSms($notifiable) {
+        return new SmsMessage();
+    }
+
+    public function toNotification($notifiable) {
+        return new NotificationMessage;
+    }
+
+    public function toAlert($notifiable) {
+        return new NotificationMessage;
     }
 
 }
