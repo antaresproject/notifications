@@ -148,6 +148,8 @@ new Vue({
             this._ckeConfig = isSms ? config.getMini() : config.getFull();
 
             this._ckeConfig.removePlugins = 'resize,autogrow';
+
+            componentHandler.upgradeAllRegistered();
         }
     },
 

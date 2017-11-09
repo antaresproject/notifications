@@ -1,8 +1,8 @@
 <div class="left-tabs">
     <div class="mdl-tabs__tab-bar">
         <div class="mdl-tabs__left-content">
-            <a href="#wysiwyg-panel" class="mdl-tabs__tab is-active" v-bind:class="{ 'is-active' : ! onlyText }" v-if="! onlyText">WYSIWYG</a>
-            <a href="#html-panel" class="mdl-tabs__tab" v-if="! onlyText">HTML</a>
+            <a href="#wysiwyg-panel" class="mdl-tabs__tab" v-bind:class="{ 'is-active' : ! onlyText }" v-show="! onlyText">WYSIWYG</a>
+            <a href="#html-panel" class="mdl-tabs__tab" v-show="! onlyText">HTML</a>
             <a href="#text-panel" class="mdl-tabs__tab is-active" v-if="onlyText">TEXT</a>
         </div>
 
@@ -72,7 +72,7 @@
             </fieldset>
         </div>
 
-        <div class="mdl-tabs__panel is-active" id="text-panel">
+        <div class="mdl-tabs__panel is-active" id="text-panel" v-if="onlyText">
             <fieldset class="p16">
                 <div class="form-block">
                     <textarea class="h100p" :ref="'editor-text-' + lang" :id="'editor-text-' + lang" v-model="contents[lang].content" :data-lang-code="lang"></textarea>
