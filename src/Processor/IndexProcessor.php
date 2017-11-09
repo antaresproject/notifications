@@ -219,19 +219,27 @@ class IndexProcessor extends Processor {
 
     /**
      * @param array $data
-     * @return \Illuminate\Contracts\View\View
+     * @return array
      */
     public function preview(array $data) {
         $this->contentParser->setPreviewMode(true);
 
-        $data['title']      = $this->contentParser->parse(  Arr::get($data, 'title', '') );
-        $data['content']    = $this->contentParser->parse(  Arr::get($data, 'content', '') );
+        $type = Arr::get($data, 'type');
 
-        if( Arr::get($data, 'type') === 'mail') {
+        if($type === 'sms') {
+            $data['title'] = '';
+        }
+        else {
+            $data['title'] = $this->contentParser->parse(  Arr::get($data, 'title', '') );
+        }
+
+        $data['content'] = $this->contentParser->parse(  Arr::get($data, 'content', '') );
+
+        if($type === 'mail') {
             $data['content'] = MailDecorator::decorate($data['content']);
         }
 
-        return view()->make('antares/notifications::admin.index.preview', $data);
+        return $data;
     }
 
     /**

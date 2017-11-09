@@ -1,5 +1,17 @@
-<div id="notificationTemplatePreview" title="{{ trans('antares/notifications::messages.template_preview_title') }}" style="display: none;" class="w1000">
-    <div class="template-preview-container" style="width:100%">
-        <h1>{{ trans('antares/notifications::messages.generating_notification_preview') }}</h1>
+<script type="text/x-template" id="notificationTemplatePreview-template">
+
+    <div id="notificationTemplatePreview" title="{{ trans('antares/notifications::messages.template_preview_title') }}" v-if="show" class="w1000">
+        <div class="template-preview-container" style="width:100%">
+            <div v-if="loading">
+                {{ trans('antares/notifications::messages.generating_notification_preview') }}
+            </div>
+
+            <h1 v-else-if="title" v-text="title"></h1>
+
+            <iframe v-if="! loading" :src="src" width="100%" :height="height" frameborder="0"></iframe>
+        </div>
     </div>
-</div>
+
+</script>
+
+<vue-template-preview ref="previewModal"></vue-template-preview>

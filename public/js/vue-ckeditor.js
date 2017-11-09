@@ -80,7 +80,6 @@ Vue.component('vue-ckeditor', {
                 this.instance.on('change', this.onChange);
                 this.instance.on('blur', this.onBlur);
                 this.instance.on('focus', this.onFocus);
-                this.destroyed = false;
             }
         },
 
@@ -95,6 +94,7 @@ Vue.component('vue-ckeditor', {
         destroy: function () {
             if (!this.destroyed) {
                 this.instance.destroy(true);
+
                 this.destroyed = true
             }
         },
