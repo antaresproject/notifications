@@ -14,6 +14,7 @@ new Vue({
         notification: {},
         langs: [],
         selectedLang: null,
+        onlyText: false,
 
         eventRecipients: [],
         eventVariables: [],
@@ -143,6 +144,7 @@ new Vue({
                 isSms = (value.name === 'sms');
 
             this.disabledContentTitle = isSms;
+            this.onlyText = isSms;
             this._ckeConfig = isSms ? config.getMini() : config.getFull();
 
             this._ckeConfig.removePlugins = 'resize,autogrow';

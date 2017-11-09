@@ -93,7 +93,8 @@ Vue.component('vue-ckeditor', {
 
         destroy: function () {
             if (!this.destroyed) {
-                this.instance.destroy();
+                this.instance.destroy(true);
+                CKEDITOR.remove(this.instance);
                 this.destroyed = true
             }
         },
