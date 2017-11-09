@@ -58,11 +58,20 @@ class IndexProcessor extends Processor {
             DB::beginTransaction();
 
             $contents       = Arr::get($data, 'contents', []);
+            $langCode       = Arr::get($data, 'lang_code', locale());
             $notification   = new Notifications($data);
 
             $notification->save();
 
             foreach($contents as $content) {
+                if( empty($content['title']) ) {
+                    $content['title'] = $contents[$langCode]['title'];
+                }
+
+                if( empty($content['content']) ) {
+                    $content['content'] = $contents[$langCode]['content'];
+                }
+
                 $notification->contents()->save(new NotificationContents($content));
             }
 
@@ -94,14 +103,24 @@ class IndexProcessor extends Processor {
             DB::beginTransaction();
 
             $contents = Arr::get($data, 'contents', []);
+            $langCode = Arr::get($data, 'lang_code', locale());
 
             $notification->load('contents');
             $notification->fill($data);
             $notification->save();
 
             foreach($contents as $content) {
+                if( empty($content['title']) ) {
+                    $content['title'] = $contents[$langCode]['title'];
+                }
+
+                if( empty($content['content']) ) {
+                    $content['content'] = $contents[$langCode]['content'];
+                }
+
                 if($id = Arr::get($content, 'id')) {
                     $content = Arr::except($content, ['id', 'lang_id']);
+
                     NotificationContents::query()->findOrFail($id)->fill($content)->save();
                 }
                 else {

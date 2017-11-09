@@ -344,6 +344,7 @@ new Vue({
             notification.event = this.notification.event ? this.notification.event.event_class : null;
             notification.recipients = _.map(this.notification.recipients || [], 'id');
             notification.contents = this.contents;
+            notification.lang_code = this.selectedLang;
 
             return notification;
         },
