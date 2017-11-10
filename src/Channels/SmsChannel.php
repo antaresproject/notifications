@@ -81,7 +81,11 @@ class SmsChannel
         } catch (Exception $e) {
             Log::error($e);
 
-            ExceptionService::report($e);
+            if( ! (property_exists($notification, 'testable') && $notification->testable)) {
+                $message = 'While sending notification by SMS channel an error occurred: ' . $e->getMessage();
+
+                ExceptionService::report($e, $message);
+            }
 
             throw new InfoException($e->getMessage());
         }

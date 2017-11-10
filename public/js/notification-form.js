@@ -144,8 +144,8 @@ new Vue({
                 isSms = (value.name === 'sms');
 
             this.disabledContentTitle = isSms;
-            this.onlyText = isSms;
-            this._ckeConfig = isSms ? config.getMini() : config.getFull();
+            this.onlyText = _.indexOf(['alert', 'sms', 'notification'], value.name) >= 0;
+            this._ckeConfig = this.onlyText ? config.getMini() : config.getFull();
 
             this._ckeConfig.removePlugins = 'resize,autogrow';
 
