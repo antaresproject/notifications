@@ -25,6 +25,13 @@ return [
         'notification' => 'antares/foundation::layouts.antares.partials._sidebar_notification',
         'alert'        => 'antares/foundation::layouts.antares.partials._sidebar_alert'
     ],
+    /** Notifcations priorities * */
+    'notification_severity' => [
+        'medium'
+    ],
+    'alert_severity'        => [
+        'highest', 'high'
+    ],
     'scripts'               => [
         'resources-rich'    => [
         //'ckeditor-js' => 'packages/ckeditor/ckeditor.js'
