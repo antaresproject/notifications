@@ -55,11 +55,17 @@ Vue.component('vue-template-preview', {
             this.loading = false;
 
             this.$nextTick(function() {
-                var height = $('#notificationTemplatePreview').find('iframe:first')[0].contentWindow.document.body.scrollHeight;
+                $('body').append('<div id="dump-template-preview" style="display:none">' + content + '</div>');
+
+                var
+                    $dump = $('#dump-template-preview'),
+                    height = $dump.height();
 
                 if(height > 600) {
                     height = 600;
                 }
+
+                $dump.remove();
 
                 this.height = height;
             });
