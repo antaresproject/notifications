@@ -7,8 +7,9 @@ use Antares\Notifications\Contracts\NotificationEditable;
 use Antares\Notifications\Messages\NotificationMessage;
 use Antares\Notifications\Model\Template;
 use Exception;
+use Illuminate\Notifications\Notification;
 
-class ExceptionNotification implements NotificationEditable {
+class ExceptionNotification extends Notification implements NotificationEditable {
 
     /**
      * @var Exception
