@@ -1,6 +1,6 @@
 <?php
 
-namespace Antares\Templates\TestCase;
+namespace Antares\Notifications\TestCase;
 
 use Antares\Notifications\BindParameter;
 use PHPUnit\Framework\TestCase;

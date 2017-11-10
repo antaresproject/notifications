@@ -20,14 +20,13 @@
 
 namespace Antares\Notifications\Http\Controllers\Admin\TestCase;
 
-use Antares\Notifications\Http\Presenters\IndexPresenter;
-use Antares\Notifications\NotificationsServiceProvider;
+use Antares\Area\Facade\AreasManager;
+use Antares\Model\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
-use Antares\Notifications\Adapter\VariablesAdapter;
-use Antares\Notifications\Processor\IndexProcessor;
-use Antares\Notifications\Repository\Repository;
-use Antares\Notifications\Model\Notifications;
 use Antares\Testing\TestCase;
+use Illuminate\Routing\Route;
+use Illuminate\Routing\Router;
 use Illuminate\View\View;
 use Mockery as m;
 
@@ -35,37 +34,20 @@ class IndexControllerTest extends TestCase
 {
 
     use WithoutMiddleware;
+    use DatabaseTransactions;
 
     /**
      * Setup the test environment.
      */
     public function setUp()
     {
-        $this->addProvider(NotificationsServiceProvider::class);
+        $this->afterApplicationCreated(function() {
+            AreasManager::manager()->setCurrentArea('admin');
+        });
 
         parent::setUp();
 
-        $this->app = $this->createApplication();
-
         $this->disableMiddlewareForAllTests();
-    }
-
-    /**
-     * Get processor mock.
-     *
-     * @return \Antares\Foundation\Processor\Account\ProfileDashboard
-     */
-    protected function getProcessorMock()
-    {
-        $variablesAdapter = $this->app->make(VariablesAdapter::class);
-        $repository       = m::mock(Repository::class);
-        $repository->shouldReceive('find')->once()->andReturn(new Notifications())
-                ->shouldReceive('findByLocale')->once()->andReturn(new Notifications());
-
-        $processor = m::mock(IndexProcessor::class, [m::mock(IndexPresenter::class), $variablesAdapter, $repository]);
-        $processor->shouldReceive('update')->withAnyArgs()->andReturnNull();
-        $this->app->instance(IndexProcessor::class, $processor);
-        return $processor;
     }
 
     /**
@@ -73,9 +55,16 @@ class IndexControllerTest extends TestCase
      */
     public function testIndex()
     {
-        $this->getProcessorMock()->shouldReceive('index')->once()->andReturn(View::class);
-        $this->call('GET', 'antares/notifications/index');
-        $this->assertResponseOk();
+        /* @var $user User */
+        $user = factory(User::class)->create();
+        //$user->attachRole('administrator');
+
+        /* @var $r Router */
+        $r = $this->app->make(Router::class);
+
+        dd($r->getRoutes());
+
+        $this->actingAs($user)->get('/admin/notifications')->assertStatus(202);
     }
 
     /**
