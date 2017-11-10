@@ -38,19 +38,47 @@ class AbstractNotification extends Notification
     }
 
     public function toMail($notifiable) {
-        return new MailMessage;
+        $data = $this->getResolvedData();
+
+        return (new MailMessage)
+            ->template('mail')
+            ->subjectData($data)
+            ->viewData($data);
     }
 
     public function toSms($notifiable) {
-        return new SmsMessage();
+        $data = $this->getResolvedData();
+
+        return (new SmsMessage())
+            ->template('sms')
+            ->viewData($data);
     }
 
     public function toNotification($notifiable) {
-        return new NotificationMessage;
+        $data = $this->getResolvedData();
+
+        return (new NotificationMessage)
+            ->types(['notification'])
+            ->template('notification')
+            ->subjectData($data)
+            ->viewData($data);
     }
 
     public function toAlert($notifiable) {
-        return new NotificationMessage;
+        $data = $this->getResolvedData();
+
+        return (new NotificationMessage)
+            ->types(['alert'])
+            ->template('alert')
+            ->subjectData($data)
+            ->viewData($data);
+    }
+
+    /**
+     * @return array
+     */
+    private function getResolvedData() : array {
+        return get_object_vars($this);
     }
 
 }
