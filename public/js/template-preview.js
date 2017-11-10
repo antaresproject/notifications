@@ -54,6 +54,12 @@ Vue.component('vue-template-preview', {
             this.content = content;
             this.loading = false;
 
+            if(title) {
+                var modalTitle = $(this.$el).find('.modal__title');
+
+                modalTitle.text( modalTitle.text() + ': ' + title);
+            }
+
             this.$nextTick(function() {
                 $('body').append('<div id="dump-template-preview" style="display:none">' + content + '</div>');
 
