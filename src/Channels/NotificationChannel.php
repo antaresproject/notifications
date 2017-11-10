@@ -66,7 +66,7 @@ class NotificationChannel
                 $type = TemplateChannel::getViaType($notification);
             }
             else {
-                $type = ((property_exists($notification, 'alert') && array_search('alert', $via) !== false))
+                $type = ((method_exists($notification, 'toAlert') && array_search('alert', $via) !== false))
                     ? 'alert'
                     : 'notification';
             }
@@ -95,11 +95,11 @@ class NotificationChannel
      */
     protected function sendNotification(NotificationMessage $message, Notification $notification, int $modelId)
     {
-        $source = get_class($notification);
+        $source     = get_class($notification);
+        $variables  = array_merge($message->subjectData, $message->viewData);
 
         foreach ($message->types as $type) {
-            $model     = $this->findNotification($message, $type, $source);
-            $variables = array_merge($message->subjectData, $message->viewData);
+            $model = $this->findNotification($message, $type, $source);
 
             if($model) {
                 $this->saveInStack($model, $modelId, $variables);
@@ -142,21 +142,26 @@ class NotificationChannel
      */
     protected function findNotification(NotificationMessage $message, string $type, string $source)
     {
-        if( ! property_exists($message, 'severity') || ! property_exists($message, 'category')) {
-            return null;
+        $query = Notifications::query()
+            ->where('source', $source)
+            ->whereHas('type', function(Builder $query) use($type) {
+                $query->where('name', $type);
+            });
+
+        if( property_exists($message, 'severity') ) {
+            $query->whereHas('severity', function (Builder $query) use ($message) {
+                $query->where('name', $message->severity);
+            });
+        }
+
+        if( property_exists($message, 'category') ) {
+            $query->whereHas('category', function (Builder $query) use ($message) {
+                $query->where('name', $message->category);
+            });
         }
 
         /* @var $notification Notifications */
-        $notification = Notifications::query()
-            ->whereHas('type', function(Builder $query) use($type) {
-                $query->where('name', $type);
-            })->whereHas('severity', function(Builder $query) use($message) {
-                $query->where('name', $message->severity);
-            })->whereHas('category', function(Builder $query) use($message) {
-                $query->where('name', $message->category);
-            })
-            ->where('source', $source)
-            ->first();
+        $notification = $query->first();
 
         return $notification;
     }

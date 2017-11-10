@@ -14,6 +14,7 @@ new Vue({
         notification: {},
         langs: [],
         selectedLang: null,
+        onlyText: false,
 
         eventRecipients: [],
         eventVariables: [],
@@ -143,9 +144,12 @@ new Vue({
                 isSms = (value.name === 'sms');
 
             this.disabledContentTitle = isSms;
-            this._ckeConfig = isSms ? config.getMini() : config.getFull();
+            this.onlyText = _.indexOf(['alert', 'sms', 'notification'], value.name) >= 0;
+            this._ckeConfig = this.onlyText ? config.getMini() : config.getFull();
 
             this._ckeConfig.removePlugins = 'resize,autogrow';
+
+            componentHandler.upgradeAllRegistered();
         }
     },
 
@@ -231,48 +235,18 @@ new Vue({
 
         preview: function(url) {
             var
-                modal = $('#notificationTemplatePreview'),
-                container = $('.template-preview-container'),
-                modalBody = container.parent(),
+                modal = this.$refs.previewModal,
                 data = {
                     type: this.notification.type.name,
                     title: this.contents[this.selectedLang].title,
                     content: this.contents[this.selectedLang].content
                 };
 
-            APP.modal.init({
-                element: modal,
-                title: modal.attr('title')
-            });
-
-            container.height(100);
+            modal.open();
 
             $.post(url, data)
                 .done(function(response) {
-                    modalBody.LoadingOverlay('hide');
-                    container.html(response);
-
-                    var
-                        height = container.find('.preview-response').height() || 450,
-                        targetHeight = height + 50;
-
-                    if (targetHeight > 600) {
-                        targetHeight = 600;
-                    }
-
-                    container.height(targetHeight);
-                    var iframe = document.createElement('iframe');
-                    var frameborder = document.createAttribute("frameborder");
-                    frameborder.value = 0;
-                    iframe.setAttributeNode(frameborder);
-                    var hght = document.createAttribute("height");
-                    hght.value = '100%';
-                    iframe.setAttributeNode(hght);
-                    var wdth = document.createAttribute("width");
-                    wdth.value = '100%';
-                    iframe.setAttributeNode(wdth);
-                    iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(container.find('.preview-response').html());
-                    container.html(iframe);
+                    modal.set(response.title, response.content);
                 })
                 .fail(function (error) {
                     swal($.extend({}, APP.swal.cb1Error(), {
@@ -284,8 +258,6 @@ new Vue({
                         cancelButtonText: 'Close',
                         closeOnCancel: true
                     }));
-
-                    modalBody.LoadingOverlay('hide');
                 });
         },
 
@@ -344,6 +316,7 @@ new Vue({
             notification.event = this.notification.event ? this.notification.event.event_class : null;
             notification.recipients = _.map(this.notification.recipients || [], 'id');
             notification.contents = this.contents;
+            notification.lang_code = this.selectedLang;
 
             return notification;
         },

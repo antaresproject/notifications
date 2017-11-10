@@ -18,7 +18,7 @@
  * @link       http://antaresproject.io
  */
 
-namespace Antares\Templates\Model\TestCase;
+namespace Antares\Notifications\Parsers\TestCase;
 
 use Antares\Notifications\Parsers\StringParser;
 use PHPUnit\Framework\TestCase;

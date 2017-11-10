@@ -119,7 +119,7 @@ class VariablesService
      * @param ReflectionParameter $parameter
      * @return ModuleVariables|null
      */
-    public function firstModuleVariablesByParameter(ReflectionParameter $parameter)
+    public function firstModuleVariablesByParameter(ReflectionParameter $parameter) : ?ModuleVariables
     {
         foreach ($this->modules as $module) {
             foreach ($module->getModelDefinitions() as $definition) {

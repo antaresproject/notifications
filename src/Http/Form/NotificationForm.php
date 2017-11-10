@@ -65,6 +65,7 @@ class NotificationForm {
 
         return $form->build('notification', function(FormGrid $form) use($notification, $langs, $contents) {
             publish('notifications', ['js/ckeditor-notifications.js']);
+            publish('notifications', ['js/template-preview.js']);
             publish('notifications', ['js/vue-ckeditor.js']);
             publish('notifications', ['js/vue-codemirror.js']);
             publish('notifications', ['js/notification-form.js']);

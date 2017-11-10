@@ -1,8 +1,9 @@
 <div class="left-tabs">
     <div class="mdl-tabs__tab-bar">
         <div class="mdl-tabs__left-content">
-            <a href="#wysiwyg-panel" class="mdl-tabs__tab is-active">WYSIWYG</a>
-            <a href="#html-panel" class="mdl-tabs__tab">HTML</a>
+            <a href="#wysiwyg-panel" class="mdl-tabs__tab" v-bind:class="{ 'is-active' : ! onlyText }" v-show="! onlyText">WYSIWYG</a>
+            <a href="#html-panel" class="mdl-tabs__tab" v-show="! onlyText">HTML</a>
+            <a href="#text-panel" class="mdl-tabs__tab is-active" v-if="onlyText">TEXT</a>
         </div>
 
         <div class="left-tabs__mobile-drop-down">
@@ -59,12 +60,24 @@
     </div>
 
     <div class="left-tabs__panels">
-        <div class="mdl-tabs__panel is-active" id="wysiwyg-panel">
-            <vue-ckeditor :ref="'editor-wysiwyg-' + lang" :id="'editor-wysiwyg-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :config.sync="ckeConfig"></vue-ckeditor>
+        <div class="mdl-tabs__panel" id="wysiwyg-panel" v-bind:class="{ 'is-active' : ! onlyText }">
+            <fieldset>
+                <vue-ckeditor :ref="'editor-wysiwyg-' + lang" :id="'editor-wysiwyg-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :config.sync="ckeConfig"></vue-ckeditor>
+            </fieldset>
         </div>
 
         <div class="mdl-tabs__panel" id="html-panel">
-            <codemirror :ref="'editor-html-' + lang" :id="'editor-html-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :options.sync="codeMirrorConfig"></codemirror>
+            <fieldset>
+                <codemirror :ref="'editor-html-' + lang" :id="'editor-html-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :options.sync="codeMirrorConfig"></codemirror>
+            </fieldset>
+        </div>
+
+        <div class="mdl-tabs__panel is-active" id="text-panel" v-if="onlyText">
+            <fieldset class="p16">
+                <div class="form-block">
+                    <textarea class="h100p" :ref="'editor-text-' + lang" :id="'editor-text-' + lang" v-model="contents[lang].content" :data-lang-code="lang"></textarea>
+                </div>
+            </fieldset>
         </div>
     </div>
 </div>

@@ -22,6 +22,7 @@ namespace Antares\Notifications\Channels;
 
 use Antares\Notifications\Contracts\TemplateMessageContract;
 use Antares\Notifications\Decorator\MailDecorator;
+use Antares\Notifications\Services\ExceptionService;
 use Antares\Notifications\Services\TemplateBuilderService;
 use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
 use Antares\Notifications\Messages\MailMessage;
@@ -119,6 +120,12 @@ class MailChannel extends BaseMailChannel
         }
         catch(\Exception $e) {
             Log::emergency($e);
+
+            if( ! (property_exists($notification, 'testable') && $notification->testable)) {
+                $message = 'While sending notification by Mail channel an error occurred: ' . $e->getMessage();
+
+                ExceptionService::report($e, $message);
+            }
 
             throw $e;
         }
