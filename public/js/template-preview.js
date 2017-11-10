@@ -65,7 +65,7 @@ Vue.component('vue-template-preview', {
 
                 var
                     $dump = $('#dump-template-preview'),
-                    height = $dump.height();
+                    height = $dump.height() + 50;
 
                 if(height > 600) {
                     height = 600;

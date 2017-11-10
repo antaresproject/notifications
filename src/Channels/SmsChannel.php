@@ -22,6 +22,7 @@ namespace Antares\Notifications\Channels;
 
 use Antares\Notifications\Exceptions\InfoException;
 use Antares\Notifications\Messages\SmsMessage;
+use Antares\Notifications\Services\ExceptionService;
 use Antares\Notifications\Services\TemplateBuilderService;
 use Antares\Notifier\Adapter\FastSmsAdapter;
 use Illuminate\Notifications\Notification;
@@ -79,6 +80,8 @@ class SmsChannel
             $this->adapter->send($message, $to);
         } catch (Exception $e) {
             Log::error($e);
+
+            ExceptionService::report($e);
 
             throw new InfoException($e->getMessage());
         }
