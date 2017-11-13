@@ -46,8 +46,13 @@ class NotifiableEvent implements Arrayable {
      * @param string $eventClass
      * @param string $categoryName
      * @param string|null $label
+     * @throws InvalidArgumentException
      */
     public function __construct(string $eventClass, string $categoryName, string $label = null) {
+        if( ! class_exists($eventClass) ) {
+            throw new InvalidArgumentException('The [' . $eventClass . '] class does not exist.');
+        }
+
         $this->eventClass = $eventClass;
         $this->categoryName = strtolower($categoryName);
         $this->label = $label ?: $eventClass;
@@ -99,7 +104,7 @@ class NotifiableEvent implements Arrayable {
      * @throws InvalidArgumentException
      */
     public function setHandler($handler) : self {
-        if($handler instanceof Closure || is_string($handler)) {
+        if($handler instanceof Closure || (is_string($handler) && class_exists($handler))) {
             $this->handler = $handler;
         }
         else {
@@ -110,9 +115,9 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
-     * @return null|string
+     * @return Closure|null|string
      */
-    public function getHandler() : ?string {
+    public function getHandler() {
         return $this->handler;
     }
 

@@ -32,9 +32,9 @@ class TemplatesCollection
     /**
      * TemplatesCollection constructor.
      * @param string $title
-     * @param string $notifiableEvent
+     * @param string $notifiableEvent Event class name or category name.
      */
-    public function __construct(string $title, string $notifiableEvent = '')
+    public function __construct(string $title, string $notifiableEvent)
     {
         $this->title           = $title;
         $this->notifiableEvent = class_exists($notifiableEvent) ? $notifiableEvent : '';
@@ -54,10 +54,10 @@ class TemplatesCollection
 
     /**
      * @param string $title
-     * @param string $notifiableEvent
+     * @param string $notifiableEvent Event class name or category name.
      * @return TemplatesCollection
      */
-    public static function make(string $title, string $notifiableEvent = ''): TemplatesCollection
+    public static function make(string $title, string $notifiableEvent): TemplatesCollection
     {
         return new TemplatesCollection($title, $notifiableEvent);
     }
