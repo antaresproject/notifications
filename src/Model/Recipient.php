@@ -10,12 +10,7 @@ class Recipient implements Arrayable {
     /**
      * @var string
      */
-    protected $id;
-
-    /**
-     * @var string
-     */
-    protected $label;
+    protected $area;
 
     /**
      * @var Closure
@@ -24,21 +19,26 @@ class Recipient implements Arrayable {
 
     /**
      * Recipient constructor.
-     * @param string $id
-     * @param string $label
+     * @param string $area
      * @param Closure $resolver
      */
-    public function __construct(string $id, string $label, Closure $resolver) {
-        $this->id = $id;
-        $this->label = $label;
+    public function __construct(string $area, Closure $resolver) {
+        $this->area     = $area;
         $this->resolver = $resolver;
     }
 
     /**
      * @return string
      */
-    public function getId() : string {
-        return $this->id;
+    public function getArea() : string {
+        return $this->area;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel() : string {
+        return ucfirst($this->area);
     }
 
     /**
@@ -48,8 +48,8 @@ class Recipient implements Arrayable {
      */
     public function toArray() : array {
         return [
-            'id'    => $this->id,
-            'label' => $this->label,
+            'area'  => $this->getArea(),
+            'label' => $this->getLabel(),
         ];
     }
 

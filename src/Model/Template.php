@@ -7,11 +7,6 @@ class Template {
     /**
      * @var string
      */
-    protected $category = 'default';
-
-    /**
-     * @var string
-     */
     protected $severity = 'medium';
 
     /**
@@ -44,23 +39,6 @@ class Template {
         $this->subject  = $subject;
         $this->view     = $view;
         $this->types    = array_unique($types);
-    }
-
-    /**
-     * @param string $category
-     * @return $this
-     */
-    public function setCategory(string $category) : self {
-        $this->category = $category;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCategory() : string {
-        return $this->category;
     }
 
     /**

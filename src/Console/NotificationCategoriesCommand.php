@@ -21,6 +21,7 @@
 
 namespace Antares\Notifications\Console;
 
+use Antares\Notifications\Services\EventsRegistrarService;
 use Illuminate\Database\Console\Migrations\BaseCommand;
 use Antares\Notifications\Model\NotificationCategory;
 
@@ -48,14 +49,17 @@ class NotificationCategoriesCommand extends BaseCommand
      */
     public function fire()
     {
-        $categories = NotificationCategory::all();
+        /* @var $service EventsRegistrarService */
+        $service    = app()->make(EventsRegistrarService::class);
+        $categories = $service->getEventsCategories();
         $flatten    = [];
+
         foreach ($categories as $category) {
-            $flatten[] = ['<info>' . $category->id . '</info>', '<fg=red>' . $category->name . '</fg=red>', '<info>' . $category->title . '</info>'];
+            $flatten[] = ['<info>' . $category['id'] . '</info>', '<info>' . $category['label'] . '</info>'];
         }
 
         if (count($flatten) > 0) {
-            $this->table(['Id', 'Name', 'Title'], $flatten);
+            $this->table(['Id', 'Label'], $flatten);
         } else {
             $this->error('No categories found');
         }

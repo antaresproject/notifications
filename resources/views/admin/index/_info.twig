@@ -40,31 +40,22 @@
         <div class="form-block">
             <div class="col-group">
                 <div class="col-mb-24 col-12">
-                    <label class="form-block__name">{{ trans('antares/notifications::messages.notification_category') }}</label>
+                    <label class="form-block__name">{{ trans('antares/notifications::messages.notification_events_category') }}</label>
                     <div class="input-field">
-                        <v-select label="title" :options="categories" v-model="notification.category"></v-select>
+                        <v-select :options="categories" v-model="category"></v-select>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="form-block">
-            <div class="col-group">
-                <div class="col-mb-24 col-12">
-                    <label class="form-block__name">{{ trans('antares/notifications::messages.notification_severity') }}</label>
-                    <div class="input-field">
-                        <v-select label="title" :options="severities" v-model="notification.severity"></v-select>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <input type="hidden" v-model="notification.severity">
 
         <div class="form-block">
             <div class="col-group">
                 <div class="col-mb-24 col-12">
                     <label class="form-block__name">{{ trans('antares/notifications::messages.notification_event') }}</label>
                     <div class="input-field">
-                        <v-select label="label" :on-change="eventChanged" :options="events" v-model="notification.event" ></v-select>
+                        <v-select label="label" :on-change="eventChanged" :options="activeCategoryEvents" v-model="notification.event" ></v-select>
                     </div>
                 </div>
             </div>
@@ -75,7 +66,7 @@
                 <div class="col-mb-24 col-12">
                     <label class="form-block__name">{{ trans('antares/notifications::messages.notification_recipients') }}</label>
                     <div class="input-field">
-                        <v-select multiple label="label" :options.sync="eventRecipients" v-model="notification.recipients"></v-select>
+                        <v-select multiple label="area" :options.sync="eventRecipients" v-model="notification.recipients"></v-select>
                     </div>
                 </div>
             </div>

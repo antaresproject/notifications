@@ -20,18 +20,18 @@
 
 namespace Antares\Notifications\Http\Datatables;
 
+use Antares\Area\AreaManager;
 use Antares\Authorization\Authorization;
 use Antares\Datatables\Helpers\DataTableActionsHelper;
+use Antares\Notifications\Filter\NotificationStatusFilter;
 use Antares\Notifications\Model\Notifications as NotificationsModel;
-use Antares\Notifications\Model\NotificationCategory;
-use Antares\Notifications\Filter\NotificationFilter;
+use Antares\Notifications\Filter\NotificationCategoryFilter;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Datatables\Services\DataTable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Closure;
+use Yajra\Datatables\Request;
 
 class NotificationsDataTable extends DataTable
 {
@@ -42,7 +42,8 @@ class NotificationsDataTable extends DataTable
      * @var array 
      */
     protected $filters = [
-        NotificationFilter::class
+        NotificationStatusFilter::class,
+        NotificationCategoryFilter::class,
     ];
 
     /**
@@ -53,9 +54,9 @@ class NotificationsDataTable extends DataTable
     public $perPage = 25;
 
     /**
-     * @var int|null
+     * @var string
      */
-    protected $currentCategoryId;
+    protected $currentRecipientId = 'all';
 
     /**
      * @var int|null
@@ -67,7 +68,23 @@ class NotificationsDataTable extends DataTable
      */
     public function query()
     {
-        return NotificationsModel::query()->with('category', 'contents');
+        $query = NotificationsModel::query()->with('contents');
+
+//        if (request()->ajax()) {
+//            $columns    = request()->get('columns', []);
+//            $item       = array_first($columns, function ($item) {
+//                return array_get($item, 'data') === 'recipient' && ! in_array(array_get($item, 'search.value'), ['', 'all'], true);
+//            });
+//
+//            dd($item);
+//
+//            if ($item) {
+//                $value = array_get($item, 'search.value');
+//                $query->where('recipients', 'like', "%\"{$value}\"%");
+//            }
+//        }
+
+        return $query;
     }
 
     /**
@@ -75,19 +92,19 @@ class NotificationsDataTable extends DataTable
      */
     public function ajax()
     {
-        $request         = request();
-        $acl             = app('antares.acl')->make('antares/notifications');
+        $request    = $this->datatables->request;
+        $acl        = app('antares.acl')->make('antares/notifications');
 
         return $this->prepare()
             ->filter($this->setupSearchFilter($request))
             ->filterColumn('type', function($query, $keyword) {
                 $query->where('type_id', $keyword);
             })
-            ->filterColumn('category', function($query, $keyword) {
-                $query->where('category_id', $keyword);
-            })
             ->editColumn('category', function (NotificationsModel $model) {
-                return $model->category->title;
+                return ucfirst($model->category);
+            })
+            ->editColumn('recipients', function (NotificationsModel $model) {
+                return implode(', ', array_map('ucfirst', $model->recipients));
             })
             ->editColumn('type', function (NotificationsModel $model) {
                 return $model->type->title;
@@ -109,20 +126,39 @@ class NotificationsDataTable extends DataTable
      */
     public function html()
     {
-        $categories = $this->categories();
-        $types      = $this->types();
+        $types = NotificationTypes::query()->pluck('title', 'id');
+        $recipients = $this->getRecipients();
 
         return $this->setName('Notifications List')
-            ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'Id'])
-            ->addColumn(['data' => 'name', 'name' => 'name', 'title' => trans('antares/notifications::messages.title'), 'className' => 'bolded'])
+            ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'Id', 'className' => 'w100'])
+            ->addColumn(['data' => 'name', 'name' => 'name', 'title' => trans('antares/notifications::messages.title'), 'className' => 'text--bold'])
+            ->addColumn(['data' => 'recipients', 'name' => 'recipients', 'title' => trans('antares/notifications::messages.notification_recipients')])
             ->addColumn(['data' => 'event', 'name' => 'event_model', 'title' => trans('antares/notifications::messages.notification_event')])
-            ->addColumn(['data' => 'category', 'name' => 'category_id', 'title' => trans('antares/notifications::messages.notification_category')])
+            ->addColumn(['data' => 'category', 'name' => 'category', 'title' => trans('antares/notifications::messages.notification_events_category')])
             ->addColumn(['data' => 'type', 'name' => 'type_id', 'title' => trans('antares/notifications::messages.notification_type')])
             ->addColumn(['data' => 'active', 'name' => 'active', 'title' => trans('antares/notifications::messages.notification_enabled')])
             ->addAction(['name' => 'edit', 'title' => '', 'class' => 'mass-actions dt-actions', 'orderable' => false, 'searchable' => false])
-            ->addGroupSelect($categories, 3, $this->currentCategoryId ?: $categories->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_category'), 'class' => 'mr24', 'id' => 'datatables-notification-category'])
-            ->addGroupSelect($types, 4, $this->currentTypeId ?: $types->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type'])
+            ->addGroupSelect($recipients, 2, $this->currentRecipientId, ['data-prefix' => trans('antares/notifications::messages.datatables.select_recipient'), 'class' => 'mr24', 'id' => 'datatables-notification-recipient'])
+            ->addGroupSelect($types, 5, $this->currentTypeId ?: $types->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type'])
             ->setDeferedData();
+    }
+
+    /**
+     * @return array
+     */
+    protected function getRecipients() : array {
+        /* @var $areaManager AreaManager */
+        $areaManager = app()->make(AreaManager::class);
+
+        $recipients = [
+            'all' => 'All',
+        ];
+
+        foreach($areaManager->getAreas()->all() as $area) {
+            $recipients[ $area->getId() ] = ucfirst($area->getId());
+        }
+
+        return $recipients;
     }
 
     /**
@@ -131,66 +167,44 @@ class NotificationsDataTable extends DataTable
      */
     protected function setupSearchFilter(Request $request) : Closure {
         return function(Builder $query) use($request) {
-            $searchKeyword  = Arr::get($request->get('search'), 'value');
+            $searchKeyword  = $request->keyword();
             $columns        = (array) $request->get('columns', []);
 
-            array_walk($columns, function($item) use(&$typeId, &$categoryId) {
+            array_walk($columns, function($item) {
                 $itemData = Arr::get($item, 'data');
 
                 if ($itemData === 'type') {
                     $this->currentTypeId = Arr::get($item, 'search.value');
                 }
-                if ($itemData === 'category') {
-                    $this->currentCategoryId = Arr::get($item, 'search.value');
+
+                if ($itemData === 'recipients') {
+                    $this->currentRecipientId = Arr::get($item, 'search.value');
                 }
 
                 return false;
             });
 
-            if (!$this->currentCategoryId) {
-                $this->currentCategoryId = NotificationCategory::query()->where('name', 'default')->first()->id;
-            }
-
-            $query->where('category_id', $this->currentCategoryId);
-
-            if (!$this->currentTypeId) {
-                $this->currentTypeId = NotificationTypes::query()->where('name', 'mail')->first()->id;
-            }
-
-            $query->where('type_id', $this->currentTypeId);
-
-            if ($searchKeyword !== '') {
+//            if (!$this->currentTypeId) {
+//                $this->currentTypeId = NotificationTypes::query()->where('name', 'mail')->first()->id;
+//            }
+//
+//            $query->where('type_id', $this->currentTypeId);
+//
+//            if ($this->currentRecipientId !== 'all') {
+//                $query->where('recipients', 'like', "%\"{$this->currentRecipientId}\"%");
+//            }
+//
+            if ($searchKeyword) {
                 $searchKeyword = '%' . $searchKeyword . '%';
 
                 $query->where(function(Builder $query) use($searchKeyword) {
                     $query
                         ->whereHas('contents', function(Builder $query) use($searchKeyword) {
                             $query->where('title', 'LIKE', $searchKeyword);
-                        })
-                        ->orWhereHas('category', function(Builder $query) use($searchKeyword) {
-                            $query->where('title', 'LIKE', $searchKeyword);
                         });
                 });
             }
         };
-    }
-
-    /**
-     * Creates select for categories
-     * 
-     * @return Collection
-     */
-    protected function categories(): Collection {
-        return NotificationCategory::query()->pluck('title', 'id');
-    }
-
-    /**
-     * Creates select for types
-     * 
-     * @return Collection
-     */
-    protected function types(): Collection {
-        return NotificationTypes::query()->pluck('title', 'id');
     }
 
     /**

@@ -154,12 +154,6 @@ class NotificationChannel
             });
         }
 
-        if( property_exists($message, 'category') ) {
-            $query->whereHas('category', function (Builder $query) use ($message) {
-                $query->where('name', $message->category);
-            });
-        }
-
         /* @var $notification Notifications */
         $notification = $query->first();
 

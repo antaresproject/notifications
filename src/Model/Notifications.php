@@ -35,7 +35,6 @@ use Illuminate\Support\Arr;
  *
  * @property integer $id
  * @property integer $severity_id
- * @property integer $category_id
  * @property string $event
  * @property NotifiableEvent|string|null $event_model
  * @property string $event_label
@@ -44,10 +43,10 @@ use Illuminate\Support\Arr;
  * @property string $checksum
  * @property string $name
  * @property string $source
+ * @property string $category
  * @property array $recipients
  * @method static Builder|Notifications active()
  * @property NotificationTypes $type
- * @property NotificationCategory $category
  * @property NotificationSeverity $severity
  * @property-read Collection|NotificationContents[] $contents
  * @property-read Collection|NotificationsStack[] $stack
@@ -71,13 +70,13 @@ class Notifications extends Eloquent
     protected $fillable = [
         'source',
         'severity_id',
-        'category_id',
         'type_id',
         'event',
         'active',
         'name',
         'checksum',
         'recipients',
+        'category',
     ];
 
     /**
@@ -93,7 +92,6 @@ class Notifications extends Eloquent
     protected $casts = [
         'id'            => 'integer',
         'severity_id'   => 'integer',
-        'category_id'   => 'integer',
         'type_id'       => 'integer',
         'active'        => 'boolean',
         'recipients'    => 'json',
@@ -125,16 +123,6 @@ class Notifications extends Eloquent
     public function type()
     {
         return $this->hasOne(NotificationTypes::class, 'id', 'type_id');
-    }
-
-    /**
-     * relation to notification categories
-     * 
-     * @return HasOne
-     */
-    public function category()
-    {
-        return $this->hasOne(NotificationCategory::class, 'id', 'category_id');
     }
 
     /**
@@ -203,30 +191,35 @@ class Notifications extends Eloquent
      * @return NotifiableEvent|string|null
      */
     public function getEventModelAttribute() {
-        /* @var $eventsRegistrarService EventsRegistrarService */
-        $eventsRegistrarService = app()->make(EventsRegistrarService::class);
-        $event = Arr::get($this->attributes, 'event');
+        $event  = (string) Arr::get($this->attributes, 'event');
+        $object = $this->getNotifiableEvent($event);
 
-        if($event && $notifiableEvent = $eventsRegistrarService->getByClassName($event)) {
-            return $notifiableEvent;
-        }
-
-        return $event;
+        return $object ?: $event;
     }
 
     /**
      * @return string
      */
     public function getEventLabelAttribute() {
-        /* @var $eventsRegistrarService EventsRegistrarService */
-        $eventsRegistrarService = app()->make(EventsRegistrarService::class);
-        $event = Arr::get($this->attributes, 'event');
+        $event  = (string) Arr::get($this->attributes, 'event');
+        $object = $this->getNotifiableEvent($event);
 
-        if($event && $notifiableEvent = $eventsRegistrarService->getByClassName($event)) {
-            return $notifiableEvent->getLabel();
-        }
+        return $object ? $object->getLabel() : $event;
+    }
 
-        return $event;
+    /**
+     * @param string|null $event
+     * @return NotifiableEvent|null
+     */
+    private function getNotifiableEvent(string $event = null) {
+        return $event ? $this->getEventsRegistrarService()->getByClassName($event) : null;
+    }
+
+    /**
+     * @return EventsRegistrarService
+     */
+    private function getEventsRegistrarService() : EventsRegistrarService {
+        return app()->make(EventsRegistrarService::class);
     }
 
 }

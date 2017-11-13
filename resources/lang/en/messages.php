@@ -29,6 +29,7 @@ return [
     'datatables'                          => [
         'select_category' => 'Category',
         'select_type'     => 'Type',
+        'select_recipient' => 'Recipient',
     ],
     'sidebar'                             => [
         'unable_to_delete_notification_item'   => 'Unable to delete notification item.',
@@ -47,6 +48,7 @@ return [
     'notification_type'                   => 'Type',
     'notification_recipients'             => 'Recipients',
     'notification_category'               => 'Category',
+    'notification_events_category'        => 'Events Category',
     'notification_severity'               => 'Severity',
     'notification_event'                  => 'Event',
     'notification_enabled'                => 'Enabled',
