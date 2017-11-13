@@ -68,23 +68,7 @@ class NotificationsDataTable extends DataTable
      */
     public function query()
     {
-        $query = NotificationsModel::query()->with('contents');
-
-//        if (request()->ajax()) {
-//            $columns    = request()->get('columns', []);
-//            $item       = array_first($columns, function ($item) {
-//                return array_get($item, 'data') === 'recipient' && ! in_array(array_get($item, 'search.value'), ['', 'all'], true);
-//            });
-//
-//            dd($item);
-//
-//            if ($item) {
-//                $value = array_get($item, 'search.value');
-//                $query->where('recipients', 'like', "%\"{$value}\"%");
-//            }
-//        }
-
-        return $query;
+        return NotificationsModel::query()->with('contents');
     }
 
     /**
@@ -99,6 +83,11 @@ class NotificationsDataTable extends DataTable
             ->filter($this->setupSearchFilter($request))
             ->filterColumn('type', function($query, $keyword) {
                 $query->where('type_id', $keyword);
+            })
+            ->filterColumn('recipients', function($query, $keyword) {
+                if($keyword !== 'all') {
+                    $query->where('recipients', 'like', "%\"{$keyword}\"%");
+                }
             })
             ->editColumn('category', function (NotificationsModel $model) {
                 return ucfirst($model->category);
@@ -135,7 +124,7 @@ class NotificationsDataTable extends DataTable
             ->addColumn(['data' => 'recipients', 'name' => 'recipients', 'title' => trans('antares/notifications::messages.notification_recipients')])
             ->addColumn(['data' => 'event', 'name' => 'event_model', 'title' => trans('antares/notifications::messages.notification_event')])
             ->addColumn(['data' => 'category', 'name' => 'category', 'title' => trans('antares/notifications::messages.notification_events_category')])
-            ->addColumn(['data' => 'type', 'name' => 'type_id', 'title' => trans('antares/notifications::messages.notification_type')])
+            ->addColumn(['data' => 'type', 'name' => 'type', 'title' => trans('antares/notifications::messages.notification_type')])
             ->addColumn(['data' => 'active', 'name' => 'active', 'title' => trans('antares/notifications::messages.notification_enabled')])
             ->addAction(['name' => 'edit', 'title' => '', 'class' => 'mass-actions dt-actions', 'orderable' => false, 'searchable' => false])
             ->addGroupSelect($recipients, 2, $this->currentRecipientId, ['data-prefix' => trans('antares/notifications::messages.datatables.select_recipient'), 'class' => 'mr24', 'id' => 'datatables-notification-recipient'])
@@ -174,11 +163,11 @@ class NotificationsDataTable extends DataTable
                 $itemData = Arr::get($item, 'data');
 
                 if ($itemData === 'type') {
-                    $this->currentTypeId = Arr::get($item, 'search.value');
+                    //$this->currentTypeId = Arr::get($item, 'search.value');
                 }
 
                 if ($itemData === 'recipients') {
-                    $this->currentRecipientId = Arr::get($item, 'search.value');
+                    //$this->currentRecipientId = Arr::get($item, 'search.value');
                 }
 
                 return false;
@@ -199,7 +188,8 @@ class NotificationsDataTable extends DataTable
 
                 $query->where(function(Builder $query) use($searchKeyword) {
                     $query
-                        ->whereHas('contents', function(Builder $query) use($searchKeyword) {
+                        ->where('name', 'LIKE', $searchKeyword)
+                        ->orWhereHas('contents', function(Builder $query) use($searchKeyword) {
                             $query->where('title', 'LIKE', $searchKeyword);
                         });
                 });
