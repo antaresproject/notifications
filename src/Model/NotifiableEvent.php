@@ -19,6 +19,11 @@ class NotifiableEvent implements Arrayable {
     /**
      * @var string
      */
+    protected $categoryName;
+
+    /**
+     * @var string
+     */
     protected $label;
 
     /**
@@ -39,10 +44,17 @@ class NotifiableEvent implements Arrayable {
     /**
      * NotifiableEvent constructor.
      * @param string $eventClass
+     * @param string $categoryName
      * @param string|null $label
+     * @throws InvalidArgumentException
      */
-    public function __construct(string $eventClass, string $label = null) {
+    public function __construct(string $eventClass, string $categoryName, string $label = null) {
+        if( ! class_exists($eventClass) ) {
+            throw new InvalidArgumentException('The [' . $eventClass . '] class does not exist.');
+        }
+
         $this->eventClass = $eventClass;
+        $this->categoryName = strtolower($categoryName);
         $this->label = $label ?: $eventClass;
 
         $this->assignVariablesFromEvent();
@@ -75,6 +87,13 @@ class NotifiableEvent implements Arrayable {
     /**
      * @return string
      */
+    public function getCategoryName() : string {
+        return $this->categoryName;
+    }
+
+    /**
+     * @return string
+     */
     public function getLabel() : string {
         return $this->label;
     }
@@ -85,7 +104,7 @@ class NotifiableEvent implements Arrayable {
      * @throws InvalidArgumentException
      */
     public function setHandler($handler) : self {
-        if($handler instanceof Closure || is_string($handler)) {
+        if($handler instanceof Closure || (is_string($handler) && class_exists($handler))) {
             $this->handler = $handler;
         }
         else {
@@ -96,9 +115,9 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
-     * @return null|string
+     * @return Closure|null|string
      */
-    public function getHandler() : ?string {
+    public function getHandler() {
         return $this->handler;
     }
 
@@ -107,17 +126,17 @@ class NotifiableEvent implements Arrayable {
      * @return NotifiableEvent
      */
     public function addRecipient(Recipient $recipient) : self {
-        $this->recipients[$recipient->getId()] = $recipient;
+        $this->recipients[$recipient->getArea()] = $recipient;
 
         return $this;
     }
 
     /**
-     * @param string $id
+     * @param string $area
      * @return Recipient|null
      */
-    public function getRecipientById(string $id) : ?Recipient {
-        return Arr::get($this->recipients, $id);
+    public function getRecipientByArea(string $area) : ?Recipient {
+        return Arr::get($this->recipients, $area);
     }
 
     /**
@@ -137,6 +156,7 @@ class NotifiableEvent implements Arrayable {
     public function toArray() : array {
         return [
             'event_class'   => $this->getEventClass(),
+            'category_name' => $this->getCategoryName(),
             'label'         => $this->getLabel(),
             'recipients'    => $this->getRecipientsLabels(),
             'variables'     => $this->variables,

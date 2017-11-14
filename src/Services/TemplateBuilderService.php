@@ -43,6 +43,11 @@ class TemplateBuilderService
     protected $source;
 
     /**
+     * @var string|null
+     */
+    protected $category;
+
+    /**
      * TemplateBuilderService constructor.
      * @param ContentParser $contentParser
      * @param Synchronizer $synchronizer
@@ -51,7 +56,7 @@ class TemplateBuilderService
     {
         $this->contentParser = $contentParser;
         $this->synchronizer  = $synchronizer;
-        $this->templates     = new TemplatesCollection('');
+        $this->templates     = new TemplatesCollection('', '');
     }
 
     /**
@@ -114,7 +119,6 @@ class TemplateBuilderService
     }
 
     /**
-     * TODO: check why it is broken and does not throw an exception.
      * @param Template $template
      * @return NotificationContents|null
      */
@@ -138,7 +142,7 @@ class TemplateBuilderService
      */
     protected function passDataFromTemplate(TemplateMessageContract $message, Template $template, NotificationContents $notificationContent = null)
     {
-        $message->category = $template->getCategory();
+        $message->category = $this->templates->getEventsCategory();
         $message->severity = $template->getSeverity();
 
         $message->subject = $this->contentParser->parse($notificationContent ? $notificationContent->title : $template->getSubject(), $message->getSubjectData());
@@ -155,19 +159,21 @@ class TemplateBuilderService
     {
         /* @var $notificationContent NotificationContents */
         $notificationContent = NotificationContents::query()
-                        ->where('lang_id', lang_id())
-                        ->whereHas('notification', function(Builder $query) use($template) {
-                            $query->where('source', $this->source);
-                            $query->where('active', 1);
+            ->where('lang_id', lang_id())
+            ->whereHas('notification', function(Builder $query) use($template) {
+                $query->where('source', $this->source);
+                $query->where('active', 1);
 
-                            $query->whereHas('category', function(Builder $query) use($template) {
-                                $query->where('name', $template->getCategory());
-                            })->whereHas('type', function(Builder $query) use($template) {
-                                $query->whereIn('name', $template->getTypes());
-                            })->whereHas('severity', function(Builder $query) use($template) {
-                                $query->where('name', $template->getSeverity());
-                            });
-                        })->first();
+                if($category = $this->templates->getEventsCategory()) {
+                    $query->where('category', $category);
+                }
+
+                $query->whereHas('type', function(Builder $query) use($template) {
+                    $query->whereIn('name', $template->getTypes());
+                })->whereHas('severity', function(Builder $query) use($template) {
+                    $query->where('name', $template->getSeverity());
+                });
+            })->first();
 
         return $notificationContent;
     }

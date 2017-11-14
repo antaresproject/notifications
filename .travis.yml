@@ -4,14 +4,12 @@ sudo: false
 
 php:
   - 7.1
+
     
-before_install:
+before_script:
   - travis_retry composer install --prefer-dist --no-interaction
   - wget https://github.com/satooshi/php-coveralls/releases/download/v1.0.0/coveralls.phar
   - chmod +x coveralls.phar
-  - composer create-project antaresproject/project ./antares 0.9.2.x-dev
-  - cd ./antares
-  - php artisan extension:install antaresproject/component-notifications --no-interaction -vvv --active
 
 script: 
     - mkdir -p ./build/logs

@@ -33,7 +33,7 @@ class NotificationsEventHelper {
      * NotificationsHelper constructor.
      */
     public function __construct() {
-        $this->eventsRegistrarService   = app()->make(EventsRegistrarService::class);
+        $this->eventsRegistrarService = app()->make(EventsRegistrarService::class);
     }
 
     /**
@@ -52,25 +52,41 @@ class NotificationsEventHelper {
 
     /**
      * @param string $className
+     * @param string $categoryName
      * @param string|null $label
      * @return NotificationsEventHelper
      */
-    public function event(string $className, string $label = null) : self {
-        $this->event = new NotifiableEvent($className, $label);
+    public function event(string $className, string $categoryName, string $label = null) : self {
+        $this->event = new NotifiableEvent($className, $categoryName, $label);
 
         return $this;
     }
 
     /**
-     * @param string $id
-     * @param string $label
+     * @param string $area
      * @param Closure $resolver
      * @return NotificationsEventHelper
      */
-    public function addRecipient(string $id, string $label, Closure $resolver) : self {
-        $this->recipients[$id] = new Recipient($id, $label, $resolver);
+    public function addRecipient(string $area, Closure $resolver) : self {
+        $this->recipients[$area] = new Recipient($area, $resolver);
 
         return $this;
+    }
+
+    /**
+     * @param Closure $resolver
+     * @return NotificationsEventHelper
+     */
+    public function addAdminRecipient(Closure $resolver) : self {
+        return $this->addRecipient('admin', $resolver);
+    }
+
+    /**
+     * @param Closure $resolver
+     * @return NotificationsEventHelper
+     */
+    public function addClientRecipient(Closure $resolver) : self {
+        return $this->addRecipient('client', $resolver);
     }
 
     /**

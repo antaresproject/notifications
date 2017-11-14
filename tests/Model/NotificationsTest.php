@@ -126,18 +126,6 @@ class NotificationsTest extends TestCase
     }
 
     /**
-     * Has valid relation to category table
-     * 
-     * @test
-     */
-    public function testCategory()
-    {
-        $category = $this->model->category();
-        $this->assertInstanceOf(HasOne::class, $category);
-        $this->assertInstanceOf(NotificationCategory::class, $category->getModel());
-    }
-
-    /**
      * Has valid relation to type table
      * 
      * @test

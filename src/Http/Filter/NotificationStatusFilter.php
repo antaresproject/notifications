@@ -24,7 +24,7 @@ namespace Antares\Notifications\Filter;
 use Yajra\Datatables\Contracts\DataTableScopeContract;
 use Antares\Datatables\Filter\SelectFilter;
 
-class NotificationFilter extends SelectFilter implements DataTableScopeContract
+class NotificationStatusFilter extends SelectFilter implements DataTableScopeContract
 {
 
     /**

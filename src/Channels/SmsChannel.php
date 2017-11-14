@@ -20,7 +20,9 @@
 
 namespace Antares\Notifications\Channels;
 
+use Antares\Notifications\Exceptions\InfoException;
 use Antares\Notifications\Messages\SmsMessage;
+use Antares\Notifications\Services\ExceptionService;
 use Antares\Notifications\Services\TemplateBuilderService;
 use Antares\Notifier\Adapter\FastSmsAdapter;
 use Illuminate\Notifications\Notification;
@@ -59,6 +61,7 @@ class SmsChannel
      * @param $notifiable
      * @param Notification $notification
      * @return bool
+     * @throws Exception
      */
     public function send($notifiable, Notification $notification)
     {
@@ -74,11 +77,17 @@ class SmsChannel
         $this->templateBuilderService->setNotification($notification)->build($message);
 
         try {
-            return $this->adapter->send($message, $to);
-        } catch (Exception $ex) {
-            Log::error($ex);
+            $this->adapter->send($message, $to);
+        } catch (Exception $e) {
+            Log::error($e);
 
-            return false;
+            if( ! (property_exists($notification, 'testable') && $notification->testable)) {
+                $message = 'While sending notification by SMS channel an error occurred: ' . $e->getMessage();
+
+                ExceptionService::report($e, $message);
+            }
+
+            throw new InfoException($e->getMessage());
         }
     }
 

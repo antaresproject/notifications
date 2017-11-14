@@ -5,7 +5,6 @@ namespace Antares\Notifications;
 use Antares\Notifications\Collections\TemplatesCollection;
 use Antares\Notifications\Model\NotificationContents;
 use Antares\Notifications\Model\NotificationSeverity;
-use Antares\Notifications\Model\NotificationCategory;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Model\Notifications;
 use Antares\Notifications\Model\Template;
@@ -47,11 +46,12 @@ class Synchronizer
      * @param TemplatesCollection $templates
      */
     public function syncTemplates(string $notificationClassName, TemplatesCollection $templates) {
-        $notifiableEvent = $templates->getNotifiableEvent();
-        $title = $templates->getTitle();
+        $notifiableEvent    = $templates->getNotifiableEvent();
+        $category           = $templates->getEventsCategory();
+        $title              = $templates->getTitle();
 
         foreach($templates->all() as $template) {
-            $this->syncTemplate($title, $notificationClassName, $template, $notifiableEvent);
+            $this->syncTemplate($title, $notificationClassName, $template, $notifiableEvent, $category);
         }
     }
 
@@ -60,14 +60,15 @@ class Synchronizer
      * @param string $notificationClassName
      * @param Template $template
      * @param string $notifiableEvent
+     * @param string $category
      * @throws Exception
      */
-    public function syncTemplate(string $title, string $notificationClassName, Template $template, string $notifiableEvent) {
+    public function syncTemplate(string $title, string $notificationClassName, Template $template, string $notifiableEvent, string $category) {
         DB::beginTransaction();
 
         try {
             foreach($template->getTypes() as $type) {
-                $this->save($title, $notificationClassName, $type, $template, $notifiableEvent);
+                $this->save($title, $notificationClassName, $type, $template, $notifiableEvent, $category);
             }
 
             DB::commit();
@@ -86,16 +87,17 @@ class Synchronizer
      * @param string $type
      * @param Template $template
      * @param string $notifiableEvent
+     * @param string $category
      */
-    protected function save(string $title, string $className, string $type, Template $template, string $notifiableEvent)
+    protected function save(string $title, string $className, string $type, Template $template, string $notifiableEvent, string $category)
     {
         /* @var $model Notifications */
         $model      = Notifications::query()->firstOrCreate([
             'source'        => $className,
             'event'         => $notifiableEvent,
+            'category'      => $category,
             'type_id'       => $this->type($type)->id,
             'severity_id'   => $this->severity($template->getSeverity())->id,
-            'category_id'   => $this->category($template->getCategory())->id,
         ]);
 
         $reflection = new ReflectionClass($className);
@@ -126,20 +128,6 @@ class Synchronizer
             $content->content = $viewContent;
             $content->save();
         }
-    }
-
-    /**
-     * Resolves notification category
-     * 
-     * @param String $category
-     * @return NotificationCategory
-     */
-    private function category(string $category = null)
-    {
-        /* @var $model NotificationCategory */
-        $model = NotificationCategory::query()->where('name', $category ?: 'default')->firstOrFail();
-
-        return $model;
     }
 
     /**

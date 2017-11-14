@@ -46,7 +46,7 @@ class ExceptionNotification extends Notification implements NotificationEditable
         $subject    = 'Exception has been occurred';
         $view       = 'antares/notifications::notification.exception';
 
-        return (new Template(['alert'], $subject, $view))->setRecipients(['admins'])->setSeverity('high');
+        return (new Template(['alert'], $subject, $view))->setRecipients(['admin'])->setSeverity('high');
     }
 
     /**

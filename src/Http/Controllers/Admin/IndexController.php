@@ -90,7 +90,7 @@ class IndexController extends AdminController
 
         $rules = [
             'name'                                  => 'required|max:255',
-            'category_id'                           => 'required|integer|exists:tbl_notification_categories,id',
+            'category'                              => 'requiored',
             'type_id'                               => 'required|integer|exists:tbl_notification_types,id',
             'severity_id'                           => 'required|integer|exists:tbl_notification_severity,id',
             'contents'                              => 'array',
@@ -114,7 +114,7 @@ class IndexController extends AdminController
      * @return \Illuminate\Contracts\View\View
      */
     public function edit(Notifications $notification, NotificationForm $form) {
-        $notification->load('contents', 'category', 'type', 'severity');
+        $notification->load('contents', 'type', 'severity');
 
         $form = $form->build($notification);
 
@@ -131,7 +131,7 @@ class IndexController extends AdminController
 
         $rules = [
             'name'                                  => 'required|max:255',
-            'category_id'                           => 'required|integer|exists:tbl_notification_categories,id',
+            'category'                              => 'requiored',
             'type_id'                               => 'required|integer|exists:tbl_notification_types,id',
             'severity_id'                           => 'required|integer|exists:tbl_notification_severity,id',
             'contents'                              => 'array',

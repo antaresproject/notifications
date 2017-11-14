@@ -5,7 +5,6 @@ namespace Antares\Notifications\Http\Form;
 use Antares\Contracts\Html\Builder;
 use Antares\Html\Form\Fieldset;
 use Antares\Html\Form\Grid as FormGrid;
-use Antares\Notifications\Model\NotificationCategory;
 use Antares\Notifications\Model\Notifications;
 use Antares\Notifications\Model\NotificationSeverity;
 use Antares\Notifications\Model\NotificationTypes;
@@ -52,7 +51,7 @@ class NotificationForm {
         }
 
         $form->setDataProviders([
-            'categories'    => NotificationCategory::all()->toJson(),
+            'categories'    => $this->eventsRegistrarService->getEventsCategories()->toJson(),
             'types'         => NotificationTypes::all()->toJson(),
             'severities'    => NotificationSeverity::all()->toJson(),
             'events'        => $this->eventsRegistrarService->getModels()->toJson(),

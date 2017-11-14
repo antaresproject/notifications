@@ -43,8 +43,10 @@ class ChannelManager extends BaseChannelManager
      */
     protected function createSmsDriver()
     {
-        $adapter = new FastSmsAdapter(config('antares/notifier::sms.adapters.fastSms'));
+        $config     = config('services.fastSms', []);
+        $adapter    = new FastSmsAdapter($config);
         $templateBuilderService = $this->app->make(TemplateBuilderService::class);
+
         return new SmsChannel($adapter, $templateBuilderService);
     }
 

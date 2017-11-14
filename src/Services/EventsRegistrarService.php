@@ -18,6 +18,8 @@ class EventsRegistrarService
      */
     protected $models;
 
+    const DEFAULT_CATEGORY = 'system';
+
     /**
      * @param NotifiableEvent $event
      */
@@ -63,6 +65,43 @@ class EventsRegistrarService
         }
 
         return $this->models->values();
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getEventsCategories() : Collection {
+        $categories = [];
+
+        foreach($this->events as $notifiableEvent) {
+            $categories[] = $notifiableEvent->getCategoryName();
+        }
+
+        if( ! in_array(self::DEFAULT_CATEGORY, $categories) ) {
+            $categories[] = self::DEFAULT_CATEGORY;
+        }
+
+        return Collection::make(array_unique($categories))
+            ->map(function(string $category) {
+                return [
+                    'id'    => $category,
+                    'label' => ucfirst($category),
+                ];
+            })
+            ->sortBy('label')
+            ->values();
+    }
+
+    /**
+     * @param string $eventClassName
+     * @return string
+     */
+    public function getEventsCategoryByEvent(string $eventClassName) : string {
+        if($event = $this->getByClassName($eventClassName)) {
+            return $event->getCategoryName();
+        }
+
+        return self::DEFAULT_CATEGORY;
     }
 
 }
