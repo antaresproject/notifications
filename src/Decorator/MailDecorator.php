@@ -16,7 +16,7 @@ class MailDecorator {
         $brandTemplate = BrandOptions::query()->where('brand_id', brand_id())->first();
         $header        = str_replace('</head>', '<style>' . $brandTemplate->styles . '</style></head>', $brandTemplate->header);
 
-        return (string) preg_replace("/<body[^>]*>(.*?)<\/body>/is", '<body>' . $content . '</body>', $header . $brandTemplate->footer);
+        return (string) sprintf('%s %s %s', $header, $content, $brandTemplate->footer);
     }
 
 }

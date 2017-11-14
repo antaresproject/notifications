@@ -119,10 +119,10 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         Option::observe(new ConfigurationListener());
 
         $this->app->alias(Mailer::class, MailerContract::class);
+    }
 
-        $this->app->make('events')->listen('antares.extension: booted', function() {
-            app()->make(NotificationsListener::class)->boot();
-        });
+    public function booted() {
+        app()->make(NotificationsListener::class)->boot();
     }
 
     /**

@@ -18,31 +18,24 @@
     </div>
 
     <div v-for="(content, lang) in contents">
-        <div v-show="lang === selectedLang">
-            <div class="col-group">
-                <div class="form-block">
-                    <div class="col-group col-group--flex-start">
-                        <div class="col-mb-3 col-2">
-                            <label class="form-block__name as-flex-start">{{ trans('antares/notifications::messages.notification_content_title') }}</label>
-                        </div>
-                        <div class="col-mb-21 col-22">
-                            <div class="input-field">
-                                <input type="text" name="name" v-model="content.title" :data-lang-code="lang" v-bind:disabled="disabledContentTitle">
+        <div class="page-notification-templates__info" v-show="lang === selectedLang">
+            <div class="form-block" v-show="! onlyText">
+                <div class="col-group" v-bind:class="{ error: errors.has('contents.' + lang + '.title') }">
+                    <div class="col-mb-24 col-12">
+                        <label class="form-block__name">{{ trans('antares/notifications::messages.notification_content_title') }}</label>
 
-                                <span class="error nopadding" v-if="errors.has('contents.' + lang + '.title')">
-                                    <p class="help-block error" v-text="errors.get('contents.' + lang + '.title')"></p>
-                                </span>
-                            </div>
+                        <div class="input-field">
+                            <input type="text" name="name" v-model="content.title" :data-lang-code="lang" v-bind:disabled="disabledContentTitle">
                         </div>
+
+                        <span class="error nopadding" v-if="errors.has('contents.' + lang + '.title')">
+                            <p class="help-block error" v-text="errors.get('contents.' + lang + '.title')"></p>
+                        </span>
                     </div>
                 </div>
             </div>
 
-            <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
-                <span class="error nopadding" v-if="errors.has('contents.' + lang + '.content')">
-                    <p class="help-block error" v-text="errors.get('contents.' + lang + '.content')"></p>
-                </span>
-
+            <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect" style="height:600px" v-bind:class="{ error: errors.has('contents.' + lang + '.title') }">
                 {% include 'antares/notifications::admin.index._tabs' %}
                 {% include 'antares/notifications::admin.index._variables' %}
             </div>

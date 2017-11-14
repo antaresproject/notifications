@@ -32,16 +32,13 @@ return [
     'alert_severity'        => [
         'highest', 'high'
     ],
-    'di'                    => [
-        \Antares\Notifications\Contracts\IndexPresenter::class => \Antares\Notifications\Http\Presenters\IndexPresenter::class
-    ],
     'scripts'               => [
         'resources-rich'    => [
         //'ckeditor-js' => 'packages/ckeditor/ckeditor.js'
         ],
         'default'           => [
-            'brain-socket-js' => 'js/brain-socket.min.js',
-            'socket-js'       => 'js/socket.js'
+            //'brain-socket-js' => 'js/brain-socket.min.js',
+            //'socket-js'       => 'js/socket.js'
         ],
         'resources-default' => [
             'notifications-js' => 'js/default.js',
@@ -54,8 +51,8 @@ return [
         ]
     ],
     'default'               => [
-        'sms'                             => '48697274132',
-        'custom_event'                    => 'antares.notifier.events.custom',
         'notifications_remove_after_days' => 90
     ],
+
+    /** SMS configuration */
 ];

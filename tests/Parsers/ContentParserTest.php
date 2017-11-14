@@ -18,13 +18,16 @@
  * @link       http://antaresproject.io
  */
 
-namespace Antares\Templates\Model\TestCase;
+namespace Antares\Notifications\Parsers\TestCase;
 
+use Antares\Notifications\Contracts\RendererContract;
 use Antares\Notifications\Parsers\ContentParser;
 use Antares\Notifications\Renderers\TwigRenderer;
 use Antares\Notifications\Services\VariablesService;
 use Antares\Notifications\Variable;
 use Antares\Testing\TestCase;
+use Illuminate\Contracts\Events\Dispatcher;
+use Mockery as m;
 
 class ContentParserTest extends TestCase
 {
@@ -42,7 +45,7 @@ class ContentParserTest extends TestCase
     public function setUp() {
         parent::setUp();
 
-        $this->variablesService = $this->app->make(VariablesService::class);
+        $this->variablesService = new VariablesService($this->app->make(Dispatcher::class));
 
         $this->variablesService->register('unit_test')
             ->set('dump', 'Dump Value', 'dump_value')
@@ -57,6 +60,12 @@ class ContentParserTest extends TestCase
         $renderer = $this->app->make(TwigRenderer::class);
 
         $this->contentParser = new ContentParser($this->variablesService, $renderer);
+    }
+
+    public function tearDown() {
+        parent::tearDown();
+
+        m::close();
     }
 
     public function testGetEmptyVariables() {
@@ -114,14 +123,40 @@ class ContentParserTest extends TestCase
         $this->assertEquals($expected, $this->contentParser->parse($content));
     }
 
-    public function testParseWithException() {
-        $this->expectException(\Exception::class);
+    public function testParseWithVariables() {
+        $content    = 'Simple content with [[ unit_test::model.name ]] variable';
+        $expected   = 'Simple content with some dump value variable';
 
-        $content = 'Simple content with [[ unit_test::model.name ]] variable';
+        $data = [
+            'model' => new TestModelStub('some dump value'),
+        ];
 
-        $this->contentParser->setPreviewMode(false);
+        $this->assertEquals($expected, $this->contentParser->parse($content, $data));
+    }
 
-        $this->contentParser->parse($content);
+    public function testParseWithVariablesAnsSimpleValue() {
+        $content    = 'Simple content with [[ unit_test::model.name ]] variable and [[ unit_test::dump ]]';
+        $expected   = 'Simple content with some dump value variable and dump_value';
+
+        $data = [
+            'model' => new TestModelStub('some dump value'),
+        ];
+
+        $this->assertEquals($expected, $this->contentParser->parse($content, $data));
+    }
+
+    public function testSettingCustomRenderer() {
+        $content = 'Simple content with [[ unit_test::dump ]] variable';
+
+        $render = m::mock(RendererContract::class)
+            ->shouldReceive('render')
+            ->withAnyArgs()
+            ->andReturn('mock content')
+            ->getMock();
+
+        $this->contentParser->setRender($render);
+
+        $this->assertEquals('mock content', $this->contentParser->parse($content));
     }
 
 }

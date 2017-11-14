@@ -86,18 +86,21 @@ class IndexController extends AdminController
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function store(Request $request) {
+        $langCode = $request->get('lang_code', locale());
+
         $rules = [
-            'name'                  => 'required|max:255',
-            'category_id'           => 'required|integer|exists:tbl_notification_categories,id',
-            'type_id'               => 'required|integer|exists:tbl_notification_types,id',
-            'severity_id'           => 'required|integer|exists:tbl_notification_severity,id',
-            'contents'              => 'array',
-            'contents.*.title'      => 'required_unless:type_id,2|max:255',
-            'contents.*.content'    => 'required',
+            'name'                                  => 'required|max:255',
+            'category_id'                           => 'required|integer|exists:tbl_notification_categories,id',
+            'type_id'                               => 'required|integer|exists:tbl_notification_types,id',
+            'severity_id'                           => 'required|integer|exists:tbl_notification_severity,id',
+            'contents'                              => 'array',
+            'contents.' . $langCode . '.title'      => 'required_unless:type_id,2|max:255',
+            'contents.' . $langCode . '.content'    => 'required',
         ];
 
         $messages = [
-            'contents.*.title.required_unless' => 'Title is required',
+            'contents.*.title.required_unless'  => 'Title is required',
+            'contents.*.content.required'       => 'Content is required',
         ];
 
         $this->validate($request, $rules, $messages);
@@ -124,18 +127,21 @@ class IndexController extends AdminController
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function update(Notifications $notification, Request $request) {
+        $langCode = $request->get('lang_code', locale());
+
         $rules = [
-            'name'                  => 'required|max:255',
-            'category_id'           => 'required|integer|exists:tbl_notification_categories,id',
-            'type_id'               => 'required|integer|exists:tbl_notification_types,id',
-            'severity_id'           => 'required|integer|exists:tbl_notification_severity,id',
-            'contents'              => 'array',
-            'contents.*.title'      => 'required_unless:type_id,2|max:255',
-            'contents.*.content'    => 'required',
+            'name'                                  => 'required|max:255',
+            'category_id'                           => 'required|integer|exists:tbl_notification_categories,id',
+            'type_id'                               => 'required|integer|exists:tbl_notification_types,id',
+            'severity_id'                           => 'required|integer|exists:tbl_notification_severity,id',
+            'contents'                              => 'array',
+            'contents.' . $langCode . '.title'      => 'required_unless:type_id,2|max:255',
+            'contents.' . $langCode . '.content'    => 'required',
         ];
 
         $messages = [
-            'contents.*.title.required_unless' => 'Title is required',
+            'contents.*.title.required_unless'  => 'Title is required',
+            'contents.*.content.required'       => 'Content is required',
         ];
 
         $this->validate($request, $rules, $messages);

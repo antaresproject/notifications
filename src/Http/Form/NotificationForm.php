@@ -65,11 +65,16 @@ class NotificationForm {
 
         return $form->build('notification', function(FormGrid $form) use($notification, $langs, $contents) {
             publish('notifications', ['js/ckeditor-notifications.js']);
+            publish('notifications', ['js/template-preview.js']);
             publish('notifications', ['js/vue-ckeditor.js']);
             publish('notifications', ['js/vue-codemirror.js']);
             publish('notifications', ['js/notification-form.js']);
 
-            app('antares.asset')->container('antares/foundation::application')->add('vue_min', '//cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.js', ['app_cache']);
+            $vuePath = app()->isLocal()
+                ? '//cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.js'
+                : '//cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.min.js';
+
+            app('antares.asset')->container('antares/foundation::application')->add('vue', $vuePath, ['app_cache']);
             app('antares.asset')->container('antares/foundation::application')->add('lodash', '//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js', ['app_cache']);
             app('antares.asset')->container('antares/foundation::application')->add('clipboard', '//cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js', ['app_cache']);
 

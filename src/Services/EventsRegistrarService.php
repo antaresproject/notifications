@@ -11,7 +11,7 @@ class EventsRegistrarService
     /**
      * @var NotifiableEvent[]
      */
-    protected static $events = [];
+    protected $events = [];
 
     /**
      * @var Collection
@@ -23,7 +23,7 @@ class EventsRegistrarService
      */
     public function register(NotifiableEvent $event)
     {
-        static::$events[$event->getEventClass()] = $event;
+        $this->events[$event->getEventClass()] = $event;
     }
 
     /**
@@ -31,7 +31,7 @@ class EventsRegistrarService
      */
     public function events(): array
     {
-        return static::$events;
+        return $this->events;
     }
 
     /**
@@ -40,8 +40,8 @@ class EventsRegistrarService
      */
     public function getByClassName(string $className)
     {
-        if (array_key_exists($className, static::$events)) {
-            return static::$events[$className];
+        if (array_key_exists($className, $this->events)) {
+            return $this->events[$className];
         }
 
         return null;
@@ -55,7 +55,7 @@ class EventsRegistrarService
         if ($this->models === null) {
             $this->models = new Collection();
 
-            foreach (static::$events as $notifiableEvent) {
+            foreach ($this->events as $notifiableEvent) {
                 $this->models->push($notifiableEvent->toArray());
             }
 

@@ -2,10 +2,12 @@
 
 namespace Antares\Notifications\Model;
 
+use Antares\Notifications\Services\VariablesService;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use Closure;
+use ReflectionClass;
 
 class NotifiableEvent implements Arrayable {
 
@@ -42,6 +44,25 @@ class NotifiableEvent implements Arrayable {
     public function __construct(string $eventClass, string $label = null) {
         $this->eventClass = $eventClass;
         $this->label = $label ?: $eventClass;
+
+        $this->assignVariablesFromEvent();
+    }
+
+    /**
+     * Assign possible variables from the event class name based on
+     */
+    protected function assignVariablesFromEvent() {
+        /* @var $variablesService VariablesService */
+        $variablesService = app()->make(VariablesService::class);
+        $parameters = (new ReflectionClass($this->eventClass))->getConstructor()->getParameters();
+
+        foreach($parameters as $parameter) {
+            $moduleVariables = $variablesService->firstModuleVariablesByParameter($parameter);
+
+            if($moduleVariables) {
+                $this->variables[] = $moduleVariables->toArray();
+            }
+        }
     }
 
     /**

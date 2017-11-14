@@ -3,6 +3,7 @@
 namespace Antares\Notifications\Services;
 
 use Antares\Notifications\Contracts\ModelVariablesResoluble;
+use Antares\Notifications\ModelVariableDefinitions;
 use Antares\Notifications\Variable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
@@ -20,7 +21,7 @@ class VariablesService
     /**
      * @var ModuleVariables[]
      */
-    protected static $modules = [];
+    protected $modules = [];
 
     /**
      * VariablesService constructor.
@@ -50,7 +51,7 @@ class VariablesService
             $model->applyVariables($module);
         }
 
-        return self::$modules[$moduleName] = $module;
+        return $this->modules[$moduleName] = $module;
     }
 
     /**
@@ -62,11 +63,11 @@ class VariablesService
     {
         $data = [];
 
-        foreach (self::$modules as $moduleVariables) {
+        foreach ($this->modules as $moduleVariables) {
             $data[] = $moduleVariables->getNamedVariables();
         }
 
-        return array_merge(...$data);
+        return count($data) ? array_merge(...$data) : [];
     }
 
     /**
@@ -74,7 +75,7 @@ class VariablesService
      */
     public function all(): array
     {
-        return self::$modules;
+        return $this->modules;
     }
 
     /**
@@ -85,11 +86,11 @@ class VariablesService
      */
     public function findByModule(string $moduleName)
     {
-        return Arr::get(self::$modules, $moduleName);
+        return Arr::get($this->modules, $moduleName);
     }
 
     /**
-     * Returns the variable object based on full variable code, ex. Shopping::order.id
+     * Returns the variable object based on full variable code, ex. shopping::order.id
      *
      * @param string $code
      * @return Variable|null
@@ -103,10 +104,29 @@ class VariablesService
 
         list($module, $variable) = explode('::', $code);
 
-        $moduleVariables = Arr::get(self::$modules, $module);
+        $moduleVariables = Arr::get($this->modules, $module);
 
         if ($moduleVariables instanceof ModuleVariables) {
             return $moduleVariables->get($variable);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the first matched module variables by the parameter.
+     *
+     * @param ReflectionParameter $parameter
+     * @return ModuleVariables|null
+     */
+    public function firstModuleVariablesByParameter(ReflectionParameter $parameter)
+    {
+        foreach ($this->modules as $module) {
+            foreach ($module->getModelDefinitions() as $definition) {
+                if ($definition->getBindParameter()->isMatchToParameter($parameter)) {
+                    return $module;
+                }
+            }
         }
 
         return null;
@@ -118,7 +138,7 @@ class VariablesService
      */
     public function getDefault(ReflectionParameter $parameter)
     {
-        foreach (static::$modules as $module) {
+        foreach ($this->modules as $module) {
             foreach ($module->getModelDefinitions() as $definition) {
                 if ($definition->getBindParameter()->isMatchToParameter($parameter)) {
                     return $definition->getDefault();
