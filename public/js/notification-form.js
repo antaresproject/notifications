@@ -45,7 +45,7 @@ new Vue({
 
         if(this.notification.category) {
             var category = this.notification.category;
-            this.category = _.first(this.categories, function(_category) {
+            this.category = _.find(this.categories, function(_category) {
                 return _category.id === category;
             });
         }
