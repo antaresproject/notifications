@@ -56,7 +56,7 @@ class TemplateBuilderService
     {
         $this->contentParser = $contentParser;
         $this->synchronizer  = $synchronizer;
-        $this->templates     = new TemplatesCollection('');
+        $this->templates     = new TemplatesCollection('', '');
     }
 
     /**

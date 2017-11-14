@@ -107,6 +107,10 @@ class NotificationsImportCommand extends Command
             if ($extension instanceof ExtensionContract) {
                 $this->extension = $extension;
             }
+            else {
+                $this->error('Extension not found.');
+                return;
+            }
         }
 
         $files = $this->getFiles();
