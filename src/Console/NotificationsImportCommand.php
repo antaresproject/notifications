@@ -70,6 +70,8 @@ class NotificationsImportCommand extends Command
     protected $synchronizer;
 
     /**
+     * Extension instance.
+     *
      * @var ExtensionContract|null
      */
     private $extension;
@@ -198,6 +200,8 @@ class NotificationsImportCommand extends Command
     }
 
     /**
+     * Returns notification path as Finder object for given extension. If path is not recognized NULL will be returned.
+     *
      * @param ExtensionContract $extension
      * @return null|Finder
      */

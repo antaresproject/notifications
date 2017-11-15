@@ -27,6 +27,8 @@ use Illuminate\Notifications\Notification;
 class TemplateChannel {
 
     /**
+     * Channel Manager instance.
+     *
      * @var ChannelManager
      */
     protected $channelManager;
@@ -53,6 +55,8 @@ class TemplateChannel {
     }
 
     /**
+     * Returns type from the given notification object.
+     *
      * @param Notification $notification
      * @return string
      * @throws \InvalidArgumentException

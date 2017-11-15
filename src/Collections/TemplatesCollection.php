@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Collections;
 
 use Antares\Notifications\Model\Template;
@@ -10,21 +28,29 @@ class TemplatesCollection
 {
 
     /**
+     * Title of grouped templates.
+     *
      * @var string
      */
     protected $title;
 
     /**
+     * Class name or event category if event does not exists.
+     *
      * @var string
      */
     protected $notifiableEvent;
 
     /**
+     * Resolved event category name.
+     *
      * @var string
      */
     protected $eventsCategory;
 
     /**
+     * List of templates.
+     *
      * @var Template[]
      */
     protected $templates = [];
@@ -53,6 +79,8 @@ class TemplatesCollection
     }
 
     /**
+     * Creates instance of class.
+     *
      * @param string $title
      * @param string $notifiableEvent Event class name or category name.
      * @return TemplatesCollection
@@ -63,6 +91,8 @@ class TemplatesCollection
     }
 
     /**
+     * Defines template within given name.
+     *
      * @param string $name
      * @param Template $template
      * @return TemplatesCollection
@@ -75,6 +105,8 @@ class TemplatesCollection
     }
 
     /**
+     * Returns template by given name. If not exists then NULL will be returned.
+     *
      * @param string $name
      * @return Template|null
      */
@@ -84,6 +116,8 @@ class TemplatesCollection
     }
 
     /**
+     * Returns resolved event category.
+     *
      * @return string
      */
     public function getEventsCategory() : string {
@@ -91,6 +125,8 @@ class TemplatesCollection
     }
 
     /**
+     * Returns an array of templates.
+     *
      * @return Template[]
      */
     public function all(): array
@@ -99,6 +135,8 @@ class TemplatesCollection
     }
 
     /**
+     * Returns event class name. If class does not exists then empty string will be returned.
+     *
      * @return string
      */
     public function getNotifiableEvent(): string
@@ -107,6 +145,8 @@ class TemplatesCollection
     }
 
     /**
+     * Returns title of templates group.
+     *
      * @return string
      */
     public function getTitle(): string

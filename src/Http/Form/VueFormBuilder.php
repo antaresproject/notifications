@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Http\Form;
 
 use App;
@@ -13,21 +31,29 @@ use InvalidArgumentException;
 class VueFormBuilder {
 
     /**
+     * Form action URL.
+     *
      * @var string
      */
     protected $action;
 
     /**
+     * Form method.
+     *
      * @var string
      */
     protected $method;
 
     /**
+     * Defined data for form.
+     *
      * @var array
      */
     protected $dataProviders = [];
 
     /**
+     * Built form.
+     *
      * @var Factory|null
      */
     protected $form;
@@ -43,6 +69,8 @@ class VueFormBuilder {
     }
 
     /**
+     * Adds single value to data providers.
+     *
      * @param string $variable
      * @param string $value
      * @throws InvalidArgumentException
@@ -56,6 +84,8 @@ class VueFormBuilder {
     }
 
     /**
+     * Sets data providers by given array.
+     *
      * @param array $dataProviders
      * @throws InvalidArgumentException
      */
@@ -66,6 +96,8 @@ class VueFormBuilder {
     }
 
     /**
+     * Returns built form.
+     *
      * @param string $name
      * @param Closure $callback
      * @return FormBuilder
@@ -96,6 +128,8 @@ class VueFormBuilder {
     }
 
     /**
+     * Returns already built form.
+     *
      * @return Factory
      */
     public function form() : Factory {
@@ -107,6 +141,8 @@ class VueFormBuilder {
     }
 
     /**
+     * Returns prepared ID for given name.
+     *
      * @param string $name
      * @return string
      */

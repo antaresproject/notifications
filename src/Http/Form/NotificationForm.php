@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Http\Form;
 
 use Antares\Contracts\Html\Builder;
@@ -14,11 +32,15 @@ use Antares\Notifications\Services\VariablesService;
 class NotificationForm {
 
     /**
+     * Registrar for events.
+     *
      * @var EventsRegistrarService
      */
     protected $eventsRegistrarService;
 
     /**
+     * Variables service instance.
+     *
      * @var VariablesService
      */
     protected $variablesService;
@@ -34,6 +56,8 @@ class NotificationForm {
     }
 
     /**
+     * Returns built form.
+     *
      * @param Notifications $notification
      * @return Builder
      */
@@ -97,6 +121,8 @@ class NotificationForm {
     }
 
     /**
+     * Returns prepared variables for form.
+     *
      * @return array
      */
     protected function getPreparedVariables() : array {

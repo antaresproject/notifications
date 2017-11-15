@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -166,6 +166,8 @@ class Notifications extends Eloquent
     }
 
     /**
+     * Returns content for given language object.
+     *
      * @param Languages $language
      * @return NotificationContents
      */
@@ -188,6 +190,8 @@ class Notifications extends Eloquent
     }
 
     /**
+     * Returns event model if exists. Otherwise simple event name will be returned.
+     *
      * @return NotifiableEvent|string|null
      */
     public function getEventModelAttribute() {
@@ -198,6 +202,8 @@ class Notifications extends Eloquent
     }
 
     /**
+     * Returns event model label if exists. Otherwise simple event name will be returned.
+     *
      * @return string
      */
     public function getEventLabelAttribute() {
@@ -208,6 +214,8 @@ class Notifications extends Eloquent
     }
 
     /**
+     * Returns notifiable event if exists by class name.
+     *
      * @param string|null $event
      * @return NotifiableEvent|null
      */
@@ -216,6 +224,8 @@ class Notifications extends Eloquent
     }
 
     /**
+     * Returns instance of Events Registrar Service.
+     *
      * @return EventsRegistrarService
      */
     private function getEventsRegistrarService() : EventsRegistrarService {

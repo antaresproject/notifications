@@ -58,6 +58,8 @@ class SmsChannel
     }
 
     /**
+     * Send the given notification.
+     *
      * @param $notifiable
      * @param Notification $notification
      * @return bool

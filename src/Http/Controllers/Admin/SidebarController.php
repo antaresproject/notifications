@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -28,8 +28,7 @@ class SidebarController extends AdminController
 {
 
     /**
-     * implments instance of controller
-     * 
+     * SidebarController constructor.
      * @param Processor $processor
      */
     public function __construct(Processor $processor)

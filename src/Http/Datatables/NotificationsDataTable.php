@@ -56,16 +56,22 @@ class NotificationsDataTable extends DataTable
     public $perPage = 25;
 
     /**
+     * Current recipient ID for filter.
+     *
      * @var string
      */
     protected $currentRecipientId = 'all';
 
     /**
+     * Current type ID for filter.
+     *
      * @var int|null
      */
     protected $currentTypeId;
 
     /**
+     * Returns query builder.
+     *
      * @return Builder
      */
     public function query()
@@ -145,6 +151,8 @@ class NotificationsDataTable extends DataTable
     }
 
     /**
+     * Adds mass disable action for table.
+     *
      * @param TableBuilder $table
      */
     protected function massActionDisable(TableBuilder $table) {
@@ -158,6 +166,8 @@ class NotificationsDataTable extends DataTable
     }
 
     /**
+     * Adds mass enable action for table.
+     *
      * @param TableBuilder $table
      */
     protected function massActionEnable(TableBuilder $table) {
@@ -171,6 +181,8 @@ class NotificationsDataTable extends DataTable
     }
 
     /**
+     * Returns array of recipients for filters.
+     *
      * @return array
      */
     protected function getRecipients() : array {
@@ -189,6 +201,8 @@ class NotificationsDataTable extends DataTable
     }
 
     /**
+     * Setup query for search filter.
+     *
      * @param Request $request
      * @return Closure
      */
@@ -236,6 +250,8 @@ class NotificationsDataTable extends DataTable
     }
 
     /**
+     * Get actions column for table builder.
+     *
      * @param Authorization $acl
      * @return Closure
      */

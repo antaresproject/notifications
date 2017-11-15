@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -29,6 +29,8 @@ class SidebarItemDecorator
 {
 
     /**
+     * Content parser instance.
+     *
      * @var ContentParser
      */
     protected $contentParser;
@@ -72,7 +74,6 @@ class SidebarItemDecorator
     public function item(NotificationsStack $item, string $view)
     {
         $firstContent       = $item->contents[0];
-
         $title              = $this->contentParser->parse($firstContent->title, (array) $item->variables);
         $content            = $this->contentParser->parse($firstContent->content, (array) $item->variables);
 

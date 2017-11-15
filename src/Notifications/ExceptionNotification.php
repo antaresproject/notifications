@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Notifications;
 
 use Antares\Notifications\Collections\TemplatesCollection;
@@ -12,11 +30,15 @@ use Illuminate\Notifications\Notification;
 class ExceptionNotification extends Notification implements NotificationEditable {
 
     /**
+     * Exception instance.
+     *
      * @var Exception
      */
     protected $exception;
 
     /**
+     * Custom exception message for notification.
+     *
      * @var string
      */
     protected $customMessage;
@@ -32,6 +54,8 @@ class ExceptionNotification extends Notification implements NotificationEditable
     }
 
     /**
+     * Returns collection of defined templates.
+     *
      * @return TemplatesCollection
      */
     public static function templates() : TemplatesCollection {
@@ -40,6 +64,8 @@ class ExceptionNotification extends Notification implements NotificationEditable
     }
 
     /**
+     * Returns template for alert.
+     *
      * @return Template
      */
     protected static function alertMessage() {
@@ -60,6 +86,8 @@ class ExceptionNotification extends Notification implements NotificationEditable
     }
 
     /**
+     * Returns message for alert.
+     *
      * @param $notifiable
      * @return NotificationMessage
      */

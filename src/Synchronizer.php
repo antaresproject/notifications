@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications;
 
 use Antares\Notifications\Collections\TemplatesCollection;
@@ -18,11 +36,15 @@ class Synchronizer
 {
 
     /**
+     * Collection of all system languages.
+     *
      * @var \Illuminate\Database\Eloquent\Collection|Languages[]
      */
     protected $languages;
 
     /**
+     * Determines if force mode is on.
+     *
      * @var bool
      */
     protected $forceMode = false;
@@ -35,6 +57,8 @@ class Synchronizer
     }
 
     /**
+     * Sets force mode.
+     *
      * @param bool $state
      */
     public function setForceMode(bool $state) {
@@ -42,6 +66,8 @@ class Synchronizer
     }
 
     /**
+     * Makes synchronization of given templates.
+     *
      * @param string $notificationClassName
      * @param TemplatesCollection $templates
      */
@@ -56,6 +82,8 @@ class Synchronizer
     }
 
     /**
+     * Makes synchronization for given template data.
+     *
      * @param string $title
      * @param string $notificationClassName
      * @param Template $template
@@ -82,6 +110,8 @@ class Synchronizer
     }
 
     /**
+     * Saves template in database.
+     *
      * @param string $title
      * @param string $className
      * @param string $type

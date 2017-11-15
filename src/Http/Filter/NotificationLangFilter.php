@@ -58,6 +58,8 @@ class NotificationLangFilter extends SelectFilter implements DataTableScopeContr
     }
 
     /**
+     * Filters data by parameters from memory
+     *
      * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder $builder
      * @return void
      */

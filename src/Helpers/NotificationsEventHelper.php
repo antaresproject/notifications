@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Helpers;
 
 use Antares\Notifications\Model\NotifiableEvent;
@@ -10,21 +28,29 @@ use Closure;
 class NotificationsEventHelper {
 
     /**
+     * Registrar for events.
+     *
      * @var EventsRegistrarService
      */
     protected $eventsRegistrarService;
 
     /**
+     * Notifiable event instance.
+     *
      * @var NotifiableEvent|null
      */
     protected $event;
 
     /**
+     * Event handler.
+     *
      * @var mixed|null
      */
     protected $handler;
 
     /**
+     * List of recipients.
+     *
      * @var Recipient[]
      */
     protected $recipients = [];
@@ -37,6 +63,8 @@ class NotificationsEventHelper {
     }
 
     /**
+     * Creates object.
+     *
      * @return NotificationsEventHelper
      */
     public static function make() : NotificationsEventHelper {
@@ -44,6 +72,8 @@ class NotificationsEventHelper {
     }
 
     /**
+     * Creates object. Different name for chain usage.
+     *
      * @return NotificationsEventHelper
      */
     public function next() : NotificationsEventHelper {
@@ -51,6 +81,8 @@ class NotificationsEventHelper {
     }
 
     /**
+     * Sets notifiable event.
+     *
      * @param string $className
      * @param string $categoryName
      * @param string|null $label
@@ -63,6 +95,8 @@ class NotificationsEventHelper {
     }
 
     /**
+     * Adds recipient for event.
+     *
      * @param string $area
      * @param Closure $resolver
      * @return NotificationsEventHelper
@@ -74,6 +108,8 @@ class NotificationsEventHelper {
     }
 
     /**
+     * Adds admin recipient for event.
+     *
      * @param Closure $resolver
      * @return NotificationsEventHelper
      */
@@ -82,6 +118,8 @@ class NotificationsEventHelper {
     }
 
     /**
+     * Adds client recipient for event.
+     *
      * @param Closure $resolver
      * @return NotificationsEventHelper
      */
@@ -90,6 +128,8 @@ class NotificationsEventHelper {
     }
 
     /**
+     * Sets handler for event.
+     *
      * @param $handler
      * @return NotificationsEventHelper
      */

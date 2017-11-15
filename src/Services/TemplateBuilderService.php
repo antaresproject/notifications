@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Services;
 
 use Antares\Notifications\Collections\TemplatesCollection;
@@ -18,31 +36,43 @@ class TemplateBuilderService
 {
 
     /**
+     * Templates collection instance.
+     *
      * @var TemplatesCollection
      */
     protected $templates;
 
     /**
+     * Content parser instance.
+     *
      * @var ContentParser
      */
     protected $contentParser;
 
     /**
+     * Synchronizer instance.
+     *
      * @var Synchronizer
      */
     protected $synchronizer;
 
     /**
+     * Editable notification if passed.
+     *
      * @var NotificationEditable|null
      */
     protected $notification;
 
     /**
+     * Notification source.
+     *
      * @var string|null
      */
     protected $source;
 
     /**
+     * Category.
+     *
      * @var string|null
      */
     protected $category;
@@ -60,6 +90,8 @@ class TemplateBuilderService
     }
 
     /**
+     * Sets given notification to builder if it has valid interface.
+     *
      * @param Notification $notification
      * @return TemplateBuilderService
      */
@@ -75,6 +107,8 @@ class TemplateBuilderService
     }
 
     /**
+     * Determines if notification is testable.
+     *
      * @return bool
      */
     protected function isTestable(): bool
@@ -87,6 +121,8 @@ class TemplateBuilderService
     }
 
     /**
+     * Returns template object of notification if exists.
+     *
      * @return Notifications|null
      */
     protected function getTemplateObject()
@@ -99,6 +135,8 @@ class TemplateBuilderService
     }
 
     /**
+     * Build notification template by the given message.
+     *
      * @param MessageContract $message
      */
     public function build(MessageContract $message)
@@ -119,6 +157,8 @@ class TemplateBuilderService
     }
 
     /**
+     * Makes synchronization of template to database.
+     *
      * @param Template $template
      * @return NotificationContents|null
      */
@@ -136,6 +176,8 @@ class TemplateBuilderService
     }
 
     /**
+     * Given message will be populated by values from template.
+     *
      * @param TemplateMessageContract $message
      * @param Template $template
      * @param NotificationContents|null $notificationContent

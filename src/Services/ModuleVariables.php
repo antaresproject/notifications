@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Services;
 
 use Antares\Notifications\BindParameter;
@@ -12,16 +30,22 @@ class ModuleVariables implements Arrayable
 {
 
     /**
+     * Module name.
+     *
      * @var string
      */
     protected $module;
 
     /**
+     * List of variables.
+     *
      * @var Variable[]
      */
     protected $variables = [];
 
     /**
+     * List of model definitions.
+     *
      * @var ModelVariableDefinitions[]
      */
     protected $definitions = [];
@@ -36,6 +60,8 @@ class ModuleVariables implements Arrayable
     }
 
     /**
+     * Defines model definition for variables.
+     *
      * @param string $name
      * @param string $className
      * @param Closure $default
@@ -61,6 +87,8 @@ class ModuleVariables implements Arrayable
     }
 
     /**
+     * Sets single variable.
+     *
      * @param string $code
      * @param string $label
      * @param $value
@@ -74,6 +102,8 @@ class ModuleVariables implements Arrayable
     }
 
     /**
+     * Returns variable by the given code if exists.
+     *
      * @param string $code
      * @return Variable|null
      */
@@ -89,6 +119,8 @@ class ModuleVariables implements Arrayable
     }
 
     /**
+     * Returns list of model definitions.
+     *
      * @return ModelVariableDefinitions[]
      */
     public function getModelDefinitions(): array
@@ -97,6 +129,8 @@ class ModuleVariables implements Arrayable
     }
 
     /**
+     * Returns all variables.
+     *
      * @return Variable[]
      */
     public function all(): array
@@ -113,6 +147,8 @@ class ModuleVariables implements Arrayable
     }
 
     /**
+     * Returns all variables in format module-name::code
+     *
      * @return array
      */
     public function getNamedVariables(): array

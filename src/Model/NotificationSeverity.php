@@ -11,13 +11,12 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
-
 
 namespace Antares\Notifications\Model;
 
@@ -61,6 +60,9 @@ class NotificationSeverity extends Eloquent
      */
     public $timestamps = false;
 
+    /**
+     * {@inheritdoc}
+     */
     protected $appends = [
         'title',
     ];
@@ -86,6 +88,8 @@ class NotificationSeverity extends Eloquent
     }
 
     /**
+     * Returns title from name.
+     *
      * @return string
      */
     public function getTitleAttribute() {

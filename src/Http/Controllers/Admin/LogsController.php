@@ -51,6 +51,8 @@ class LogsController extends AdminController
     }
 
     /**
+     * Index action.
+     *
      * @param LogsDataTable $dataTable
      * @return array
      */
@@ -59,7 +61,10 @@ class LogsController extends AdminController
     }
 
     /**
-     * {@inheritdoc}
+     * Preview action.
+     *
+     * @param $id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
      */
     public function preview($id)
     {
@@ -67,6 +72,8 @@ class LogsController extends AdminController
     }
 
     /**
+     * Delete action.
+     *
      * @param Request $request
      * @param null $id
      * @return \Symfony\Component\HttpFoundation\Response

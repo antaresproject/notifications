@@ -1,9 +1,26 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Services;
 
 use Antares\Notifications\Contracts\ModelVariablesResoluble;
-use Antares\Notifications\ModelVariableDefinitions;
 use Antares\Notifications\Variable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
@@ -14,11 +31,15 @@ class VariablesService
 {
 
     /**
+     * Events dispatcher instance.
+     *
      * @var Dispatcher
      */
     protected $dispatcher;
 
     /**
+     * List of module variables.
+     *
      * @var ModuleVariables[]
      */
     protected $modules = [];
@@ -71,6 +92,8 @@ class VariablesService
     }
 
     /**
+     * Returns registered module variables.
+     *
      * @return ModuleVariables[]|array
      */
     public function all(): array
@@ -133,6 +156,8 @@ class VariablesService
     }
 
     /**
+     * Returns default value of the given parameter.
+     *
      * @param ReflectionParameter $parameter
      * @return mixed|null
      */

@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -36,6 +36,8 @@ use Log;
 class IndexProcessor extends Processor {
 
     /**
+     * Content parser instance.
+     *
      * @var ContentParser
      */
     protected $contentParser;
@@ -49,6 +51,8 @@ class IndexProcessor extends Processor {
     }
 
     /**
+     * Stores new notification.
+     *
      * @param array $data
      * @return ResponseHelper
      */
@@ -93,6 +97,8 @@ class IndexProcessor extends Processor {
     }
 
     /**
+     * Updates notification.
+     *
      * @param Notifications $notification
      * @param array $data
      * @return ResponseHelper
@@ -146,6 +152,8 @@ class IndexProcessor extends Processor {
     }
 
     /**
+     * Deletes notification.
+     *
      * @param Notifications $notification
      * @return ResponseHelper
      */
@@ -180,6 +188,8 @@ class IndexProcessor extends Processor {
     }
 
     /**
+     * Sending test of given notifications data.
+     *
      * @param array $data
      * @return ResponseHelper
      */
@@ -218,6 +228,8 @@ class IndexProcessor extends Processor {
     }
 
     /**
+     * Preview notification.
+     *
      * @param array $data
      * @return array
      */
@@ -243,6 +255,8 @@ class IndexProcessor extends Processor {
     }
 
     /**
+     * Changes notification status.
+     *
      * @param Notifications $notification
      * @return ResponseHelper
      */
@@ -267,6 +281,8 @@ class IndexProcessor extends Processor {
     }
 
     /**
+     * Mass status changes of notifications.
+     *
      * @param array $ids
      * @param bool $state
      * @return ResponseHelper

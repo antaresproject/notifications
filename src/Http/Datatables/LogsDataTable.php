@@ -55,6 +55,8 @@ class LogsDataTable extends DataTable
     public $perPage = 25;
 
     /**
+     * Returns query builder.
+     *
      * @return Builder
      */
     public function query()
@@ -131,6 +133,8 @@ class LogsDataTable extends DataTable
     }
 
     /**
+     * Returns built button for mass action.
+     *
      * @return string|\Antares\Support\Expression
      */
     protected function getMassActionButton() {

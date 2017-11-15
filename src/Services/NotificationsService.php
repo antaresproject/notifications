@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Services;
 
 use Antares\Model\User;
@@ -14,16 +32,22 @@ use ReflectionClass;
 class NotificationsService {
 
     /**
+     * Channel manager instance.
+     *
      * @var ChannelManager
      */
     protected $channelManager;
 
     /**
+     * Content parser instance.
+     *
      * @var ContentParser
      */
     protected $contentParser;
 
     /**
+     * Variables service instance.
+     *
      * @var VariablesService
      */
     protected $variablesService;
@@ -41,6 +65,8 @@ class NotificationsService {
     }
 
     /**
+     * Handles notification as preview for given user.
+     *
      * @param Notifications $notification
      * @param User $user
      */
@@ -64,6 +90,8 @@ class NotificationsService {
     }
 
     /**
+     * Handles notification for given event.
+     *
      * @param Notifications $notification
      * @param object $event
      */
@@ -103,6 +131,8 @@ class NotificationsService {
     }
 
     /**
+     * Returns resolved notification object of source.
+     *
      * @param string $source
      * @param object|null $event
      * @return Notification

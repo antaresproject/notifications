@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Services;
 
 use Antares\Notifications\Model\NotifiableEvent;
@@ -9,18 +27,27 @@ class EventsRegistrarService
 {
 
     /**
+     * List of notifiable events.
+     *
      * @var NotifiableEvent[]
      */
     protected $events = [];
 
     /**
+     * Built collection of events.
+     *
      * @var Collection
      */
     protected $models;
 
+    /**
+     * Default notification category name.
+     */
     const DEFAULT_CATEGORY = 'system';
 
     /**
+     * Registers event.
+     *
      * @param NotifiableEvent $event
      */
     public function register(NotifiableEvent $event)
@@ -29,6 +56,8 @@ class EventsRegistrarService
     }
 
     /**
+     * Returns all registered events.
+     *
      * @return NotifiableEvent[]
      */
     public function events(): array
@@ -37,6 +66,8 @@ class EventsRegistrarService
     }
 
     /**
+     * Returns event by the given class name if exists.
+     *
      * @param string $className
      * @return NotifiableEvent|null
      */
@@ -50,6 +81,8 @@ class EventsRegistrarService
     }
 
     /**
+     * Returns sorted collection of events.
+     *
      * @return Collection
      */
     public function getModels(): Collection
@@ -68,6 +101,8 @@ class EventsRegistrarService
     }
 
     /**
+     * Returns sorted categories from registered events.
+     *
      * @return Collection
      */
     public function getEventsCategories() : Collection {
@@ -93,6 +128,8 @@ class EventsRegistrarService
     }
 
     /**
+     * Returns category from event class name. If not exists then default will be returned.
+     *
      * @param string $eventClassName
      * @return string
      */

@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Model;
 
 use Antares\Notifications\Services\VariablesService;
@@ -78,6 +96,8 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
+     * Returns event class name.
+     *
      * @return string
      */
     public function getEventClass() : string {
@@ -85,6 +105,8 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
+     * Returns category name.
+     *
      * @return string
      */
     public function getCategoryName() : string {
@@ -92,6 +114,8 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
+     * Returns label.
+     *
      * @return string
      */
     public function getLabel() : string {
@@ -99,7 +123,9 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
-     * @param $handler
+     * Sets handler for event as closure or class name.
+     *
+     * @param Closure|string $handler
      * @return NotifiableEvent
      * @throws InvalidArgumentException
      */
@@ -115,6 +141,8 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
+     * Returns defined handler if exists.
+     *
      * @return Closure|null|string
      */
     public function getHandler() {
@@ -122,6 +150,8 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
+     * Adds recipient.
+     *
      * @param Recipient $recipient
      * @return NotifiableEvent
      */
@@ -132,6 +162,8 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
+     * Return recipient by the given area name if exists.
+     *
      * @param string $area
      * @return Recipient|null
      */
@@ -140,6 +172,8 @@ class NotifiableEvent implements Arrayable {
     }
 
     /**
+     * Returns an array of recipients labels.
+     *
      * @return array
      */
     public function getRecipientsLabels() : array {

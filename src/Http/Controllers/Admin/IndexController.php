@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -64,6 +64,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Index action.
+     *
      * @param NotificationsDataTable $dataTable
      * @return array
      */
@@ -72,6 +74,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Create action.
+     *
      * @param NotificationForm $form
      * @return \Illuminate\Contracts\View\View
      */
@@ -82,6 +86,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Store action.
+     *
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -109,6 +115,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Edit action.
+     *
      * @param Notifications $notification
      * @param NotificationForm $form
      * @return \Illuminate\Contracts\View\View
@@ -122,6 +130,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Update action.
+     *
      * @param Notifications $notification
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -150,6 +160,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Destroy action.
+     *
      * @param Request $request
      * @param Notifications $notification
      * @return \Symfony\Component\HttpFoundation\Response
@@ -159,6 +171,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Send test action for one notification.
+     *
      * @param Request $request
      * @param Notifications $notification
      * @return \Symfony\Component\HttpFoundation\Response
@@ -173,6 +187,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Send test action for mass notifications.
+     *
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -181,7 +197,7 @@ class IndexController extends AdminController
     }
 
     /**
-     * preview notification
+     * Preview action.
      *
      * @param Request $request
      * @return View
@@ -191,6 +207,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Change status (enable/disable) action.
+     *
      * @param Request $request
      * @param Notifications $notification
      * @return \Symfony\Component\HttpFoundation\Response
@@ -200,6 +218,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Mass disable action.
+     *
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -210,6 +230,8 @@ class IndexController extends AdminController
     }
 
     /**
+     * Mass enable action.
+     *
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */

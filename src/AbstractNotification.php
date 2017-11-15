@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications;
 
 use Antares\Notifications\Channels\TemplateChannel;
@@ -37,6 +55,12 @@ class AbstractNotification extends Notification
         return [TemplateChannel::class];
     }
 
+    /**
+     * Returns mail message.
+     *
+     * @param $notifiable
+     * @return MailMessage
+     */
     public function toMail($notifiable) {
         $data = $this->getResolvedData();
 
@@ -46,6 +70,12 @@ class AbstractNotification extends Notification
             ->viewData($data);
     }
 
+    /**
+     * Returns SMS message.
+     *
+     * @param $notifiable
+     * @return SmsMessage
+     */
     public function toSms($notifiable) {
         $data = $this->getResolvedData();
 
@@ -54,6 +84,12 @@ class AbstractNotification extends Notification
             ->viewData($data);
     }
 
+    /**
+     * Returns notification message.
+     *
+     * @param $notifiable
+     * @return NotificationMessage
+     */
     public function toNotification($notifiable) {
         $data = $this->getResolvedData();
 
@@ -64,6 +100,12 @@ class AbstractNotification extends Notification
             ->viewData($data);
     }
 
+    /**
+     * Returns alert message.
+     *
+     * @param $notifiable
+     * @return NotificationMessage
+     */
     public function toAlert($notifiable) {
         $data = $this->getResolvedData();
 
@@ -75,6 +117,8 @@ class AbstractNotification extends Notification
     }
 
     /**
+     * Returns data from this object.
+     *
      * @return array
      */
     private function getResolvedData() : array {

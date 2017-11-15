@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Parsers;
 
 use Antares\Notifications\Contracts\RendererContract;
@@ -12,25 +30,39 @@ use Illuminate\Support\Str;
 class ContentParser {
 
     /**
+     * Variables Service instance.
+     *
      * @var VariablesService
      */
     protected $variablesService;
 
     /**
+     * Renderer instance.
+     *
      * @var RendererContract
      */
     protected $renderer;
 
     /**
+     * Determines preview mode.
+     *
      * @var bool
      */
     protected $previewMode = false;
 
+    /**
+     * Pattern for variables.
+     */
     const VARIABLE_PATTERN = '/\[\[(.*?)\]\]/';
 
+    /**
+     * Pattern for blocks.
+     */
     const BLOCK_PATTERN = '/\{%(.*?)\%\}/';
 
     /**
+     * Array of block instructions.
+     *
      * @var array
      */
     protected static $instructions = [
@@ -95,6 +127,8 @@ class ContentParser {
     }
 
     /**
+     * Returns parsed content with given variables. If preview mode is set as TRUE then the parser will try to fetch fake version of them.
+     * 
      * @param string $content
      * @param array $data
      * @return string
@@ -156,6 +190,8 @@ class ContentParser {
     }
 
     /**
+     * For preview mode not-filled variables will be set by fake versions.
+     *
      * @param ModelVariableDefinitions $modelVariableDefinitions
      * @param array $data
      * @throws \Exception
