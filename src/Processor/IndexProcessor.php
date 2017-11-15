@@ -266,4 +266,58 @@ class IndexProcessor extends Processor {
         return $response;
     }
 
+    /**
+     * @param array $ids
+     * @param bool $state
+     * @return ResponseHelper
+     */
+    public function massChangeStatus(array $ids, bool $state) : ResponseHelper {
+        $url = handles('antares::notifications');
+
+        try {
+            DB::beginTransaction();
+
+            if(count($ids) === 0) {
+                $message = trans('antares/notifications::messages.notification_mass_not_selected');
+
+                throw new InfoException($message);
+            }
+
+            /* @var $notifications Notifications[] */
+            $notifications = Notifications::query()->whereIn('id', $ids)->get();
+
+            foreach($notifications as $notification) {
+                $notification->active = $state;
+                $notification->save();
+            }
+
+            $message = $state
+                ? trans('antares/notifications::messages.notification_mass_enabled_success')
+                : trans('antares/notifications::messages.notification_mass_disabled_success');
+
+            DB::commit();
+
+            $response = ResponseHelper::success($message, $url);
+        }
+        catch(InfoException $e) {
+            Log::emergency($e);
+            DB::rollBack();
+
+            $message    = $e->getMessage();
+            $response   = ResponseHelper::error($message);
+        }
+        catch(Exception $e) {
+            Log::emergency($e);
+            DB::rollBack();
+
+            $message = $state
+                ? trans('antares/notifications::messages.notification_mass_enabled_failed')
+                : trans('antares/notifications::messages.notification_mass_disabled_failed');
+
+            $response = ResponseHelper::error($message);
+        }
+
+        return $response;
+    }
+
 }

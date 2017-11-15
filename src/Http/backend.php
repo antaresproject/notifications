@@ -36,6 +36,8 @@ $router->group(['prefix' => 'notifications'], function (Router $router) {
     $router->post('{notification}/sendTest', 'IndexController@sendTestOfNotification');
     $router->post('sendTest', 'IndexController@sendTest');
     $router->post('preview', 'IndexController@preview');
+    $router->post('disable', 'IndexController@massDisable');
+    $router->post('enable', 'IndexController@massEnable');
 
     $router->post('{notification}/changeStatus', 'IndexController@changeStatus');
 

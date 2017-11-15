@@ -29,9 +29,11 @@ use Antares\Notifications\Filter\NotificationCategoryFilter;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Datatables\Services\DataTable;
 use Illuminate\Database\Eloquent\Builder;
+use Antares\Datatables\Html\Builder as TableBuilder;
 use Illuminate\Support\Arr;
 use Closure;
 use Yajra\Datatables\Request;
+use HTML;
 
 class NotificationsDataTable extends DataTable
 {
@@ -115,12 +117,15 @@ class NotificationsDataTable extends DataTable
      */
     public function html()
     {
-        $types = NotificationTypes::query()->pluck('title', 'id');
+        publish('notifications', ['js/notifications-table.js']);
+
+        $acl        = app('antares.acl')->make('antares/notifications');
+        $types      = NotificationTypes::query()->pluck('title', 'id');
         $recipients = $this->getRecipients();
 
-        return $this->setName('Notifications List')
+        $table = $this->setName('Notifications List')
             ->addColumn(['data' => 'id', 'name' => 'id', 'title' => 'Id', 'className' => 'w100'])
-            ->addColumn(['data' => 'name', 'name' => 'name', 'title' => trans('antares/notifications::messages.title'), 'className' => 'text--bold'])
+            ->addColumn(['data' => 'name', 'name' => 'name', 'title' => trans('antares/notifications::messages.notification_name'), 'className' => 'text--bold'])
             ->addColumn(['data' => 'recipients', 'name' => 'recipients', 'title' => trans('antares/notifications::messages.notification_recipients')])
             ->addColumn(['data' => 'event', 'name' => 'event_model', 'title' => trans('antares/notifications::messages.notification_event')])
             ->addColumn(['data' => 'category', 'name' => 'category', 'title' => trans('antares/notifications::messages.notification_events_category')])
@@ -130,6 +135,39 @@ class NotificationsDataTable extends DataTable
             ->addGroupSelect($recipients, 2, $this->currentRecipientId, ['data-prefix' => trans('antares/notifications::messages.datatables.select_recipient'), 'class' => 'mr24', 'id' => 'datatables-notification-recipient'])
             ->addGroupSelect($types, 5, $this->currentTypeId ?: $types->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type'])
             ->setDeferedData();
+
+        if($acl->can('notifications-change-status')) {
+            $this->massActionDisable($table);
+            $this->massActionEnable($table);
+        }
+
+        return $table;
+    }
+
+    /**
+     * @param TableBuilder $table
+     */
+    protected function massActionDisable(TableBuilder $table) {
+        $url    = handles('antares::notifications/disable');
+        $label  = trans('antares/notifications::messages.notification_disable');
+        $action = HTML::link($url, HTML::raw('<span>' . $label . '</span>'), [
+            'class' => 'mass-action-request'
+        ]);
+
+        $table->addMassAction('disable_notifications', $action);
+    }
+
+    /**
+     * @param TableBuilder $table
+     */
+    protected function massActionEnable(TableBuilder $table) {
+        $url    = handles('antares::notifications/enable');
+        $label  = trans('antares/notifications::messages.notification_enable');
+        $action = HTML::link($url, HTML::raw('<span>' . $label . '</span>'), [
+            'class' => 'mass-action-request'
+        ]);
+
+        $table->addMassAction('enable_notifications', $action);
     }
 
     /**
@@ -219,14 +257,8 @@ class NotificationsDataTable extends DataTable
                 $contextMenu->addAction(
                     handles('antares::notifications/' . $notification->id . '/changeStatus'),
                     $notification->active ? trans('antares/notifications::messages.notification_disable') : trans('antares/notifications::messages.notification_enable'), [
-                        'class'             => 'triggerable confirm',
-                        'data-http-method'  => 'POST',
-                        'data-icon'         => $notification->active ? 'minus-circle' : 'check-circle',
-                        'data-title'        => trans('antares/notifications::messages.modals.general_prompt'),
-                        'data-description'  => trans('antares/notifications::messages.modals.change_status', [
-                            'id'    => $notification->id,
-                            'name'  => $notification->name,
-                        ]),
+                        'class'     => 'triggerable request-change-notification-status',
+                        'data-icon' => $notification->active ? 'minus-circle' : 'check-circle',
                     ]
                 );
             }

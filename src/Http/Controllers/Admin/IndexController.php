@@ -199,4 +199,25 @@ class IndexController extends AdminController
         return $this->processor->changeStatus($notification)->notify()->resolve($request);
     }
 
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function massDisable(Request $request) {
+        $ids = $request->input('ids', []);
+
+        return $this->processor->massChangeStatus($ids, false)->notify()->resolve($request);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function massEnable(Request $request) {
+        $ids = $request->input('ids', []);
+
+        return $this->processor->massChangeStatus($ids, true)->notify()->resolve($request);
+    }
+
+
 }

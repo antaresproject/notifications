@@ -22,10 +22,11 @@ $manager->register('notifications.create', function(Generator $generator) {
 });
 
 $manager->register('notifications.edit', function(Generator $generator, Notifications $notification) {
-    $name = $notification->name;
+    $name   = $notification->name;
+    $id     = $notification->id;
 
     $generator->parent('notifications.index');
-    $generator->push(trans('antares/notifications::messages.notification_templates_edit', compact('name')));
+    $generator->push(trans('antares/notifications::messages.notification_templates_edit', compact('id' ,'name')));
 });
 
 $manager->register('notifications.logs.index', function(Generator $generator) {
