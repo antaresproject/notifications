@@ -119,13 +119,17 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         Option::observe(new ConfigurationListener());
 
         $this->app->alias(Mailer::class, MailerContract::class);
+
+       // dd('aaaa');
+        app()->make(NotificationsListener::class)->boot();
+        //dd('bbb');
     }
 
     /**
      * Booted method after all extensions.
      */
     public function booted() {
-        app()->make(NotificationsListener::class)->boot();
+
     }
 
     /**

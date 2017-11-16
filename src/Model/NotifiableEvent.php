@@ -23,6 +23,7 @@ namespace Antares\Notifications\Model;
 use Antares\Notifications\Services\VariablesService;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Closure;
 use ReflectionClass;
@@ -73,7 +74,9 @@ class NotifiableEvent implements Arrayable {
 
         $this->eventClass = $eventClass;
         $this->categoryName = strtolower($categoryName);
-        $this->label = $label ?: $eventClass;
+        $this->label = $label ?: Str::title(
+            Str::snake(class_basename($eventClass), ' ')
+        );
 
         $this->assignVariablesFromEvent();
     }

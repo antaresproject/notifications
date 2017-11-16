@@ -35,7 +35,7 @@ class NotifiableEventTest extends TestCase
        $notifiableEvent = new NotifiableEvent($className, 'tests');
 
        $this->assertEquals($className, $notifiableEvent->getEventClass());
-       $this->assertEquals($className, $notifiableEvent->getLabel());
+       $this->assertEquals('Mock Event Stub', $notifiableEvent->getLabel());
        $this->assertEquals('tests', $notifiableEvent->getCategoryName());
    }
 

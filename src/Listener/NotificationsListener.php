@@ -72,14 +72,19 @@ class NotificationsListener
      */
     protected function listenNotificationEvent(Notifications $notification)
     {
-        if($notification->event_model instanceof NotifiableEvent) {
-            $eventClass = $notification->event_model->getEventClass();
+        $eventClassName = null;
 
-            if(class_exists($eventClass)) {
-                $this->dispatcher->listen($eventClass, function($event) use($notification) {
-                    $this->notificationsService->handle($notification, $event);
-                });
-            }
+        if($notification->event_model instanceof NotifiableEvent) {
+            $eventClassName = $notification->event_model->getEventClass();
+        }
+        elseif($notification->event) {
+            $eventClassName = $notification->event;
+        }
+
+        if(is_string($eventClassName) && class_exists($eventClassName)) {
+            $this->dispatcher->listen($eventClassName, function($event) use($notification) {
+                $this->notificationsService->handle($notification, $event);
+            });
         }
     }
 
