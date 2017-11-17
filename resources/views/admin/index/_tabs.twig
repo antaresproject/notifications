@@ -62,20 +62,20 @@
     <div class="left-tabs__panels">
         <div class="mdl-tabs__panel" id="wysiwyg-panel" v-bind:class="{ 'is-active' : ! onlyText }">
             <fieldset>
-                <vue-ckeditor :ref="'editor-wysiwyg-' + lang" :id="'editor-wysiwyg-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :config.sync="ckeConfig"></vue-ckeditor>
+                <vue-ckeditor v-if="currentTab === '#wysiwyg-panel'" :ref="'editor-wysiwyg-' + lang" :id="'editor-wysiwyg-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :config.sync="ckeConfig"></vue-ckeditor>
             </fieldset>
         </div>
 
         <div class="mdl-tabs__panel" id="html-panel">
             <fieldset>
-                <codemirror :ref="'editor-html-' + lang" :id="'editor-html-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :options.sync="codeMirrorConfig"></codemirror>
+                <codemirror v-if="currentTab === '#html-panel'" :ref="'editor-html-' + lang" :id="'editor-html-' + lang" v-model="contents[lang].content" :data-lang-code="lang" :options.sync="codeMirrorConfig"></codemirror>
             </fieldset>
         </div>
 
         <div class="mdl-tabs__panel is-active" id="text-panel" v-if="onlyText">
-            <fieldset class="p16">
+            <fieldset>
                 <div class="form-block">
-                    <textarea class="h100p" :ref="'editor-text-' + lang" :id="'editor-text-' + lang" v-model="contents[lang].content" :data-lang-code="lang"></textarea>
+                    <textarea class="p16" v-if="currentTab === '#text-panel'" class="h100p" :ref="'editor-text-' + lang" :id="'editor-text-' + lang" v-model="contents[lang].content" :data-lang-code="lang"></textarea>
                 </div>
             </fieldset>
         </div>

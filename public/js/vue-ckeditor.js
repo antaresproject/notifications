@@ -32,7 +32,7 @@ Vue.component('vue-ckeditor', {
 
     data: function() {
         return {
-            destroyed: false,
+            destroyed: true,
             rawData: false
         }
     },
@@ -69,7 +69,7 @@ Vue.component('vue-ckeditor', {
             if (typeof CKEDITOR === 'undefined') {
                 console.log('CKEDITOR is missing (http://ckeditor.com/)')
             }
-            else {
+            else if(this.destroyed === true) {
                 if (this.types === 'inline') {
                     CKEDITOR.inline(this.id, this.config);
                 } else {
@@ -94,7 +94,7 @@ Vue.component('vue-ckeditor', {
 
         destroy: function () {
             if (!this.destroyed) {
-                this.instance.destroy(true);
+                this.instance.destroy(false);
 
                 this.destroyed = true
             }

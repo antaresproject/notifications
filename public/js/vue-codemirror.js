@@ -2,7 +2,8 @@ Vue.component('codemirror', {
     template: '<textarea></textarea>',
     data: function() {
         return {
-            editor: null
+            editor: null,
+            content: ''
         }
     },
     props: {
@@ -29,12 +30,13 @@ Vue.component('codemirror', {
         var component = this;
 
         this.editor = CodeMirror.fromTextArea(this.$el, this.options);
+        this.editor.setValue(this.value || this.content);
 
         this.editor.on('change', function(editor) {
-            component.value = editor.getValue();
+            component.content = editor.getValue();
 
-            component.$emit('change', component.value);
-            component.$emit('input', component.value);
+            component.$emit('change', component.content);
+            component.$emit('input', component.content);
         });
 
         var events = [
@@ -103,7 +105,8 @@ Vue.component('codemirror', {
                 var scrollInfo = this.editor.getScrollInfo();
 
                 this.editor.setValue(newVal);
-                this.editor.scrollTo(scrollInfo.left, scrollInfo.top)
+                this.editor.scrollTo(scrollInfo.left, scrollInfo.top);
+                this.content = newVal;
             }
         }
     },

@@ -21,7 +21,8 @@ new Vue({
         eventVariables: [],
         disabledContentTitle: false,
         form: null,
-        _ckeConfig: {}
+        _ckeConfig: {},
+        currentTab: null
     },
 
     created: function() {
@@ -77,7 +78,6 @@ new Vue({
         });
 
         this.initVariables();
-        this.initCodeMirror();
 
         enquire.register("screen and (max-width:767px)", {
             match: function () {
@@ -92,6 +92,12 @@ new Vue({
                 self._ckeConfig = self.disabledContentTitle ? config.getMini() : config.getFull();
                 self._ckeConfig.removePlugins = 'resize,autogrow';
             }
+        });
+
+        self.currentTab = this.form.find('.mdl-tabs__tab.is-active').attr('href');
+
+        this.form.on('click', '.mdl-tabs__tab', function() {
+            self.currentTab = $(this).attr('href');
         });
     },
 
@@ -116,7 +122,6 @@ new Vue({
                 styleActiveLine: true,
                 matchBrackets: true,
                 scrollbarStyle: 'overlay',
-                autoClearEmptyLines: false,
                 readOnly: false,
                 matchTags: {
                     bothTags: true
@@ -154,6 +159,13 @@ new Vue({
             this._ckeConfig = this.onlyText ? config.getMini() : config.getFull();
 
             this._ckeConfig.removePlugins = 'resize,autogrow';
+
+            if(this.onlyText) {
+                this.currentTab = '#text-panel';
+            }
+            else {
+                this.currentTab = '#wysiwyg-panel';
+            }
 
             componentHandler.upgradeAllRegistered();
         }
@@ -196,12 +208,12 @@ new Vue({
                     code = $(this).data('variable-code'),
                     editors = self.getCurrentEditors();
 
-                if ($('a[href="#wysiwyg-panel"]', '.left-tabs').hasClass("is-active")) {
+                if(self.currentTab === '#wysiwyg-panel') {
                     $('.page-notification-templates__content .mdl-tabs--open-variables-panel').removeClass('mdl-tabs--open-variables-panel');
 
                     editors.wysiwyg.instance.insertHtml(code);
                 }
-                else {
+                else if(self.currentTab === '#html-panel') {
                     editors.html.instance.replaceSelection(code);
                 }
             });
@@ -212,18 +224,9 @@ new Vue({
 
             return {
                 wysiwyg: this.$refs['editor-wysiwyg-' + lang][0],
-                html: this.$refs['editor-html-' + lang][0]
+                html: this.$refs['editor-html-' + lang][0],
+                text: this.$refs['editor-text-' + lang][0]
             };
-        },
-
-        initCodeMirror: function() {
-            var self = this;
-
-            this.form.find('.left-tabs .mdl-tabs__tab').on('click', function () {
-                setTimeout(function () {
-                    self.getCurrentEditors().html.refresh();
-                }, 1);
-            });
         },
 
         eventChanged: function(value) {
@@ -395,7 +398,7 @@ new Vue({
                     });
 
                     $('aside.sidebar--notifications .sidebar__header-right .btn-more', document).on('click', function (e) {
-                        $('aside.sidebar--notifications').removeClass('sidebar--open');
+                        $sidebar.removeClass('sidebar--open');
                     });
                 }
             });
