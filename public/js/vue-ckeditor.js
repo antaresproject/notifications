@@ -94,6 +94,7 @@ Vue.component('vue-ckeditor', {
 
         destroy: function () {
             if (!this.destroyed) {
+                this.instance.focusManager.blur(true);
                 this.instance.destroy(false);
 
                 this.destroyed = true
