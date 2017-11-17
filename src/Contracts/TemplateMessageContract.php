@@ -24,14 +24,6 @@ interface TemplateMessageContract
 {
 
     /**
-     * Defines which template should be used by the given name.
-     *
-     * @param string $name
-     * @return $this
-     */
-    public function template(string $name);
-
-    /**
      * Defines data for notification subject.
      *
      * @param array $data
@@ -48,11 +40,11 @@ interface TemplateMessageContract
     public function viewData(array $data);
 
     /**
-     * Returns template name if exists.
+     * Returns type of notification.
      *
-     * @return null|string
+     * @return string
      */
-    public function getTemplate();
+    public function getType() : string;
 
     /**
      * Returns subject data.

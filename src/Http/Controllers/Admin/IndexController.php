@@ -96,9 +96,8 @@ class IndexController extends AdminController
 
         $rules = [
             'name'                                  => 'required|max:255',
-            'category'                              => 'requiored',
+            'category'                              => 'required',
             'type_id'                               => 'required|integer|exists:tbl_notification_types,id',
-            'severity_id'                           => 'required|integer|exists:tbl_notification_severity,id',
             'contents'                              => 'array',
             'contents.' . $langCode . '.title'      => 'required_unless:type_id,2|max:255',
             'contents.' . $langCode . '.content'    => 'required',
@@ -141,9 +140,8 @@ class IndexController extends AdminController
 
         $rules = [
             'name'                                  => 'required|max:255',
-            'category'                              => 'requiored',
+            'category'                              => 'required',
             'type_id'                               => 'required|integer|exists:tbl_notification_types,id',
-            'severity_id'                           => 'required|integer|exists:tbl_notification_severity,id',
             'contents'                              => 'array',
             'contents.' . $langCode . '.title'      => 'required_unless:type_id,2|max:255',
             'contents.' . $langCode . '.content'    => 'required',

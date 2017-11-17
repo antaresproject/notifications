@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect" style="height:600px" v-bind:class="{ error: errors.has('contents.' + lang + '.title') }">
+            <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect" v-bind:class="{ error: errors.has('contents.' + lang + '.title') }">
                 {% include 'antares/notifications::admin.index._tabs' %}
                 {% include 'antares/notifications::admin.index._variables' %}
             </div>

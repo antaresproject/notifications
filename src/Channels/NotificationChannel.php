@@ -96,14 +96,11 @@ class NotificationChannel
     protected function sendNotification(NotificationMessage $message, Notification $notification, int $modelId)
     {
         $source     = get_class($notification);
-        $variables  = array_merge($message->subjectData, $message->viewData);
+        $variables  = array_merge($message->getSubjectData(), $message->viewData);
+        $model      = $this->findNotification($message, $message->getType(), $source);
 
-        foreach ($message->types as $type) {
-            $model = $this->findNotification($message, $type, $source);
-
-            if($model) {
-                $this->saveInStack($model, $modelId, $variables);
-            }
+        if($model) {
+            $this->saveInStack($model, $modelId, $variables);
         }
     }
 

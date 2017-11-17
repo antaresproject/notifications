@@ -93,26 +93,27 @@ class TemplatesCollection
     /**
      * Defines template within given name.
      *
-     * @param string $name
      * @param Template $template
      * @return TemplatesCollection
      */
-    public function define(string $name, Template $template): self
+    public function define(Template $template): self
     {
-        $this->templates[$name] = $template;
+        foreach($template->getTypes() as $type) {
+            $this->templates[$type] = $template;
+        }
 
         return $this;
     }
 
     /**
-     * Returns template by given name. If not exists then NULL will be returned.
+     * Returns template by given type. If not exists then NULL will be returned.
      *
-     * @param string $name
+     * @param string $type
      * @return Template|null
      */
-    public function getByName(string $name)
+    public function getByType(string $type)
     {
-        return Arr::get($this->templates, $name);
+        return Arr::get($this->templates, $type);
     }
 
     /**

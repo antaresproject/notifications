@@ -116,6 +116,7 @@ new Vue({
                 styleActiveLine: true,
                 matchBrackets: true,
                 scrollbarStyle: 'overlay',
+                autoClearEmptyLines: false,
                 readOnly: false,
                 matchTags: {
                     bothTags: true

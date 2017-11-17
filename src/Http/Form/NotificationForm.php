@@ -115,7 +115,7 @@ class NotificationForm {
 
                 $fieldset->control('button', 'button')
                     ->attributes(['type' => 'submit', 'class' => 'btn btn-primary'])
-                    ->value($notification->exists ? trans('antares/foundation::label.save_changes') : trans('Save'));
+                    ->value(trans('antares/foundation::label.save_changes'));
             });
         });
     }

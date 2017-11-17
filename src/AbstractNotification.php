@@ -65,7 +65,6 @@ class AbstractNotification extends Notification
         $data = $this->getResolvedData();
 
         return (new MailMessage)
-            ->template('mail')
             ->subjectData($data)
             ->viewData($data);
     }
@@ -80,7 +79,6 @@ class AbstractNotification extends Notification
         $data = $this->getResolvedData();
 
         return (new SmsMessage())
-            ->template('sms')
             ->viewData($data);
     }
 
@@ -94,8 +92,7 @@ class AbstractNotification extends Notification
         $data = $this->getResolvedData();
 
         return (new NotificationMessage)
-            ->types(['notification'])
-            ->template('notification')
+            ->asNotification()
             ->subjectData($data)
             ->viewData($data);
     }
@@ -110,8 +107,7 @@ class AbstractNotification extends Notification
         $data = $this->getResolvedData();
 
         return (new NotificationMessage)
-            ->types(['alert'])
-            ->template('alert')
+            ->asAlert()
             ->subjectData($data)
             ->viewData($data);
     }

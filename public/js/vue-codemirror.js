@@ -29,7 +29,6 @@ Vue.component('codemirror', {
         var component = this;
 
         this.editor = CodeMirror.fromTextArea(this.$el, this.options);
-        this.editor.setValue(this.value);
 
         this.editor.on('change', function(editor) {
             component.value = editor.getValue();

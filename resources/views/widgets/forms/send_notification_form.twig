@@ -13,7 +13,7 @@
     {% set control=fieldsets[0].field('type') %} 
     <div class="form-block">
         <div class="col-group pt10">
-            <div class="col-mb-10">
+            <div class="col-mb-24 col-12">
                 <div class="input-field">
                     {{ control.getField(row, control, [])|raw }} 
                 </div>
@@ -21,9 +21,9 @@
                     <span class="input-field__icon"><i class="zmdi zmdi-close"></i></span>
                     <div id="{{ control.id }}_error" class="error">{{ errors.first(control.name, format)|raw }}</div>
                 {% endif %}
-
             </div>
-            <div class="col-mb-11">
+
+            <div class="col-mb-24 col-12">
                 {% set control=fieldsets[0].field('notifications') %}        
                 <div class="input-field">
                     {{ control.getField(row, control, [])|raw }} 

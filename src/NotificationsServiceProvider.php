@@ -120,16 +120,7 @@ class NotificationsServiceProvider extends ModuleServiceProvider
 
         $this->app->alias(Mailer::class, MailerContract::class);
 
-       // dd('aaaa');
         app()->make(NotificationsListener::class)->boot();
-        //dd('bbb');
-    }
-
-    /**
-     * Booted method after all extensions.
-     */
-    public function booted() {
-
     }
 
     /**

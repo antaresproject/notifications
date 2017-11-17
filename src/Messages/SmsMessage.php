@@ -50,6 +50,15 @@ class SmsMessage implements MessageContract, TemplateMessageContract {
     public $type = 'text';
 
     /**
+     * Returns type of notification.
+     *
+     * @return string
+     */
+    public function getType() : string {
+        return 'sms';
+    }
+
+    /**
      * SmsMessage constructor.
      * @param string $content
      */

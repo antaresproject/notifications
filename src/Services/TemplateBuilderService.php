@@ -141,8 +141,8 @@ class TemplateBuilderService
      */
     public function build(MessageContract $message)
     {
-        if ($message instanceof TemplateMessageContract && $templateName = $message->getTemplate()) {
-            $template = $this->templates->getByName($templateName);
+        if ($message instanceof TemplateMessageContract && $type = $message->getType()) {
+            $template = $this->templates->getByType($type);
 
             if ($template) {
                 if ($templateObject = $this->getTemplateObject()) {

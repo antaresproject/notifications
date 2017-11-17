@@ -23,22 +23,41 @@ namespace Antares\Notifications\Messages;
 class NotificationMessage extends AbstractMessage {
 
     /**
-     * Array fo notification types.
+     * Notification type.
      *
-     * @var string[]
+     * @var string
      */
-    public $types = ['notification'];
+    public $type = 'notification';
 
     /**
-     * Defines types for template.
+     * Sets notification type as notification.
      *
-     * @param string[] $types
      * @return NotificationMessage
      */
-    public function types(array $types) : self {
-        $this->types = $types;
+    public function asNotification() : self {
+        $this->type = 'notification';
 
         return $this;
+    }
+
+    /**
+     * Sets notification type as alert.
+     *
+     * @return NotificationMessage
+     */
+    public function asAlert() : self {
+        $this->type = 'alert';
+
+        return $this;
+    }
+
+    /**
+     * Returns type of notification.
+     *
+     * @return string
+     */
+    public function getType() : string {
+        return $this->type;
     }
 
 }
