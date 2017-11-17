@@ -103,7 +103,7 @@ class NotificationsService {
             $notificationToSend = app()->make($handler)->handle($event, $notification);
         }
 
-        if($handler && ! $notificationToSend) {
+        if($handler && ! $notificationToSend instanceof Notification) {
             return;
         }
 
