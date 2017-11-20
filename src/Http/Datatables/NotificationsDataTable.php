@@ -140,6 +140,7 @@ class NotificationsDataTable extends DataTable
             ->addAction(['name' => 'edit', 'title' => '', 'class' => 'mass-actions dt-actions', 'orderable' => false, 'searchable' => false])
             ->addGroupSelect($recipients, 2, $this->currentRecipientId, ['data-prefix' => trans('antares/notifications::messages.datatables.select_recipient'), 'class' => 'mr24', 'id' => 'datatables-notification-recipient'])
             ->addGroupSelect($types, 5, $this->currentTypeId ?: $types->keys()->first(), ['data-prefix' => trans('antares/notifications::messages.datatables.select_type'), 'class' => 'mr24', 'id' => 'datatables-notification-type'])
+            ->zeroDataLink(trans('antares/notifications::messages.notification_templates_create'), handles('antares::notifications/create'))
             ->setDeferedData();
 
         if($acl->can('notifications-change-status')) {
