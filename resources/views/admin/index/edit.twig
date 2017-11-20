@@ -3,5 +3,12 @@
     <script src="https://unpkg.com/vue-select@latest"></script>
 
     {{ form|raw }}
+    <style>
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 300ms cubic-bezier(1.0, 0.5, 0.8, 1.0) !important;
+        }
+    </style>
+
     {% include 'antares/notifications::admin.partials._modal' %}
 {% endblock %}
