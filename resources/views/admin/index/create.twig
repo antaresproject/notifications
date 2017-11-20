@@ -5,6 +5,16 @@
             <script src="https://unpkg.com/vue-select@latest"></script>
 
             {{ form|raw }}
+
+            <style>
+                .fade-enter-active,
+                .fade-leave-active {
+                    transition: opacity 300ms cubic-bezier(1.0, 0.5, 0.8, 1.0) !important;
+                }
+                .v-select .dropdown-toggle {
+                    border:1px solid #dfe3e6 !important;
+                }
+            </style>
         {% endblock %}
     </div>
 {% endblock %}
