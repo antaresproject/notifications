@@ -73,12 +73,6 @@ class LogsDataTable extends DataTable
     public function ajax()
     {
         return $this->prepare()
-            ->editColumn('lang_code', function ($row) {
-                $code     = $row->lang_code;
-                $codeIcon = (($code === 'en') ? 'us' : $code);
-
-                return '<i data-tooltip-inline="' . $row->lang_name . '" class="flag-icon flag-icon-' . $codeIcon . '"></i>';
-            })
             ->editColumn('area', function ($row) {
                 $recipients = array_get($row->variables, 'recipients');
                 $area       = $recipients ? user($recipients[0]['id'])->getArea() : $row->area;
@@ -107,9 +101,6 @@ class LogsDataTable extends DataTable
         return $this->setName('Notifications List')
             ->addColumn(['data' => 'id', 'name' => 'tbl_notifications_stack.id', 'title' => 'Id'])
             ->addColumn(['data' => 'created_at', 'name' => 'tbl_notifications_stack.created_at', 'title' => trans('antares/notifications::logs.headers.date'), 'className' => 'bolded'])
-            ->addColumn(['data' => 'name', 'name' => 'tbl_notifications.name', 'title' => trans('antares/notifications::logs.headers.name')])
-            ->addColumn(['data' => 'lang_code', 'name' => 'tbl_languages.code', 'title' => trans('antares/notifications::logs.headers.lang')])
-            ->addColumn(['data' => 'event', 'name' => 'tbl_notifications.event', 'title' => trans('antares/notifications::logs.headers.event')])
             ->addColumn(['data' => 'type', 'name' => 'tbl_notification_types.title', 'title' => trans('antares/notifications::logs.headers.type')])
             ->addColumn(['data' => 'area', 'name' => 'area', 'title' => trans('antares/notifications::logs.headers.level')])
             ->addColumn(['data' => 'fullname', 'name' => 'tbl_users.firstname', 'title' => trans('antares/notifications::logs.headers.user')])
@@ -122,12 +113,10 @@ class LogsDataTable extends DataTable
                 'aoColumnDefs' => [
                     ['width' => '1%', 'targets' => 0],
                     ['width' => '7%', 'targets' => 1],
-                    ['width' => '14%', 'targets' => 2],
-                    ['width' => '2%', 'targets' => 3],
-                    ['width' => '7%', 'targets' => 5],
-                    ['width' => '5%', 'targets' => 6],
-                    ['width' => '10%', 'targets' => 7],
-                    ['width' => '1%', 'targets' => 8],
+                    ['width' => '7%', 'targets' => 2],
+                    ['width' => '5%', 'targets' => 3],
+                    ['width' => '10%', 'targets' => 4],
+                    ['width' => '1%', 'targets' => 5],
                 ]
             ]);
     }

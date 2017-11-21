@@ -30,14 +30,14 @@ use Antares\Model\User;
  * @package Antares\Notifications\Model
  *
  * @property integer $id
- * @property integer $notification_id
+ * @property string $title
  * @property integer $author_id
- * @property array $variables
+ * @property string $content
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property Notifications $notification
  * @property User $author
- * @property-read Collection|NotificationContents[] $contents
+ * @property NotificationSeverity $severity
+ * @property NotificationTypes $type
  * @property-read Collection|NotificationsStackParams[] $params
  * @property-read Collection|NotificationsStackRead[] $read
  */
@@ -56,14 +56,7 @@ class NotificationsStack extends Model
      *
      * @var array
      */
-    protected $fillable = ['notification_id', 'author_id', 'variables', 'created_at', 'updated_at'];
-
-    /**
-     * Cast values.
-     *
-     * @var array
-     */
-    protected $casts = ['variables' => 'json'];
+    protected $fillable = ['title', 'type_id', 'severity_id', 'content', 'author_id', 'created_at', 'updated_at'];
 
     /**
      * Indicates if the model should be timestamped.
@@ -71,26 +64,6 @@ class NotificationsStack extends Model
      * @var bool
      */
     public $timestamps = true;
-
-    /**
-     * Relation to notifications table
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function notification()
-    {
-        return $this->hasOne(Notifications::class, 'id', 'notification_id');
-    }
-
-    /**
-     * Relation to notifications table
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function contents()
-    {
-        return $this->hasMany(NotificationContents::class, 'notification_id', 'notification_id');
-    }
 
     /**
      * Relation to stack params table
@@ -120,6 +93,26 @@ class NotificationsStack extends Model
     public function author()
     {
         return $this->hasOne(User::class, 'id', 'author_id');
+    }
+
+    /**
+     * Returns severity.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function severity()
+    {
+        return $this->hasOne(NotificationSeverity::class, 'id', 'severity_id');
+    }
+
+    /**
+     * Returns type.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function type()
+    {
+        return $this->hasOne(NotificationTypes::class, 'id', 'type_id');
     }
 
 }

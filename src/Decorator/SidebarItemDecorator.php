@@ -21,27 +21,11 @@
 namespace Antares\Notifications\Decorator;
 
 use Antares\Notifications\Model\NotificationsStack;
-use Antares\Notifications\Parsers\ContentParser;
 use Illuminate\Database\Eloquent\Collection;
 use RuntimeException;
 
 class SidebarItemDecorator
 {
-
-    /**
-     * Content parser instance.
-     *
-     * @var ContentParser
-     */
-    protected $contentParser;
-
-    /**
-     * SidebarItemDecorator constructor.
-     * @param ContentParser $contentParser
-     */
-    public function __construct(ContentParser $contentParser) {
-        $this->contentParser = $contentParser;
-    }
 
     /**
      * Decorates notifications of alerts
@@ -73,16 +57,12 @@ class SidebarItemDecorator
      */
     public function item(NotificationsStack $item, string $view)
     {
-        $firstContent       = $item->contents[0];
-        $title              = $this->contentParser->parse($firstContent->title, (array) $item->variables);
-        $content            = $this->contentParser->parse($firstContent->content, (array) $item->variables);
-
         return view($view, [
             'id'         => $item->id,
             'author'     => $item->author,
-            'title'      => $title,
-            'value'      => $content,
-            'priority'   => priority_label($item->notification->severity->name),
+            'title'      => $item->title,
+            'value'      => $item->content,
+            'priority'   => priority_label($item->severity->name),
             'created_at' => $item->created_at
         ])->render();
     }

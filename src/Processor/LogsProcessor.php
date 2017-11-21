@@ -23,7 +23,6 @@ namespace Antares\Notifications\Processor;
 use Antares\Helpers\ResponseHelper;
 use Antares\Notifications\Decorator\MailDecorator;
 use Antares\Notifications\Decorator\SidebarItemDecorator;
-use Antares\Notifications\Parsers\ContentParser;
 use Antares\Notifications\Repository\StackRepository;
 use Antares\Notifications\Model\NotificationsStack;
 use Antares\Foundation\Processor\Processor;
@@ -57,25 +56,16 @@ class LogsProcessor extends Processor {
     protected $sidebarItemDecorator;
 
     /**
-     * Content parser instance.
-     *
-     * @var ContentParser
-     */
-    protected $contentParser;
-
-    /**
      * LogsProcessor constructor.
      * @param NotificationsStack $stack
      * @param StackRepository $stackRepository
      * @param SidebarItemDecorator $sidebarItemDecorator
-     * @param ContentParser $contentParser
      */
-    public function __construct(NotificationsStack $stack, StackRepository $stackRepository, SidebarItemDecorator $sidebarItemDecorator, ContentParser $contentParser)
+    public function __construct(NotificationsStack $stack, StackRepository $stackRepository, SidebarItemDecorator $sidebarItemDecorator)
     {
         $this->stack = $stack;
         $this->stackRepository = $stackRepository;
         $this->sidebarItemDecorator = $sidebarItemDecorator;
-        $this->contentParser = $contentParser;
     }
 
     /**
@@ -88,11 +78,11 @@ class LogsProcessor extends Processor {
     {
         /* @var $item NotificationsStack */
         $item       = $this->stackRepository->fetchOne((int) $id)->firstOrFail();
-        $typeName   = $item->notification->type->name;
+        $typeName   = $item->type->name;
 
         if ( in_array($typeName, ['mail', 'sms'], true) ) {
-            $title      = $this->contentParser->parse($item->contents[0]->title, $item->variables );
-            $content    = $this->contentParser->parse($item->contents[0]->content , $item->variables);
+            $title      = $item->title;
+            $content    = $item->content;
 
             if($typeName === 'mail') {
                 $content = MailDecorator::decorate($content);

@@ -21,6 +21,7 @@
 namespace Antares\Notifications\Processor;
 
 use Antares\Notifications\Decorator\SidebarItemDecorator;
+use Antares\Notifications\Model\NotificationsStack;
 use Antares\Notifications\Repository\StackRepository;
 use Antares\Foundation\Processor\Processor;
 use Illuminate\Support\Facades\Input;

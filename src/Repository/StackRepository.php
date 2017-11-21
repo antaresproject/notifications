@@ -83,9 +83,6 @@ class StackRepository extends AbstractRepository
         return NotificationsStack::query()
             ->distinct()
             ->select(['tbl_notifications_stack.*'])
-            ->whereHas('contents', function(Builder $query) {
-                $query->where(['lang_id' => lang_id()]);
-            })
             ->where(function (Builder $query) {
                 $query
                     ->whereNull('author_id')
@@ -101,33 +98,9 @@ class StackRepository extends AbstractRepository
             })
             ->whereNotIn('id', $read)
             ->with('author')
-            ->with('contents')
-            ->with('notification.severity')
+            ->with('severity')
+            ->with('type')
             ->orderBy('tbl_notifications_stack.created_at', 'desc');
-    }
-
-    /**
-     * Gets user notifications
-     *
-     * @return Builder
-     */
-    public function getNotifications()
-    {
-        return $this->query()->whereHas('notification', function(Builder $query) {
-            $query->whereIn('tbl_notifications.severity_id', $this->getNotificationsSeverityIds());
-        });
-    }
-
-    /**
-     * Alerts getter
-     * 
-     * @return Builder
-     */
-    public function getAlerts()
-    {
-        return $this->query()->whereHas('notification', function(Builder $query) {
-            $query->whereIn('tbl_notifications.severity_id', $this->getAlertsSeverityIds());
-        });
     }
 
     /**
@@ -155,6 +128,24 @@ class StackRepository extends AbstractRepository
     }
 
     /**
+     * @return Builder
+     */
+    public function getAlerts() {
+        return $this->query()->whereHas('type', function(Builder $q) {
+            $q->where('name', 'alert');
+        });
+    }
+
+    /**
+     * @return Builder
+     */
+    public function getNotifications() {
+        return $this->query()->whereHas('type', function(Builder $q) {
+            $q->where('name', 'notification');
+        });
+    }
+
+    /**
      * Deletes all messages
      * 
      * @param String $type
@@ -162,7 +153,9 @@ class StackRepository extends AbstractRepository
      */
     public function clear($type = 'notifications')
     {
-        $builder = ($type == 'alerts') ? $this->getAlerts() : $this->getNotifications();
+        $builder = ($type == 'alerts')
+            ? $this->getAlerts()
+            : $this->getNotifications();
 
         return NotificationsStackRead::query()->whereIn('stack_id', $builder->pluck('id'))->delete();
     }
@@ -289,21 +282,13 @@ class StackRepository extends AbstractRepository
         return NotificationsStack::query()
             ->select([
                 'tbl_notifications_stack.id',
-                'tbl_notifications_stack.variables',
                 'tbl_notifications_stack.created_at',
                 'tbl_notifications_stack.author_id',
-                'tbl_notifications.event as event',
-                'tbl_notifications.name',
                 'tbl_notification_types.title as type',
-                'tbl_languages.code as lang_code',
-                'tbl_languages.name as lang_name',
                 'tbl_roles.area as area',
                 DB::raw('CONCAT_WS(" ", tbl_users.firstname, tbl_users.lastname) AS fullname')
             ])
-            ->leftJoin('tbl_notification_contents', 'tbl_notifications_stack.notification_id', '=', 'tbl_notification_contents.notification_id')
-            ->leftJoin('tbl_notifications', 'tbl_notifications_stack.notification_id', '=', 'tbl_notifications.id')
-            ->leftJoin('tbl_notification_types', 'tbl_notifications.type_id', '=', 'tbl_notification_types.id')
-            ->leftJoin('tbl_languages', 'tbl_notification_contents.lang_id', '=', 'tbl_languages.id')
+            ->leftJoin('tbl_notification_types', 'tbl_notifications_stack.type_id', '=', 'tbl_notification_types.id')
             ->leftJoin('tbl_users', 'tbl_notifications_stack.author_id', '=', 'tbl_users.id')
             ->leftJoin('tbl_user_role', 'tbl_users.id', '=', 'tbl_user_role.user_id')
             ->leftJoin('tbl_roles', 'tbl_user_role.role_id', '=', 'tbl_roles.id')
@@ -326,7 +311,7 @@ class StackRepository extends AbstractRepository
     {
         return NotificationsStack::query()
             ->withoutGlobalScopes()
-            ->with('notification.contents.lang', 'notification.type', 'author.roles')
+            ->with('author.roles')
             ->where('id', $id)
             ->where(function(Builder $q) {
                 $q->whereNull('author_id')->orWhere('author_id', user()->id)->orWhereHas('author', function(Builder $q) {
