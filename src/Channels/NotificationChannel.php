@@ -99,6 +99,10 @@ class NotificationChannel
         $variables  = array_merge($message->getSubjectData(), $message->viewData);
         $model      = $this->findNotification($message, $message->getType(), $source);
 
+        if( ! $model) {
+            $model = $this->findNotification($message, $message->getType());
+        }
+
         if($model) {
             $this->saveInStack($model, $modelId, $variables);
         }
@@ -137,13 +141,17 @@ class NotificationChannel
      * @param string $source
      * @return Notifications|null
      */
-    protected function findNotification(NotificationMessage $message, string $type, string $source)
+    protected function findNotification(NotificationMessage $message, string $type, string $source = null)
     {
-        $query = Notifications::query()
-            ->where('source', $source)
-            ->whereHas('type', function(Builder $query) use($type) {
-                $query->where('name', $type);
-            });
+        $query = Notifications::query();
+
+        if($source) {
+            $query->where('source', $source);
+        }
+
+        $query->whereHas('type', function(Builder $query) use($type) {
+            $query->where('name', $type);
+        });
 
         if( property_exists($message, 'severity') ) {
             $query->whereHas('severity', function (Builder $query) use ($message) {
