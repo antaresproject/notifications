@@ -59,8 +59,8 @@ class ExceptionNotification extends Notification implements NotificationEditable
      * @return TemplatesCollection
      */
     public static function templates() : TemplatesCollection {
-        return TemplatesCollection::make('On Exception Occurred')
-            ->define('alert', self::alertMessage());
+        return TemplatesCollection::make('On Exception Occurred', 'system')
+            ->define(self::alertMessage());
     }
 
     /**
@@ -93,7 +93,7 @@ class ExceptionNotification extends Notification implements NotificationEditable
      */
     public function toAlert($notifiable) {
         return (new NotificationMessage())
-            ->types(['alert'])
+            ->asAlert()
             ->viewData([
                 'message' => $this->customMessage ?: $this->exception->getMessage()
             ]);
