@@ -44,6 +44,9 @@
                     <div class="input-field">
                         <v-select :options="categories" v-model="category"></v-select>
                     </div>
+                    <div class="input-field__desc">
+                        Categorises events and the notification itself.
+                    </div>
                 </div>
             </div>
         </div>
@@ -57,6 +60,9 @@
                     <div class="input-field">
                         <v-select label="label" :on-change="eventChanged" :options="activeCategoryEvents" v-model="notification.event" ></v-select>
                     </div>
+                    <div class="input-field__desc">
+                        Select on which event the notification should be sent.
+                    </div>
                 </div>
             </div>
         </div>
@@ -67,6 +73,9 @@
                     <label class="form-block__name">{{ trans('antares/notifications::messages.notification_recipients') }}</label>
                     <div class="input-field">
                         <v-select multiple label="label" :options.sync="eventRecipients" v-model="notification.recipients"></v-select>
+                    </div>
+                    <div class="input-field__desc">
+                        Who should receive the notification?
                     </div>
                 </div>
             </div>
