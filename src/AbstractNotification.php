@@ -117,7 +117,7 @@ class AbstractNotification extends Notification
      *
      * @return array
      */
-    private function getResolvedData() : array {
+    protected function getResolvedData() : array {
         return get_object_vars($this);
     }
 

@@ -20,7 +20,7 @@
 return [
     'notification_templates'              => 'Notification Templates',
     'notification_templates_create'       => 'Create Notification Template',
-    'notification_templates_edit'         => 'Edit #:id :name',
+    'notification_templates_edit'         => 'Edit: #:id :name',
     'title'                               => 'Title',
     'language'                            => [
         'en' => 'English',
