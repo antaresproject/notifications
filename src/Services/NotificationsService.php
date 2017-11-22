@@ -27,6 +27,7 @@ use Antares\Notifications\Model\SimpleContent;
 use Antares\Notifications\Parsers\ContentParser;
 use Antares\Notifications\SimpleNotification;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Collection;
 use ReflectionClass;
 
 class NotificationsService {
@@ -121,13 +122,17 @@ class NotificationsService {
 
         $notificationToSend->template = $notification;
 
+        $resolvedRecipients = new Collection();
+
         foreach( (array) $notification->recipients as $recipientArea) {
             $recipient = $eventModel->getRecipientByArea($recipientArea);
 
-            if($recipient && $resolvedRecipient = $recipient->resolve($event)) {
-                $this->channelManager->send($resolvedRecipient, $notificationToSend);
+            if($recipient && ($resolvedRecipient = $recipient->resolve($event))) {
+                $resolvedRecipients->push($resolvedRecipient);
             }
         }
+
+        $this->channelManager->send($resolvedRecipients->unique(), $notificationToSend);
     }
 
     /**

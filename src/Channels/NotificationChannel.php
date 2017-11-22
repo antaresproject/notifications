@@ -116,7 +116,6 @@ class NotificationChannel
             'title'         => $message->subject,
             'content'       => $content,
             'author_id'     => auth()->guest() ? null : user()->id,
-
         ]);
 
         $stack->save();
