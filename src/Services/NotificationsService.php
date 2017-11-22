@@ -124,8 +124,8 @@ class NotificationsService {
         foreach( (array) $notification->recipients as $recipientArea) {
             $recipient = $eventModel->getRecipientByArea($recipientArea);
 
-            if($recipient) {
-                $this->channelManager->send($recipient->resolve($event), $notificationToSend);
+            if($recipient && $resolvedRecipient = $recipient->resolve($event)) {
+                $this->channelManager->send($resolvedRecipient, $notificationToSend);
             }
         }
     }
