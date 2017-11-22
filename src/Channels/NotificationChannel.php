@@ -106,14 +106,9 @@ class NotificationChannel
             $content = Arr::get($message->getViewData(), 'content', '');
         }
 
-        if( property_exists($message, 'severity')) {
-            $severityId = NotificationSeverity::query()->where('name', $message->severity)->first();
-        }
-        else {
-            $severityId = NotificationSeverity::query()->where('name', 'medium')->first()->id;
-        }
-
-        $typeId = NotificationTypes::query()->where('name', $type)->first()->id;
+        $severity   = property_exists($message, 'severity') ? $message->severity : 'medium';
+        $severityId = NotificationSeverity::query()->where('name', $severity)->first()->id;
+        $typeId     = NotificationTypes::query()->where('name', $type)->first()->id;
 
         $stack = new NotificationsStack([
             'type_id'       => $typeId,

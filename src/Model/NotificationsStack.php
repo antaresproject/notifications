@@ -32,6 +32,8 @@ use Antares\Model\User;
  * @property integer $id
  * @property string $title
  * @property integer $author_id
+ * @property integer $type_id
+ * @property integer $severity_id
  * @property string $content
  * @property Carbon $created_at
  * @property Carbon $updated_at
