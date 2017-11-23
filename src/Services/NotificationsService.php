@@ -72,17 +72,12 @@ class NotificationsService {
      * @param User $user
      */
     public function handleAsPreview(Notifications $notification, User $user) {
-        if($source = $notification->source) {
-            $notificationToSend = $this->getNotificationObjectBySource($source);
-        }
-        else {
-            $type               = $notification->type->name;
-            $contentModel       = $notification->lang( lang() );
-            $titleLine          = $this->contentParser->parse($contentModel->title);
-            $contentLine        = $this->contentParser->parse($contentModel->content);
-            $content            = new SimpleContent($contentModel->lang->code, $titleLine, $contentLine);
-            $notificationToSend = new SimpleNotification($type, $content);
-        }
+        $type               = $notification->type->name;
+        $contentModel       = $notification->lang( lang() );
+        $titleLine          = $this->contentParser->parse($contentModel->title);
+        $contentLine        = $this->contentParser->parse($contentModel->content);
+        $content            = new SimpleContent($contentModel->lang->code, $titleLine, $contentLine);
+        $notificationToSend = new SimpleNotification($type, $content);
 
         $notificationToSend->testable = true;
         $notificationToSend->template = $notification;

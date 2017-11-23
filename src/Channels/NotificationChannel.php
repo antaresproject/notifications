@@ -20,11 +20,13 @@
 
 namespace Antares\Notifications\Channels;
 
+use Antares\Notifications\Model\Notifications;
 use Antares\Notifications\Model\NotificationSeverity;
 use Antares\Notifications\Model\NotificationsStackParams;
 use Antares\Notifications\Messages\NotificationMessage;
 use Antares\Notifications\Model\NotificationsStack;
 use Antares\Notifications\Model\NotificationTypes;
+use Antares\Notifications\Parsers\ContentParser;
 use Antares\Notifications\Services\TemplateBuilderService;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Arr;
@@ -75,6 +77,7 @@ class NotificationChannel
                     : 'notification';
             }
 
+            /* @var $message NotificationMessage */
             $message = ($type === 'alert')
                 ? $notification->toAlert($notifiable)
                 : $notification->toNotification($notifiable);
@@ -95,10 +98,12 @@ class NotificationChannel
      *
      * @param NotificationMessage $message
      * @param string $type
-     * @param array $
+     * @param int $modelId
      */
     protected function saveInStack(NotificationMessage $message, string $type, int $modelId)
     {
+        $subject = $message->subject;
+
         if( property_exists($message, 'content')) {
             $content = $message->content;
         }
@@ -113,7 +118,7 @@ class NotificationChannel
         $stack = new NotificationsStack([
             'type_id'       => $typeId,
             'severity_id'   => $severityId,
-            'title'         => $message->subject,
+            'title'         => $subject,
             'content'       => $content,
             'author_id'     => auth()->guest() ? null : user()->id,
         ]);

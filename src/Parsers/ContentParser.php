@@ -107,9 +107,23 @@ class ContentParser {
      * @return Variable[]|array
      */
     public function getRequiredVariables(string $content) : array {
-        $variables = $this->variablesService->getNamedVariables();
+        $variables          = $this->variablesService->getNamedVariables();
+        $contentVariables   = $this->getVariables($content);
+        $required           = [];
 
-        return (array) Arr::only($variables, $this->getVariables($content));
+        foreach($variables as $code => $variable) {
+            foreach($contentVariables as $contentVariable) {
+                if( starts_with($contentVariable, $code) ) {
+                    $after = str_after($contentVariable, $code);
+
+                    if($after === '' || substr($after, 0, 1) === '.') {
+                        $required[$code] = $variable;
+                    }
+                }
+            }
+        }
+
+        return $required;
     }
 
     /**

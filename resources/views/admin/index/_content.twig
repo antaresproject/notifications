@@ -19,7 +19,7 @@
 
     <div v-for="(content, lang) in contents">
         <div class="page-notification-templates__info" v-show="lang === selectedLang">
-            <div class="form-block" v-show="! onlyText">
+            <div class="form-block" v-show="! disabledContentTitle">
                 <div class="col-group" v-bind:class="{ error: errors.has('contents.' + lang + '.title') }">
                     <div class="col-mb-24 col-12">
                         <label class="form-block__name">{{ trans('antares/notifications::messages.notification_content_title') }}</label>

@@ -54,6 +54,7 @@ class ContentParserTest extends TestCase
             })
             ->setAttributes([
                 'name' => 'Model Name',
+                'nested' => 'Nested',
             ]);
 
 
@@ -159,6 +160,19 @@ class ContentParserTest extends TestCase
         $this->assertEquals('mock content', $this->contentParser->parse($content));
     }
 
+    public function testParseWithNestedVariables() {
+        $content    = 'Simple content with [[ unit_test::model.nested.one ]] variable';
+        $expected   = 'Simple content with Nested variable';
+
+        $data = [
+            'model' => new TestModelStub('some dump value', [
+                'one' => 'Nested'
+            ]),
+        ];
+
+        $this->assertEquals($expected, $this->contentParser->parse($content, $data));
+    }
+
 }
 
 class TestModelStub {
@@ -169,11 +183,18 @@ class TestModelStub {
     public $name;
 
     /**
+     * @var array
+     */
+    public $nested = [];
+
+    /**
      * TestModelStub constructor.
      * @param string $name
+     * @param array $nested
      */
-    public function __construct(string $name) {
+    public function __construct(string $name, array $nested = []) {
         $this->name = $name;
+        $this->nested = $nested;
     }
 
 }

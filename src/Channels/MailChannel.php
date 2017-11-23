@@ -30,6 +30,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Arr;
+use Illuminate\Mail\Markdown;
 use Log;
 
 class MailChannel extends BaseMailChannel
@@ -52,11 +53,12 @@ class MailChannel extends BaseMailChannel
     /**
      * MailChannel constructor.
      * @param Mailer $mailer
+     * @param Markdown $markdown
      * @param TemplateBuilderService $templateBuilderService
      */
-    public function __construct(Mailer $mailer, TemplateBuilderService $templateBuilderService)
+    public function __construct(Mailer $mailer, Markdown $markdown, TemplateBuilderService $templateBuilderService)
     {
-        parent::__construct($mailer);
+        parent::__construct($mailer, $markdown);
 
         $this->templateBuilderService = $templateBuilderService;
     }

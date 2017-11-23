@@ -27,7 +27,6 @@ use Antares\Notifications\Channels\NotificationChannel;
 use Antares\Notifications\Channels\MailChannel;
 use Antares\Notifications\Channels\SmsChannel;
 use Antares\Notifier\Adapter\FastSmsAdapter;
-use Illuminate\Mail\Markdown;
 
 class ChannelManager extends BaseChannelManager
 {
@@ -49,9 +48,7 @@ class ChannelManager extends BaseChannelManager
      */
     protected function createMailDriver()
     {
-        return $this->app->make(MailChannel::class)->setMarkdownResolver(function () {
-            return $this->app->make(Markdown::class);
-        });
+        return $this->app->make(MailChannel::class);
     }
 
     /**
