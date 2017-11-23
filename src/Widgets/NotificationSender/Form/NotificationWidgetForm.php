@@ -89,9 +89,13 @@ class NotificationWidgetForm
                                 ->attributes(['class' => 'notification-widget-change-type-select', 'url' => handles('antares::notifications/notifications')])
                                 ->options($this->repository->getDecoratedNotificationTypes());
 
+                        $events = [
+                            'Antares\Logger\Events\NewDeviceDetected',
+                        ];
+
                         $fieldset->control('select', 'notifications')
                                 ->attributes(['class' => 'notification-widget-notifications-select'])
-                                ->options($this->repository->getNotificationContents('mail')->pluck('notification.name', 'id'));
+                                ->options($this->repository->getNotificationContentsByEvents($events, 'mail')->pluck('notification.name', 'id'));
 
                         if (!is_null(from_route('user'))) {
                             $fieldset->control('button', 'send')

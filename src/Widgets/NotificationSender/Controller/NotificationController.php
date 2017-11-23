@@ -98,7 +98,9 @@ class NotificationController extends AdminController
             return $this->form->get()->isValid();
         }
 
-        $contentParser->setPreviewMode(true);
+        $testMode = (bool) $request->get('test');
+
+        $contentParser->setPreviewMode($testMode);
 
         $model      = $this->findModel($request->get('notifications'));
         $recipient  = $this->getRecipient();

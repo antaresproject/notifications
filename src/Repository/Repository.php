@@ -58,6 +58,39 @@ class Repository {
     }
 
     /**
+     * Gets notification contents for events
+     *
+     * @param array $events
+     * @param null $type
+     * @return \Illuminate\Database\Eloquent\Collection|NotificationContents[]
+     */
+    public function getNotificationContentsByEvents(array $events, $type = null)
+    {
+        return NotificationContents::query()
+            ->with('notification')
+            ->whereHas('lang', function(Builder $query) {
+                $query->where('code', locale());
+            })
+            ->whereHas('notification', function(Builder $query) use($events, $type) {
+                $query->whereIn('event', $events);
+
+                if (is_null($type)) {
+                    $query->whereHas('type', function(Builder $q) {
+                        $q->whereIn('name', ['sms', 'mail']);
+                    });
+                }
+                elseif (is_numeric($type)) {
+                    $query->where('type_id', $type);
+                }
+                elseif (is_string($type)) {
+                    $query->whereHas('type', function(Builder $q) use($type) {
+                        $q->where('name', $type);
+                    });
+                }
+            })->get();
+    }
+
+    /**
      * Gets decorated notification types
      *
      * @return Collection
