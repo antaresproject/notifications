@@ -11,35 +11,41 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
 
-
 namespace Antares\Notifications\Http\Controllers\Admin;
 
+use Antares\UI\Navigation\Breadcrumbs\Manager;
+use Antares\Notifications\Http\Datatables\NotificationsDataTable;
+use Antares\Notifications\Http\Form\NotificationForm;
+use Antares\Notifications\Model\Notifications;
 use Antares\Notifications\Processor\IndexProcessor as Processor;
 use Antares\Foundation\Http\Controllers\AdminController;
-use Antares\Notifications\Contracts\IndexListener;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class IndexController extends AdminController implements IndexListener
+class IndexController extends AdminController
 {
 
+    use ValidatesRequests;
+
     /**
-     * implments instance of controller
-     * 
+     * IndexController constructor.
      * @param Processor $processor
+     * @param Manager $breadcrumbs
      */
-    public function __construct(Processor $processor)
+    public function __construct(Processor $processor, Manager $breadcrumbs)
     {
         parent::__construct();
         $this->processor = $processor;
+
+        $breadcrumbs->enabled(true);
     }
 
     /**
@@ -54,237 +60,184 @@ class IndexController extends AdminController implements IndexListener
         $this->middleware("antares.can:antares/notifications::notifications-change-status", ['only' => ['changeStatus']]);
         $this->middleware("antares.can:antares/notifications::notifications-create", ['only' => ['create', 'store']]);
         $this->middleware("antares.can:antares/notifications::notifications-list", ['only' => ['index']]);
-        //$this->middleware("antares.can:antares/notifications::notifications-delete", ['only' => ['delete']]);        
+        //$this->middleware("antares.can:antares/notifications::notifications-delete", ['only' => ['delete']]);
     }
 
     /**
-     * index default action
-     * 
-     * @param String $type
-     * @return View
-     */
-    public function index($type = null)
-    {
-        return $this->processor->index($type);
-    }
-
-    /**
-     * notification edit form
+     * Index action.
      *
-     * @param $id
-     * @param string $locale
-     * @return View
+     * @param NotificationsDataTable $dataTable
+     * @return array
      */
-    public function edit($id, $locale = 'en')
-    {
-        return $this->processor->edit($id, $locale, $this);
+    public function index(NotificationsDataTable $dataTable) {
+        return $dataTable->render('antares/notifications::admin.index.index');
     }
 
     /**
-     * update single job
+     * Create action.
      *
-     * @return RedirectResponse
+     * @param NotificationForm $form
+     * @return \Illuminate\Contracts\View\View
      */
-    public function update()
-    {
-        return $this->processor->update($this);
+    public function create(NotificationForm $form) {
+        $form = $form->build(new Notifications);
+
+        return view()->make('antares/notifications::admin.index.create', compact('form'));
     }
 
     /**
-     * Response when storing command failed on validation.
+     * Store action.
      *
-     * @param $id
-     * @param $errors
-     * @return RedirectResponse|\Illuminate\Routing\Redirector
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function updateValidationFailed($id, $errors)
-    {
-        return $this->redirectWithErrors(handles('antares::notifications/edit/' . $id), $errors);
+    public function store(Request $request) {
+        $langCode = $request->get('lang_code', locale());
+
+        $rules = [
+            'name'                                  => 'required|max:255',
+            'category'                              => 'required',
+            'type_id'                               => 'required|integer|exists:tbl_notification_types,id',
+            'contents'                              => 'array',
+            'contents.' . $langCode . '.title'      => 'required_unless:type_id,2|max:255',
+            'contents.' . $langCode . '.content'    => 'required',
+        ];
+
+        $messages = [
+            'contents.*.title.required_unless'  => 'Title is required',
+            'contents.*.content.required'       => 'Content is required',
+        ];
+
+        $this->validate($request, $rules, $messages);
+
+        return $this->processor->store($request->all())->notify()->resolve($request);
     }
 
     /**
-     * when update job failed
-     * 
-     * @return RedirectResponse
-     */
-    public function updateFailed()
-    {
-        app('antares.messages')->add('error', trans('antares/notifications::messages.notification_update_failed'));
-        return redirect()->back();
-    }
-
-    /**
-     * when update job completed successfully
-     * 
-     * @return RedirectResponse
-     */
-    public function updateSuccess()
-    {
-        app('antares.messages')->add('success', trans('antares/notifications::messages.notification_update_success'));
-        return redirect()->back();
-    }
-
-    /**
-     * sends test notification
+     * Edit action.
      *
-     * @param null $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param Notifications $notification
+     * @param NotificationForm $form
+     * @return \Illuminate\Contracts\View\View
      */
-    public function sendtest($id = null)
-    {
-        return $this->processor->sendTest($this, $id);
+    public function edit(Notifications $notification, NotificationForm $form) {
+        $notification->load('contents', 'type', 'severity');
+
+        $form = $form->build($notification);
+
+        return view()->make('antares/notifications::admin.index.edit', compact('form'));
     }
 
     /**
-     * when sending preview notification failed
-     * 
-     * @return RedirectResponse
+     * Update action.
+     *
+     * @param Notifications $notification
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function sendFailed()
-    {
-        app('antares.messages')->add('error', trans('antares/notifications::messages.notification_preview_error'));
-        return redirect()->back();
+    public function update(Notifications $notification, Request $request) {
+        $langCode = $request->get('lang_code', locale());
+
+        $rules = [
+            'name'                                  => 'required|max:255',
+            'category'                              => 'required',
+            'type_id'                               => 'required|integer|exists:tbl_notification_types,id',
+            'contents'                              => 'array',
+            'contents.' . $langCode . '.title'      => 'required_unless:type_id,2|max:255',
+            'contents.' . $langCode . '.content'    => 'required',
+        ];
+
+        $messages = [
+            'contents.*.title.required_unless'  => 'Title is required',
+            'contents.*.content.required'       => 'Content is required',
+        ];
+
+        $this->validate($request, $rules, $messages);
+
+        return $this->processor->update($notification, $request->all())->notify()->resolve($request);
     }
 
     /**
-     * when sending preview notification completed successfully
-     * 
-     * @return RedirectResponse
+     * Destroy action.
+     *
+     * @param Request $request
+     * @param Notifications $notification
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function sendSuccess()
-    {
-        app('antares.messages')->add('success', trans('antares/notifications::messages.notification_preview_sent'));
-        return redirect()->back();
+    public function destroy(Request $request, Notifications $notification) {
+        return $this->processor->delete($notification)->notify()->resolve($request);
     }
 
     /**
-     * preview notification
+     * Send test action for one notification.
+     *
+     * @param Request $request
+     * @param Notifications $notification
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function sendTestOfNotification(Request $request, Notifications $notification) {
+        $data = $notification->toArray();
+
+        $data['contents'] = [];
+        $data['contents'][] = $notification->lang( lang() )->toArray();
+
+        return $this->processor->sendTest($data)->notify()->resolve($request);
+    }
+
+    /**
+     * Send test action for mass notifications.
+     *
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function sendTest(Request $request) {
+        return $this->processor->sendTest($request->all())->notify()->resolve($request);
+    }
+
+    /**
+     * Preview action.
      *
      * @param Request $request
      * @return View
      */
-    public function preview(Request $request)
-    {
+    public function preview(Request $request) {
         return $this->processor->preview($request->all());
     }
 
     /**
-     * changes notification status
-     * 
-     * @param String $id
-     * @return RedirectResponse
-     */
-    public function changeStatus($id)
-    {
-        return $this->processor->changeStatus($this, $id);
-    }
-
-    /**
-     * when changing notification status completed successfully
-     * 
-     * @return RedirectResponse
-     */
-    public function changeStatusSuccess()
-    {
-        app('antares.messages')->add('success', trans('antares/notifications::messages.notification_change_status_success'));
-        return redirect()->back();
-    }
-
-    /**
-     * when changing notification status failed
-     * 
-     * @return RedirectResponse
-     */
-    public function changeStatusFailed()
-    {
-        app('antares.messages')->add('error', trans('antares/notifications::messages.notification_change_status_failed'));
-        return redirect()->back();
-    }
-
-    /**
-     * create new notification notification
-     * 
-     * @param String $type
-     * @return View
-     */
-    public function create($type = null)
-    {
-        return $this->processor->create($type);
-    }
-
-    /**
-     * when storing new notification notification
-     * 
-     * @return RedirectResponse
-     */
-    public function store()
-    {
-        return $this->processor->store($this);
-    }
-
-    /**
-     * when storing new notification notification failed on validation
-     * 
-     * @return RedirectResponse
-     */
-    public function storeValidationFailed($errors)
-    {
-        return $this->redirectWithErrors(url()->previous(), $errors);
-    }
-
-    /**
-     * when creation notification notification completed successfully
+     * Change status (enable/disable) action.
      *
-     * @return RedirectResponse
+     * @param Request $request
+     * @param Notifications $notification
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function createSuccess()
-    {
-        app('antares.messages')->add('error', trans('antares/notifications::messages.notification_create_success'));
-        return redirect()->to(handles('antares::notifications/index'));
+    public function changeStatus(Request $request, Notifications $notification) {
+        return $this->processor->changeStatus($notification)->notify()->resolve($request);
     }
 
     /**
-     * when creation notification notification failed
-     * 
-     * @return RedirectResponse
+     * Mass disable action.
+     *
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function createFailed()
-    {
-        app('antares.messages')->add('error', trans('antares/notifications::messages.notification_create_failed'));
-        return redirect()->back();
+    public function massDisable(Request $request) {
+        $ids = $request->input('ids', []);
+
+        return $this->processor->massChangeStatus($ids, false)->notify()->resolve($request);
     }
 
     /**
-     * deletes custom notification
-     * 
-     * @param mixed $id
-     * @return RedirectResponse
+     * Mass enable action.
+     *
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function delete($id)
-    {
-        return $this->processor->delete($id, $this);
+    public function massEnable(Request $request) {
+        $ids = $request->input('ids', []);
+
+        return $this->processor->massChangeStatus($ids, true)->notify()->resolve($request);
     }
 
-    /**
-     * when deletion of custom notification completed successfully
-     * 
-     * @return RedirectResponse
-     */
-    public function deleteSuccess()
-    {
-        app('antares.messages')->add('success', trans('antares/notifications::messages.notification_delete_success'));
-        return redirect()->to(handles('antares::notifications/index'));
-    }
-
-    /**
-     * when deletion of custom notification failed
-     * 
-     * @return RedirectResponse
-     */
-    public function deleteFailed()
-    {
-        app('antares.messages')->add('error', trans('antares/notifications::messages.notification_delete_failed'));
-        return redirect()->to(handles('antares::notifications/index'));
-    }
 
 }

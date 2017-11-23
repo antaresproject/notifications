@@ -21,15 +21,17 @@
 namespace Antares\Notifications;
 
 use Antares\Notifications\Contracts\RendererContract;
-use Antares\Notifications\Http\Handlers\NotificationsBreadcrumbMenu;
-use Antares\Foundation\Http\Handlers\NotificationsTopMenuHandler;
 use Antares\Notifications\Console\NotificationCategoriesCommand;
 use Antares\Notifications\Console\NotificationSeveritiesCommand;
 use Antares\Foundation\Support\Providers\ModuleServiceProvider;
 use Antares\Notifications\Console\NotificationsImportCommand;
 use Antares\Notifications\Console\NotificationTypesCommand;
 use Antares\Notifications\Listener\ConfigurationListener;
+use Antares\Notifications\Listener\NotificationsListener;
+use Antares\Notifications\Parsers\ContentParser;
 use Antares\Notifications\Renderers\TwigRenderer;
+use Antares\Notifications\Services\EventsRegistrarService;
+use Antares\Notifications\Services\NotificationsService;
 use Antares\Notifications\Services\VariablesService;
 use Illuminate\Contracts\Mail\Mailer as MailerContract;
 use Antares\Notifications\Console\NotificationsRemover;
@@ -91,6 +93,10 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         });
 
         $this->app->singleton(VariablesService::class);
+        $this->app->singleton(EventsRegistrarService::class);
+        $this->app->singleton(NotificationsService::class);
+        $this->app->singleton(NotificationsListener::class);
+        $this->app->singleton(ContentParser::class);
 
         $this->app->bind(RendererContract::class, TwigRenderer::class);
     }
@@ -107,13 +113,14 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         $this->addLanguageComponent('antares/notifications', 'antares/notifications', "{$path}/resources/lang");
         $this->addViewComponent('antares/notifications', 'antares/notifications', "{$path}/resources/views");
         $this->bootMemory();
-        $this->attachMenu(NotificationsTopMenuHandler::class);
-        $this->attachMenu(NotificationsBreadcrumbMenu::class);
+
         $this->app->make('view')->composer('antares/notifications::admin.logs.config', ControlPane::class);
 
         Option::observe(new ConfigurationListener());
 
         $this->app->alias(Mailer::class, MailerContract::class);
+
+        app()->make(NotificationsListener::class)->boot();
     }
 
     /**
@@ -134,7 +141,7 @@ class NotificationsServiceProvider extends ModuleServiceProvider
     protected function bootMemory()
     {
         $this->app->make('antares.acl')->make($this->routeGroup)->attach(
-                $this->app->make('antares.platform.memory')
+            $this->app->make('antares.platform.memory')
         );
     }
 

@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Listener;
 
 use Antares\Memory\Model\Option;
@@ -13,7 +31,8 @@ class ConfigurationListener
     /**
      * Handles the security form event.
      *
-     * @param SecurityFormSubmitted $securityFormSubmitted
+     * @param Fluent $model
+     * @param Grid $grid
      */
     public function handle(Fluent $model, Grid $grid)
     {
@@ -22,9 +41,18 @@ class ConfigurationListener
 
             $fieldset->control('input:text', 'days')
                     ->label('')
+                    ->wrapper(['class' => 'col-dt-24 col-24 col-mb-24'])
                     ->field(function() {
                         $memory = app('antares.memory')->make('primary');
-                        return '<div class="col-group"><div class="col-dt-16 col-16 col-mb-16">' . trans('antares/notifications::logs.form.notifications_config_days_label', ['x' => '<input class="w50" type="number" name="days" value="' . $memory->get('notifications_remove_after_days', '') . '" size="2" max-length="2"  />']) . '</div><div class="col-dt-16 col-16 col-mb-16 "><div class="input-field__desc">' . trans('antares/notifications::logs.form.notifications_config_days_help') . '</div></div></div>';
+                        return '<div class="col-group"><div class="col-mb-24">' . trans('antares/notifications::logs.form.notifications_config_days_label', ['x' => '<input class="w50" type="number" name="days" value="' . $memory->get('notifications_remove_after_days', '') . '" size="2" max-length="2"  />']) . '</div></div>';
+                        //. '<div class="col-group"><div class="col-mb-24">'..'</div></div> ';
+                    });
+            $fieldset->control('input:text', 'help')
+                    ->label('')
+                    ->wrapper(['class' => 'col-dt-24 col-24 col-mb-24'])
+                    ->fieldClass('input-field__desc')
+                    ->field(function() {
+                        return '<div class="col-group"><div class="col-mb-24">' . trans('antares/notifications::logs.form.notifications_config_days_help') . '</div></div>';
                     });
         });
         $grid->rules(array_merge($grid->rules, [
@@ -34,8 +62,9 @@ class ConfigurationListener
 
     /**
      * Save notifications configuration
-     * 
+     *
      * @param Option $model
+     * @return bool
      */
     public function updated(Option $model)
     {

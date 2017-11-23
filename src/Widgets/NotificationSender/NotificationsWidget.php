@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -55,14 +55,12 @@ class NotificationsWidget extends AbstractTemplate
      * @var array
      */
     protected $attributes = [
-        'x'              => 0,
-        'y'              => 0,
-        'min_width'      => 2,
-        'min_height'     => 3,
-        'max_width'      => 12,
-        'max_height'     => 9,
-        'default_width'  => 3,
-        'default_height' => 9,
+        'min_width'      => 3,
+        'min_height'     => 4,
+        'max_width'      => 52,
+        'max_height'     => 52,
+        'default_width'  => 5,
+        'default_height' => 6,
         'titlable'       => true,
     ];
 
@@ -71,7 +69,7 @@ class NotificationsWidget extends AbstractTemplate
      *
      * @var array
      */
-    protected $views      = [
+    protected $views = [
         'antares/foundation::admin.users.show'
     ];
 
@@ -105,7 +103,7 @@ class NotificationsWidget extends AbstractTemplate
      */
     public function render()
     {
-        app('antares.asset')->container('antares/foundation::application')->add('webpack_forms_basic', '/webpack/forms_basic.js', ['app_cache']);
+        app('antares.asset')->container('antares/foundation::application')->add('vue_min', '//cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.min.js', ['app_cache']);
 
         publish('notifications', ['js/notification-widget.js']);
         return view('antares/notifications::widgets.send_notification', ['form' => $this->form->get()])->render();

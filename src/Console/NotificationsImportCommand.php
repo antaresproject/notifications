@@ -70,6 +70,8 @@ class NotificationsImportCommand extends Command
     protected $synchronizer;
 
     /**
+     * Extension instance.
+     *
      * @var ExtensionContract|null
      */
     private $extension;
@@ -96,8 +98,8 @@ class NotificationsImportCommand extends Command
      */
     public function handle()
     {
-        $forceMode      = $this->option('force');
-        $extensionName  = $this->argument('extension');
+        $forceMode     = $this->option('force');
+        $extensionName = $this->argument('extension');
 
         $this->synchronizer->setForceMode($forceMode);
 
@@ -107,15 +109,19 @@ class NotificationsImportCommand extends Command
             if ($extension instanceof ExtensionContract) {
                 $this->extension = $extension;
             }
+            else {
+                $this->error('Extension not found.');
+                return;
+            }
         }
 
         $files = $this->getFiles();
 
         /* @var $file string */
-        foreach($files->all() as $file) {
+        foreach ($files->all() as $file) {
             $reflection = new ReflectionClass($file);
 
-            if( $this->hasDesiredInterface($reflection) ) {
+            if ($this->hasDesiredInterface($reflection)) {
                 $templates = call_user_func(array($file, 'templates'));
 
                 $this->synchronizer->syncTemplates($file, $templates);
@@ -129,9 +135,9 @@ class NotificationsImportCommand extends Command
      * @param ReflectionClass $class
      * @return bool
      */
-    protected function hasDesiredInterface(ReflectionClass $class) : bool
+    protected function hasDesiredInterface(ReflectionClass $class): bool
     {
-        return ! $class->isAbstract() && in_array(NotificationEditable::class, $class->getInterfaceNames(), true);
+        return !$class->isAbstract() && in_array(NotificationEditable::class, $class->getInterfaceNames(), true);
     }
 
     /**
@@ -144,11 +150,11 @@ class NotificationsImportCommand extends Command
         $autoload = require_once base_path('vendor/composer/autoload_classmap.php');
         $dirs     = $this->extension ? $this->getExtensionDirs($this->extension) : $this->getExtensionsDirs();
 
-        if( ! $dirs) {
+        if (!$dirs) {
             return new Collection();
         }
 
-        if($dirs instanceof Finder) {
+        if ($dirs instanceof Finder) {
             $dirs = new Collection([$dirs]);
         }
 
@@ -177,7 +183,7 @@ class NotificationsImportCommand extends Command
      * 
      * @return Collection|Finder[]
      */
-    protected function getExtensionsDirs() : Collection
+    protected function getExtensionsDirs(): Collection
     {
         $extensions = $this->manager->getAvailableExtensions()->filterByActivated();
         $collection = collect();
@@ -185,7 +191,7 @@ class NotificationsImportCommand extends Command
         foreach ($extensions as $extension) {
             $finder = $this->getExtensionDirs($extension);
 
-            if($finder) {
+            if ($finder) {
                 $collection->push($finder);
             }
         }
@@ -194,10 +200,12 @@ class NotificationsImportCommand extends Command
     }
 
     /**
+     * Returns notification path as Finder object for given extension. If path is not recognized NULL will be returned.
+     *
      * @param ExtensionContract $extension
      * @return null|Finder
      */
-    protected function getExtensionDirs(ExtensionContract $extension) : ?Finder
+    protected function getExtensionDirs(ExtensionContract $extension)
     {
         $path = $extension->getPath() . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Notifications';
 

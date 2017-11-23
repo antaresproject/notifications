@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -20,7 +20,7 @@
 
 namespace Antares\Notifications\Decorator;
 
-use Antares\Notifications\Adapter\VariablesAdapter;
+use Antares\Notifications\Model\NotificationsStack;
 use Illuminate\Database\Eloquent\Collection;
 use RuntimeException;
 
@@ -28,24 +28,9 @@ class SidebarItemDecorator
 {
 
     /**
-     * Variables adapter instance.
-     *
-     * @var VariablesAdapter
-     */
-    protected $variablesAdapter;
-
-    /**
-     * SidebarItemDecorator constructor.
-     * @param VariablesAdapter $variablesAdapter
-     */
-    public function __construct(VariablesAdapter $variablesAdapter) {
-        $this->variablesAdapter = $variablesAdapter;
-    }
-
-    /**
      * Decorates notifications of alerts
      * 
-     * @param Collection $items
+     * @param Collection|NotificationsStack[] $items
      * @param String $type
      * @return array
      * @throws RuntimeException
@@ -64,25 +49,20 @@ class SidebarItemDecorator
     }
 
     /**
-     * Decorates single item
-     * 
-     * @param \Illuminate\Database\Eloquent\Model $item
-     * @param String $view
-     * @return String
+     * Decorates single item.
+     *
+     * @param NotificationsStack $item
+     * @param string $view
+     * @return string
      */
-    public function item($item, $view)
+    public function item(NotificationsStack $item, string $view)
     {
-        /* @var $variablesAdapter VariablesAdapter */
-        $firstContent       = $item->content[0];
-        $title              = $this->variablesAdapter->get($firstContent->title, (array) $item->variables);
-        $content            = $this->variablesAdapter->get($firstContent->content, (array) $item->variables);
-
         return view($view, [
             'id'         => $item->id,
             'author'     => $item->author,
-            'title'      => $title,
-            'value'      => $content,
-            'priority'   => priority_label($item->notification->severity->name),
+            'title'      => $item->title,
+            'value'      => $item->content,
+            'priority'   => priority_label($item->severity->name),
             'created_at' => $item->created_at
         ])->render();
     }

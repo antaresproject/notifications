@@ -29,4 +29,13 @@ class MailMessage extends BaseMailMessage implements MessageContract, TemplateMe
 
     use DeliveredTemplateTrait;
 
+    /**
+     * Returns type of notification.
+     *
+     * @return string
+     */
+    public function getType() : string {
+        return 'mail';
+    }
+
 }

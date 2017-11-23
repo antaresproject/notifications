@@ -10,7 +10,7 @@ before_script:
   - travis_retry composer install --prefer-dist --no-interaction
   - wget https://github.com/satooshi/php-coveralls/releases/download/v1.0.0/coveralls.phar
   - chmod +x coveralls.phar
-  
+
 script: 
     - mkdir -p ./build/logs
     - ./vendor/bin/phpunit -c phpunit.xml --coverage-clover ./build/logs/clover.xml;

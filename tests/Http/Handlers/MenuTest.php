@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -22,10 +22,10 @@ namespace Antares\Notifications\Http\Handlers\TestCase;
 
 use Antares\Notifications\Http\Handlers\Menu as NotificationsMenu;
 use Antares\Foundation\Support\MenuHandler;
-use Antares\Testing\ApplicationTestCase;
+use Antares\Testing\TestCase;
 use Mockery as m;
 
-class MenuTest extends ApplicationTestCase
+class MenuTest extends TestCase
 {
 
     /**

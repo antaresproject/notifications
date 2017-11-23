@@ -11,13 +11,12 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
  * @link       http://antaresproject.io
  */
-declare(strict_types = 1);
 
 namespace Antares\Notifications\Repository;
 
@@ -48,53 +47,13 @@ class StackRepository extends AbstractRepository
     }
 
     /**
-     * push notification to database
-     * 
-     * @param String $type
-     * @param String $name
-     * @param array $value
-     * @return boolean
-     */
-    public function push($type, $name, $value)
-    {
-        $typeModel = NotificationTypes::where('name', $type)->first();
-        if (is_null($typeModel)) {
-            return false;
-        }
-        $tId   = $typeModel->id;
-        $model = $this->makeModel()->getModel()->newInstance([
-            'type_id' => $tId,
-            'name'    => $name,
-            'value'   => $value
-        ]);
-        $model->save();
-        return $model;
-    }
-
-    /**
-     * finds all new notification messages
-     * 
-     * @param array $ids
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function findAllNew($ids = [])
-    {
-        $query = $model = $this->makeModel()->where('broadcasted', 0);
-        if (!empty($ids)) {
-            $values = array_values($ids);
-            $query->whereNotIn('id', $values);
-        }
-        return $query->get();
-    }
-
-    /**
      * Gets notifications severity ids
      * 
      * @return array
      */
     protected function getNotificationsSeverityIds()
     {
-        return NotificationSeverity::whereIn('name', config('antares/notifications::notification_severity'))->get()->pluck('id')->toArray();
+        return NotificationSeverity::query()->whereIn('name', config('antares/notifications::notification_severity'))->get()->pluck('id')->toArray();
     }
 
     /**
@@ -104,87 +63,44 @@ class StackRepository extends AbstractRepository
      */
     protected function getAlertsSeverityIds()
     {
-        return NotificationSeverity::whereIn('name', config('antares/notifications::alert_severity'))->get()->pluck('id')->toArray();
+        return NotificationSeverity::query()->whereIn('name', config('antares/notifications::alert_severity'))->get()->pluck('id')->toArray();
     }
 
     /**
      * Gets base query builder for notifications and alerts
      * 
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
     public function query()
     {
-        $read = NotificationsStackRead::select(['stack_id'])
-                ->withTrashed()
-                ->where('user_id', user()->id)
-                ->whereNotNull('deleted_at')
-                ->pluck('stack_id');
-        return $this->makeModel()->newQuery()
-                        ->distinct()
-                        ->select(['tbl_notifications_stack.*'])
-                        ->whereHas('content', function($query) {
-                            $query->where([
-                                'lang_id' => lang_id()
-                            ]);
-                        })
-                        ->whereHas('notification', function($query) {
-                            $query->whereHas('type', function($subquery) {
-                                $subquery->where('name', area());
-                            });
-                        })
-                        ->where(function ($query) {
-                            $query
-                            ->whereNull('author_id')
-                            ->orWhere('author_id', user()->id)
-                            ->orWhereHas('author', function($subquery) {
-                                $subquery->whereHas('roles', function($rolesQuery) {
-                                    $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
-                                });
-                            })
-                            ->orWhereHas('params', function($subquery) {
-                                $subquery->where('model_id', user()->id);
-                            });
-                        })
-                        ->whereNotIn('id', $read)
-                        ->with('author')
-                        ->with('content')->with('notification.severity')
-                        ->orderBy('tbl_notifications_stack.created_at', 'desc');
-    }
+        $read = NotificationsStackRead::query()
+            ->select(['stack_id'])
+            ->withTrashed()
+            ->where('user_id', user()->id)
+            ->whereNotNull('deleted_at')
+            ->pluck('stack_id');
 
-    /**
-     * Gets user notifications
-     * 
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getNotifications()
-    {
-        return $this->query()->whereHas('notification', function($query) {
-                    $query->whereIn('tbl_notifications.severity_id', $this->getNotificationsSeverityIds());
-                });
-    }
-
-    /**
-     * Alerts getter
-     * 
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getAlerts()
-    {
-        return $this->query()->whereHas('notification', function($query) {
-                    $query->whereIn('tbl_notifications.severity_id', $this->getAlertsSeverityIds());
-                });
-    }
-
-    /**
-     * Assign counter query
-     * 
-     * @param \Illuminate\Database\Query\Builder $builder
-     * @return \Illuminate\Database\Eloquent\Model
-     */
-    protected function count($builder)
-    {
-        $read = NotificationsStackRead::select(['stack_id'])->withTrashed()->where('user_id', user()->id)->pluck('stack_id');
-        return $builder->whereNotIn('id', $read)->count();
+        return NotificationsStack::query()
+            ->distinct()
+            ->select(['tbl_notifications_stack.*'])
+            ->where(function (Builder $query) {
+                $query
+                    ->whereNull('author_id')
+                    ->orWhere('author_id', user()->id)
+                    ->orWhereHas('author', function(Builder $q) {
+                        $q->whereHas('roles', function(Builder $rolesQuery) {
+                            $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
+                        });
+                    })
+                    ->orWhereHas('params', function(Builder $q) {
+                        $q->where('model_id', user()->id);
+                    });
+            })
+            ->whereNotIn('id', $read)
+            ->with('author')
+            ->with('severity')
+            ->with('type')
+            ->orderBy('tbl_notifications_stack.created_at', 'desc');
     }
 
     /**
@@ -194,10 +110,39 @@ class StackRepository extends AbstractRepository
      */
     public function getCount()
     {
+        $read = $this->getReadStack();
+
         return [
-            'notifications' => $this->count($this->getNotifications()),
-            'alerts'        => $this->count($this->getAlerts())
+            'notifications' => $this->getNotifications()->whereNotIn('id', $read)->count(),
+            'alerts'        => $this->getAlerts()->whereNotIn('id', $read)->count(),
         ];
+    }
+
+    /**
+     * Returns read stacks.
+     *
+     * @return mixed
+     */
+    protected function getReadStack() {
+        return NotificationsStackRead::query()->select(['stack_id'])->withTrashed()->where('user_id', user()->id)->pluck('stack_id');
+    }
+
+    /**
+     * @return Builder
+     */
+    public function getAlerts() {
+        return $this->query()->whereHas('type', function(Builder $q) {
+            $q->where('name', 'alert');
+        });
+    }
+
+    /**
+     * @return Builder
+     */
+    public function getNotifications() {
+        return $this->query()->whereHas('type', function(Builder $q) {
+            $q->where('name', 'notification');
+        });
     }
 
     /**
@@ -208,14 +153,11 @@ class StackRepository extends AbstractRepository
      */
     public function clear($type = 'notifications')
     {
-        $builder = ($type == 'alerts') ? $this->getAlerts() : $this->getNotifications();
+        $builder = ($type == 'alerts')
+            ? $this->getAlerts()
+            : $this->getNotifications();
 
-        return $this->makeModel()
-                        ->getModel()
-                        ->read()
-                        ->getModel()
-                        ->newQuery()
-                        ->whereIn('stack_id', $builder->pluck('id'))->delete();
+        return NotificationsStackRead::query()->whereIn('stack_id', $builder->pluck('id'))->delete();
     }
 
     /**
@@ -229,7 +171,7 @@ class StackRepository extends AbstractRepository
         DB::beginTransaction();
         try {
             $builder = ($type == 'alerts') ? $this->getAlerts() : $this->getNotifications();
-            $read    = NotificationsStackRead::select(['stack_id'])->withTrashed()->where('user_id', user()->id)->pluck('stack_id');
+            $read    = $this->getReadStack();
             $items   = $builder->whereNotIn('id', $read)->get();
 
             foreach ($items as $item) {
@@ -242,7 +184,10 @@ class StackRepository extends AbstractRepository
             DB::rollback();
             return false;
         }
-        return DB::commit();
+
+        DB::commit();
+
+        return true;
     }
 
     /**
@@ -253,13 +198,15 @@ class StackRepository extends AbstractRepository
      */
     public function deleteById($id)
     {
-        $read = NotificationsStackRead::where([
+        $read = NotificationsStackRead::query()->where([
                     'stack_id' => $id,
                     'user_id'  => user()->id
                 ])->first();
+
         if (!is_null($read)) {
             return $read->delete();
         }
+
         return false;
     }
 
@@ -276,17 +223,20 @@ class StackRepository extends AbstractRepository
         DB::beginTransaction();
         try {
             $this->resolveJsonCastableColumns($log);
-            $inserted = Logs::insert($log);
+            $inserted = Logs::query()->insert($log);
+
             if (!$inserted) {
                 throw new Exception('Unable to save log');
             }
-            $lid          = DB::getPdo()->lastInsertId();
+
+            /* @var $notification Notifications */
             $notification = Notifications::query()->firstOrNew([
                 'brand_id'    => brand_id(),
-                'category_id' => NotificationCategory::where('name', 'default')->first()->id,
-                'type_id'     => NotificationTypes::where('name', 'admin')->first()->id,
+                'category_id' => NotificationCategory::query()->where('name', 'default')->first()->id,
+                'type_id'     => NotificationTypes::query()->where('name', 'notification')->first()->id,
                 'name'        => $log['name'],
             ]);
+
             if (!$notification->exists) {
                 $notification->active = 1;
                 $notification->save();
@@ -297,19 +247,21 @@ class StackRepository extends AbstractRepository
                 ]));
             }
         } catch (Exception $ex) {
-            DB::rollback();
+            DB::rollBack();
             return false;
         }
+
         DB::commit();
         return true;
     }
 
     /**
      * Resolves json castable columns
-     * 
+     *
+     * @param array $log
      * @return array
      */
-    protected function resolveJsonCastableColumns(&$log)
+    protected function resolveJsonCastableColumns(array &$log)
     {
         foreach ($log as $name => $value) {
             if (!is_array($value)) {
@@ -322,39 +274,31 @@ class StackRepository extends AbstractRepository
 
     /**
      * Fetch stacks
-     * 
-     * @param array $columns
+     *
      * @return Builder
      */
-    public function fetchAll(array $columns = []): Builder
+    public function fetchAll(): Builder
     {
-        return $this->makeModel()
-                        ->newQuery()
-                        ->select([
-                            'tbl_notifications_stack.id',
-                            'tbl_notifications_stack.variables as variables',
-                            'tbl_notifications_stack.created_at as created_at',
-                            'tbl_notifications_stack.author_id as author_id',
-                            'tbl_notifications.classname as name',
-                            'tbl_notification_contents.title as title',
-                            'tbl_notification_types.title as type',
-                            'tbl_languages.code as lang_code',
-                            'tbl_languages.name as lang_name',
-                            'tbl_roles.area as area',
-                            DB::raw('CONCAT_WS(" ",tbl_users.firstname,tbl_users.lastname) AS fullname')
-                        ])
-                        ->leftJoin('tbl_notification_contents', 'tbl_notifications_stack.notification_id', '=', 'tbl_notification_contents.notification_id')
-                        ->leftJoin('tbl_notifications', 'tbl_notifications_stack.notification_id', '=', 'tbl_notifications.id')
-                        ->leftJoin('tbl_notification_types', 'tbl_notifications.type_id', '=', 'tbl_notification_types.id')
-                        ->leftJoin('tbl_languages', 'tbl_notification_contents.lang_id', '=', 'tbl_languages.id')
-                        ->leftJoin('tbl_users', 'tbl_notifications_stack.author_id', '=', 'tbl_users.id')
-                        ->leftJoin('tbl_user_role', 'tbl_users.id', '=', 'tbl_user_role.user_id')
-                        ->leftJoin('tbl_roles', 'tbl_user_role.role_id', '=', 'tbl_roles.id')
-                        ->where(function($query) {
-                            $query->whereNull('author_id')
-                            ->orWhere('author_id', user()->id)
-                            ->orWhereIn('tbl_roles.id', user()->roles->first()->getChilds());
-                        });
+        return NotificationsStack::query()
+            ->select([
+                'tbl_notifications_stack.id',
+                'tbl_notifications_stack.created_at',
+                'tbl_notifications_stack.author_id',
+                'tbl_notification_types.title as type',
+                'tbl_roles.area as area',
+                DB::raw('CONCAT_WS(" ", tbl_users.firstname, tbl_users.lastname) AS fullname')
+            ])
+            ->leftJoin('tbl_notification_types', 'tbl_notifications_stack.type_id', '=', 'tbl_notification_types.id')
+            ->leftJoin('tbl_users', 'tbl_notifications_stack.author_id', '=', 'tbl_users.id')
+            ->leftJoin('tbl_user_role', 'tbl_users.id', '=', 'tbl_user_role.user_id')
+            ->leftJoin('tbl_roles', 'tbl_user_role.role_id', '=', 'tbl_roles.id')
+            ->groupBy('tbl_notifications_stack.id')
+            ->where(function(Builder $query) {
+                $query
+                    ->whereNull('author_id')
+                    ->orWhere('author_id', user()->id)
+                    ->orWhereIn('tbl_roles.id', user()->roles->first()->getChilds());
+            });
     }
 
     /**
@@ -365,17 +309,17 @@ class StackRepository extends AbstractRepository
      */
     public function fetchOne(int $id): Builder
     {
-        return $this->makeModel()->newQuery()->withoutGlobalScopes()->distinct()
-                        ->select(['tbl_notifications_stack.*'])->with('content')->with('content.lang')->with('notification.type')
-                        ->where(function ($query) {
-                            $query->whereNull('author_id')->orWhere('author_id', user()->id)->orWhereHas('author', function($subquery) {
-                                $subquery->whereHas('roles', function($rolesQuery) {
-                                    $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
-                                });
-                            });
-                        })
-                        ->with('author')->with('author.roles')->with('content')
-                        ->whereId($id);
+        return NotificationsStack::query()
+            ->withoutGlobalScopes()
+            ->with('author.roles')
+            ->where('id', $id)
+            ->where(function(Builder $q) {
+                $q->whereNull('author_id')->orWhere('author_id', user()->id)->orWhereHas('author', function(Builder $q) {
+                    $q->whereHas('roles', function(Builder $q) {
+                        $q->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
+                    });
+                });
+            });
     }
 
 }

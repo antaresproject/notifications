@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -68,7 +68,7 @@ class NotificationsTest extends TestCase
      */
     public function testHasTimestamps()
     {
-        $this->assertFalse($this->model->timestamps);
+        $this->assertTrue($this->model->timestamps);
     }
 
     /**
@@ -76,7 +76,7 @@ class NotificationsTest extends TestCase
      * 
      * @test
      */
-    public function testHasValidMorhClass()
+    public function testHasValidMorphClass()
     {
         $this->assertSame($this->model->getMorphClass(), 'Antares\Notifications\Model\Notifications');
     }
@@ -123,18 +123,6 @@ class NotificationsTest extends TestCase
         $contents = $this->model->contents();
         $this->assertInstanceOf(HasMany::class, $contents);
         $this->assertInstanceOf(NotificationContents::class, $contents->getModel());
-    }
-
-    /**
-     * Has valid relation to category table
-     * 
-     * @test
-     */
-    public function testCategory()
-    {
-        $category = $this->model->category();
-        $this->assertInstanceOf(HasOne::class, $category);
-        $this->assertInstanceOf(NotificationCategory::class, $category->getModel());
     }
 
     /**

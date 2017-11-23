@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -20,11 +20,15 @@
 
 namespace Antares\Notifications\Widgets\NotificationSender\Controller;
 
+use Antares\Model\User;
+use Antares\Notifications\Parsers\ContentParser;
+use Antares\Notifications\Services\NotificationsService;
 use Antares\Notifications\Widgets\NotificationSender\Form\NotificationWidgetForm;
 use Antares\Foundation\Http\Controllers\AdminController;
 use Antares\Notifications\Repository\Repository;
 use Antares\Notifications\Model\Notifications;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Http\JsonResponse;
 
@@ -46,12 +50,12 @@ class NotificationController extends AdminController
     protected $repository;
 
     /**
-     * Construct
-     * 
+     * NotificationController constructor.
      * @param NotificationWidgetForm $form
      * @param Repository $repository
+     * @param ContentParser $contentParser
      */
-    public function __construct(NotificationWidgetForm $form, Repository $repository)
+    public function __construct(NotificationWidgetForm $form, Repository $repository, ContentParser $contentParser)
     {
         parent::__construct();
         $this->repository = $repository;
@@ -64,54 +68,52 @@ class NotificationController extends AdminController
     public function setupMiddleware()
     {
         $this->middleware("web");
-        $this->middleware("antares.widgets");
         $this->middleware("antares.auth");
     }
 
     /**
      * Index action, list of notifications depends on type
-     * 
+     *
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new JsonResponse($this->getNotifications());
+        $contents = $this->repository->getNotificationContents( $request->get('type') );
+
+        return response()->json($contents);
     }
 
     /**
      * Send action
-     * 
-     * @return JsonResponse
+     *
+     * @param ContentParser $contentParser
+     * @param NotificationsService $notificationsService
+     * @param Request $request
+     * @return JsonResponse|mixed
      */
-    public function send()
+    public function send(ContentParser $contentParser, NotificationsService $notificationsService, Request $request)
     {
-        if (!Input::get('afterValidate')) {
+        if (!$request->get('afterValidate')) {
             return $this->form->get()->isValid();
         }
-        $this->fire($this->findModel(Input::get('notifications')));
-        return new JsonResponse(['message' => trans('antares/notifications::messages.widget_notification_added_to_queue')]);
-    }
 
-    /**
-     * Fires notification events
-     * 
-     * @param Model $model
-     * @return void
-     */
-    protected function fire(Model $model)
-    {
-        $recipient = $this->getRecipient();
-        if (is_null($recipient->phone)) {
-            $recipient->phone = config('antares/notifications::default.sms');
-        }
-        $params = ['variables' => ['user' => $recipient], 'recipients' => [$recipient]];
-        return event($model->event, $params);
+        $testMode = (bool) $request->get('test');
+
+        $contentParser->setPreviewMode($testMode);
+
+        $model      = $this->findModel($request->get('notifications'));
+        $recipient  = $this->getRecipient();
+
+        $notificationsService->handleAsPreview($model, $recipient);
+
+        return new JsonResponse(['message' => trans('antares/notifications::messages.widget_notification_added_to_queue')]);
     }
 
     /**
      * Gets recipient for notification
      * 
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return User
      */
     protected function getRecipient()
     {
@@ -124,25 +126,18 @@ class NotificationController extends AdminController
 
     /**
      * Finds notification model
-     * 
-     * @return \Illuminate\Database\Eloquent\Model
+     *
+     * @param $id
+     * @return Notifications
      */
-    protected function findModel()
+    protected function findModel($id)
     {
-        return Notifications::whereHas('contents', function($query) {
-                    $query->where('id', Input::get('notifications'));
-                })->firstOrFail();
-    }
+        /* @var $model Notifications */
+        $model = Notifications::query()->whereHas('contents', function(Builder $query) use($id) {
+            $query->where('id', $id);
+        })->firstOrFail();
 
-    /**
-     * Gets notifications
-     * 
-     * @return \Antares\Support\Collection
-     */
-    public function getNotifications()
-    {
-        $type = Input::get('type');
-        return $this->repository->getNotificationContents($type);
+        return $model;
     }
 
 }

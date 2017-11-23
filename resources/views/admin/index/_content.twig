@@ -1,0 +1,44 @@
+<fieldset>
+    <div class="page-notification-templates__content">
+        <legend>{{ trans('antares/notifications::messages.notification_template_content') }}</legend>
+
+        <div class="page-notification-templates__lang">
+            <div class="page-notification-templates__lang-text">
+                {{ trans('antares/notifications::messages.notification_edit_for') }}:
+            </div>
+            <div class="form-block nomargin">
+                <div class="input-field input-field--icon">
+                    <span class="input-field__icon"><span class="flag-icon"></span></span>
+                    <select class="lang-selector" data-flag-select data-selectar="true" id="contents-languages-dropdown">
+                        <option v-for="lang in langs" v-bind:value="lang.code" v-bind:data-country="lang.icon_code">${ lang.name }</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-for="(content, lang) in contents">
+        <div class="page-notification-templates__info" v-show="lang === selectedLang">
+            <div class="form-block" v-show="! disabledContentTitle">
+                <div class="col-group" v-bind:class="{ error: errors.has('contents.' + lang + '.title') }">
+                    <div class="col-mb-24 col-12">
+                        <label class="form-block__name">{{ trans('antares/notifications::messages.notification_content_title') }}</label>
+
+                        <div class="input-field">
+                            <input type="text" name="name" v-model="content.title" :data-lang-code="lang" v-bind:disabled="disabledContentTitle">
+                        </div>
+
+                        <span class="error nopadding" v-if="errors.has('contents.' + lang + '.title')">
+                            <p class="help-block error" v-text="errors.get('contents.' + lang + '.title')"></p>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect" v-bind:class="{ error: errors.has('contents.' + lang + '.title') }">
+                {% include 'antares/notifications::admin.index._tabs' %}
+                {% include 'antares/notifications::admin.index._variables' %}
+            </div>
+        </div>
+    </div>
+</fieldset>

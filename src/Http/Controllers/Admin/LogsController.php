@@ -20,22 +20,26 @@
 
 namespace Antares\Notifications\Http\Controllers\Admin;
 
+use Antares\Notifications\Http\Datatables\LogsDataTable;
 use Antares\Notifications\Processor\LogsProcessor as Processor;
 use Antares\Foundation\Http\Controllers\AdminController;
-use Antares\Notifications\Contracts\LogsListener;
+use Antares\UI\Navigation\Breadcrumbs\Manager;
+use Illuminate\Http\Request;
 
-class LogsController extends AdminController implements LogsListener
+class LogsController extends AdminController
 {
 
     /**
-     * implments instance of controller
-     * 
+     * LogsController constructor.
+     * @param Manager $manager
      * @param Processor $processor
      */
-    public function __construct(Processor $processor)
+    public function __construct(Manager $manager, Processor $processor)
     {
         parent::__construct();
         $this->processor = $processor;
+
+        $manager->enabled(true);
     }
 
     /**
@@ -47,15 +51,20 @@ class LogsController extends AdminController implements LogsListener
     }
 
     /**
-     * {@inheritdoc}
+     * Index action.
+     *
+     * @param LogsDataTable $dataTable
+     * @return array
      */
-    public function index()
-    {
-        return $this->processor->index();
+    public function index(LogsDataTable $dataTable) {
+        return $dataTable->render('antares/notifications::admin.logs.index');
     }
 
     /**
-     * {@inheritdoc}
+     * Preview action.
+     *
+     * @param $id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
      */
     public function preview($id)
     {
@@ -63,29 +72,20 @@ class LogsController extends AdminController implements LogsListener
     }
 
     /**
-     * {@inheritdoc}
+     * Delete action.
+     *
+     * @param Request $request
+     * @param null $id
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function delete($id = null)
-    {
-        return $this->processor->delete($this, $id);
-    }
+    public function delete(Request $request, $id = null) {
+        $ids = $request->get('attr', []);
 
-    /**
-     * {@inheritdoc}
-     */
-    public function deleteSuccess()
-    {
-        app('antares.messages')->add('success', trans('antares/notifications::logs.notification_delete_success'));
-        return redirect()->to(handles('antares::notifications/logs/index'));
-    }
+        if($id) {
+            $ids[] = $id;
+        }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function deleteFailed()
-    {
-        app('antares.messages')->add('error', trans('antares/notifications::logs.notification_delete_failed'));
-        return redirect()->to(handles('antares::notifications/logs/index'));
+        return $this->processor->delete(array_unique($ids))->notify()->resolve($request);
     }
 
 }

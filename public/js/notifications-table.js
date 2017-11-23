@@ -1,20 +1,59 @@
-//$(document).ready(function () {
-//    $('.notifications-select-category', document).on('change', function (e) {
-//        var table = $('.notifications-select-category').closest('.tbl-c').find('[data-table-init]');
-//        if (table.length < 0) {
-//            return false;
-//        }
-//        var api = table.dataTable().api();
-//        var val = $.fn.dataTable.util.escapeRegex($(this).val());
-//        api.column(3).search(val, true, false).draw();
-//    });
-//    $('.notifications-select-type', document).on('change', function (e) {
-//        var table = $('.notifications-select-type').closest('.tbl-c').find('[data-table-init]');
-//        if (table.length < 0) {
-//            return false;
-//        }
-//        var api = table.dataTable().api();
-//        var val = $.fn.dataTable.util.escapeRegex($(this).val());
-//        api.column(4).search(val, true, false).draw();
-//    });
-//});
+$(document).ready(function() {
+
+    var $table = $('table.dataTable');
+
+    $table.on('click', '.request-change-notification-status', function(e) {
+        e.preventDefault();
+
+        var url = $(this).attr('href');
+
+        $.post(url).then(function(response) {
+            if( ! response.notified && response.type) {
+                var type = response.type + 'FM';
+
+                noty( $.extend({}, APP.noti[type]('lg', 'full'), {
+                    text: response.message,
+                    layout: 'bottomRight'
+                }));
+            }
+            if(response.url) {
+                window.location.href = response.url;
+            }
+        });
+    });
+
+    $('.card-ctrls .ddown__menu li').on('click',  function(e) {
+        var $anchor = $(this).find('> a');
+
+        if( $anchor.hasClass('mass-action-request') ) {
+            e.preventDefault();
+
+            var
+                url = $anchor.attr('href'),
+                data = {
+                    ids: []
+                };
+
+            $table.find('tr.is-selected').each(function() {
+                var id = $(this).find('.mass-actions-menu').data('id');
+
+                data.ids.push(id);
+            });
+
+            $.post(url, data).then(function(response) {
+                if( ! response.notified && response.type) {
+                    var type = response.type + 'FM';
+
+                    noty( $.extend({}, APP.noti[type]('lg', 'full'), {
+                        text: response.message,
+                        layout: 'bottomRight'
+                    }));
+                }
+                if(response.url) {
+                    window.location.href = response.url;
+                }
+            });
+        }
+    });
+
+});

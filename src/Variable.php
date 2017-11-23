@@ -1,33 +1,62 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications;
 
 use Closure;
 use InvalidArgumentException;
 
-class Variable {
+class Variable
+{
 
     /**
+     * Variable code.
+     *
      * @var string
      */
     protected $code;
 
     /**
+     * Variable label.
+     *
      * @var string
      */
     protected $label;
 
     /**
+     * Variable value.
+     *
      * @var Closure|mixed
      */
     protected $value;
 
     /**
+     * Bind parameter instance.
+     *
      * @var BindParameter|null
      */
     protected $bindParameter;
 
     /**
+     * Determines if variable is compiled.
+     *
      * @var bool
      */
     protected $compiled = true;
@@ -38,20 +67,24 @@ class Variable {
      * @param string $label
      * @param Closure|mixed $value
      */
-    public function __construct(string $code, string $label, $value) {
-        $this->code     = $code;
-        $this->label    = $label;
-        $this->value    = $value;
+    public function __construct(string $code, string $label, $value)
+    {
+        $this->code  = $code;
+        $this->label = $label;
+        $this->value = $value;
 
-        if( ! ($this->isSimpleType() || $value instanceof Closure)) {
+        if (!($this->isSimpleType() || $value instanceof Closure)) {
             throw new InvalidArgumentException('Invalid value. Must be string, integer, float or Closure object.');
         }
     }
 
     /**
+     * Sets variable as compiled.
+     *
      * @param bool $state
      */
-    public function setAsCompiled(bool $state) : void {
+    public function setAsCompiled(bool $state): void
+    {
         $this->compiled = $state;
     }
 
@@ -60,7 +93,8 @@ class Variable {
      *
      * @param BindParameter $bindParameter
      */
-    public function setRequiredParameter(BindParameter $bindParameter) : void {
+    public function setRequiredParameter(BindParameter $bindParameter): void
+    {
         $this->bindParameter = $bindParameter;
     }
 
@@ -69,7 +103,8 @@ class Variable {
      *
      * @return BindParameter|null
      */
-    public function getRequiredParameter() : ?BindParameter {
+    public function getRequiredParameter()
+    {
         return $this->bindParameter;
     }
 
@@ -78,7 +113,8 @@ class Variable {
      *
      * @return string
      */
-    public function getCode() : string {
+    public function getCode(): string
+    {
         return $this->code;
     }
 
@@ -87,7 +123,8 @@ class Variable {
      *
      * @return string
      */
-    public function getLabel() : string {
+    public function getLabel(): string
+    {
         return $this->label;
     }
 
@@ -96,7 +133,8 @@ class Variable {
      *
      * @return Closure|mixed
      */
-    public function getValue() {
+    public function getValue()
+    {
         return value($this->value);
     }
 
@@ -105,14 +143,18 @@ class Variable {
      *
      * @return bool
      */
-    public function isSimpleType() : bool {
+    public function isSimpleType(): bool
+    {
         return is_string($this->value) || is_integer($this->value) || is_float($this->value);
     }
 
     /**
+     * Determines if variable is compiled.
+     *
      * @return bool
      */
-    public function isCompiled() : bool {
+    public function isCompiled(): bool
+    {
         return $this->compiled;
     }
 

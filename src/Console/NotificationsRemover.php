@@ -42,13 +42,6 @@ class NotificationsRemover extends Command
     protected $launched = 'daily';
 
     /**
-     * Name of default category automation command
-     *
-     * @var String
-     */
-    protected $category = 'custom';
-
-    /**
      * when command can be executed
      *
      * @var array

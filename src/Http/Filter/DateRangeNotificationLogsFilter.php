@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -51,15 +51,16 @@ class DateRangeNotificationLogsFilter extends DateRangeFilter implements DataTab
 
     /**
      * Filters data by parameters from memory
-     * 
-     * @param mixed $builder
+     *
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder $builder
+     * @return void
      */
     public function apply($builder)
     {
         if (!empty($values = $this->getValues())) {
             $range = json_decode($values, true);
             if (!isset($range['start']) or ! isset($range['end'])) {
-                return $builder;
+                return;
             }
             $start = $range['start'] . ' 00:00:00';
             $end   = $range['end'] . ' 23:59:59';

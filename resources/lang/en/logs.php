@@ -34,7 +34,8 @@ return [
         'title' => 'Title',
         'type'  => 'Notification Type',
         'level' => 'User Level',
-        'user'  => 'User'
+        'user'  => 'User',
+        'event' => 'Event',
     ],
     'actions'                               => [
         'preview' => 'Preview',

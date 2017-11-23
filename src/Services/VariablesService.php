@@ -1,32 +1,55 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Services;
 
-use Antares\Modules\BillevioBase\Models\NotificationModuleVariables;
 use Antares\Notifications\Contracts\ModelVariablesResoluble;
-use Antares\Notifications\Parsers\VariableParser;
 use Antares\Notifications\Variable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use ReflectionParameter;
 
-class VariablesService {
+class VariablesService
+{
 
     /**
+     * Events dispatcher instance.
+     *
      * @var Dispatcher
      */
     protected $dispatcher;
 
     /**
+     * List of module variables.
+     *
      * @var ModuleVariables[]
      */
-    protected static $modules = [];
+    protected $modules = [];
 
     /**
      * VariablesService constructor.
      * @param Dispatcher $dispatcher
      */
-    public function __construct(Dispatcher $dispatcher) {
+    public function __construct(Dispatcher $dispatcher)
+    {
         $this->dispatcher = $dispatcher;
     }
 
@@ -37,18 +60,19 @@ class VariablesService {
      * @param ModelVariablesResoluble|null $model
      * @return ModuleVariables
      */
-    public function register(string $moduleName, ModelVariablesResoluble $model = null) : ModuleVariables {
+    public function register(string $moduleName, ModelVariablesResoluble $model = null): ModuleVariables
+    {
         $module = $this->findByModule($moduleName);
 
-        if($module === null) {
+        if ($module === null) {
             $module = new ModuleVariables($moduleName);
         }
 
-        if($model) {
+        if ($model) {
             $model->applyVariables($module);
         }
 
-        return self::$modules[$moduleName] = $module;
+        return $this->modules[$moduleName] = $module;
     }
 
     /**
@@ -56,21 +80,25 @@ class VariablesService {
      *
      * @return Variable[]|array
      */
-    public function getNamedVariables() : array {
+    public function getNamedVariables(): array
+    {
         $data = [];
 
-        foreach(self::$modules as $moduleVariables) {
+        foreach ($this->modules as $moduleVariables) {
             $data[] = $moduleVariables->getNamedVariables();
         }
 
-        return array_merge(...$data);
+        return count($data) ? array_merge(...$data) : [];
     }
 
     /**
+     * Returns registered module variables.
+     *
      * @return ModuleVariables[]|array
      */
-    public function all() : array {
-        return self::$modules;
+    public function all(): array
+    {
+        return $this->modules;
     }
 
     /**
@@ -79,28 +107,68 @@ class VariablesService {
      * @param string $moduleName
      * @return ModuleVariables|null
      */
-    public function findByModule(string $moduleName) : ?ModuleVariables {
-        return Arr::get(self::$modules, $moduleName);
+    public function findByModule(string $moduleName)
+    {
+        return Arr::get($this->modules, $moduleName);
     }
 
     /**
-     * Returns the variable object based on full variable code, ex. Shopping::order.id
+     * Returns the variable object based on full variable code, ex. shopping::order.id
      *
      * @param string $code
      * @return Variable|null
      * @throws \InvalidArgumentException
      */
-    public function findByCode(string $code) : ?Variable {
-        if( ! Str::contains($code, '::') ) {
+    public function findByCode(string $code)
+    {
+        if (!Str::contains($code, '::')) {
             throw new \InvalidArgumentException('The given variable code is invalid. Must contains :: chars in the name but the [' . $code . '] has been give.');
         }
 
         list($module, $variable) = explode('::', $code);
 
-        $moduleVariables = Arr::get(self::$modules, $module);
+        $moduleVariables = Arr::get($this->modules, $module);
 
-        if($moduleVariables instanceof ModuleVariables) {
+        if ($moduleVariables instanceof ModuleVariables) {
             return $moduleVariables->get($variable);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the first matched module variables by the parameter.
+     *
+     * @param ReflectionParameter $parameter
+     * @return ModuleVariables|null
+     */
+    public function firstModuleVariablesByParameter(ReflectionParameter $parameter) : ?ModuleVariables
+    {
+        foreach ($this->modules as $module) {
+            foreach ($module->getModelDefinitions() as $definition) {
+                if ($definition->getBindParameter()->isMatchToParameter($parameter)) {
+                    return $module;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns default value of the given parameter.
+     *
+     * @param ReflectionParameter $parameter
+     * @return mixed|null
+     */
+    public function getDefault(ReflectionParameter $parameter)
+    {
+        foreach ($this->modules as $module) {
+            foreach ($module->getModelDefinitions() as $definition) {
+                if ($definition->getBindParameter()->isMatchToParameter($parameter)) {
+                    return $definition->getDefault();
+                }
+            }
         }
 
         return null;

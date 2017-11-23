@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -21,6 +21,7 @@
 namespace Antares\Notifications;
 
 use Antares\Notifications\Model\NotificationContents;
+use Illuminate\Support\Collection;
 
 class Contents
 {
@@ -33,26 +34,26 @@ class Contents
     protected $notifications;
 
     /**
-     * Contents constructor.
+     * Fetch notifications to the instance variable.
      */
-    public function __construct()
-    {
-        $this->notifications = app(NotificationContents::class)
-                ->select([
-                    'tbl_notification_contents.id',
-                    'tbl_languages.code',
-                    'tbl_notification_contents.title',
-                    'tbl_notification_contents.content',
-                    'tbl_notifications.classname',
-                ])
-                ->leftJoin('tbl_notifications', 'tbl_notification_contents.notification_id', '=', 'tbl_notifications.id')
-                ->leftJoin('tbl_languages', 'tbl_notification_contents.lang_id', '=', 'tbl_languages.id')
-                ->leftJoin('tbl_notification_types', 'tbl_notifications.type_id', '=', 'tbl_notification_types.id')
-                ->leftJoin('tbl_notifications_stack', 'tbl_notifications.id', '=', 'tbl_notifications_stack.notification_id')
-                ->where('tbl_notification_types.name', 'admin')
-                ->whereNotNull('tbl_notification_contents.content')
-                ->where('tbl_notification_contents.content', '<>', '')
-                ->get();
+    protected function fetch() {
+        $this->notifications = new Collection();
+
+//        $this->notifications = NotificationContents::query()
+//            ->select([
+//                'tbl_notification_contents.id',
+//                'tbl_languages.code',
+//                'tbl_notification_contents.title',
+//                'tbl_notification_contents.content',
+//            ])
+//            ->leftJoin('tbl_notifications', 'tbl_notification_contents.notification_id', '=', 'tbl_notifications.id')
+//            ->leftJoin('tbl_languages', 'tbl_notification_contents.lang_id', '=', 'tbl_languages.id')
+//            ->leftJoin('tbl_notification_types', 'tbl_notifications.type_id', '=', 'tbl_notification_types.id')
+//            ->leftJoin('tbl_notifications_stack', 'tbl_notifications.id', '=', 'tbl_notifications_stack.notification_id')
+//            ->where('tbl_notification_types.name', 'admin')
+//            ->whereNotNull('tbl_notification_contents.content')
+//            ->where('tbl_notification_contents.content', '<>', '')
+//            ->get();
     }
 
     /**
@@ -60,28 +61,38 @@ class Contents
      * 
      * @param String $operation
      * @param String $locale
-     * @return Contents
+     * @return string|null
      */
-    public function find($operation, $locale)
+    public function find(string $operation, string $locale)
     {
-        $model = $this->notifications->first(function ($value, $key) use($operation, $locale) {
-            return $value->code == $locale && ($value->title == $operation or $value->name == $operation);
+        if($this->notifications === null) {
+            $this->fetch();
+        }
+
+        $model = $this->notifications->first(function ($value) use($operation, $locale) {
+            return $value->code === $locale && ($value->title === $operation or $value->name == $operation);
         });
-        return !is_null($model) ? $model->content : false;
+
+        return $model ? $model->content : null;
     }
 
     /**
-     * Finds notification content by message classname
+     * Finds notification content by message class name
      * 
-     * @param String $classname
-     * @return Contents
+     * @param String $className
+     * @return string|null
      */
-    public function findByClassname($classname)
+    public function findByClassname(string $className)
     {
-        $model = $this->notifications->first(function ($value, $key) use($classname) {
-            return $value->classname == $classname;
+        if($this->notifications === null) {
+            $this->fetch();
+        }
+
+        $model = $this->notifications->first(function ($value) use($className) {
+            return $value->source === $className;
         });
-        return !is_null($model) ? $model->content : false;
+
+        return $model ? $model->content : null;
     }
 
 }

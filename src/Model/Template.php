@@ -1,33 +1,61 @@
 <?php
 
+/**
+ * Part of the Antares package.
+ *
+ * NOTICE OF LICENSE
+ *
+ * Licensed under the 3-clause BSD License.
+ *
+ * This source file is subject to the 3-clause BSD License that is
+ * bundled with this package in the LICENSE file.
+ *
+ * @package    Notifications
+ * @version    0.9.2
+ * @author     Antares Team
+ * @license    BSD License (3-clause)
+ * @copyright  (c) 2017, Antares
+ * @link       http://antaresproject.io
+ */
+
 namespace Antares\Notifications\Model;
 
 class Template {
 
     /**
-     * @var string
-     */
-    protected $category = 'default';
-
-    /**
+     * Severity name.
+     *
      * @var string
      */
     protected $severity = 'medium';
 
     /**
+     * Used types.
+     *
      * @var string[]
      */
     protected $types = [];
 
     /**
+     * Subject.
+     *
      * @var string
      */
     protected $subject;
 
     /**
+     * Path to view.
+     *
      * @var string
      */
     protected $view;
+
+    /**
+     * Names of recipients.
+     *
+     * @var string[]
+     */
+    protected $recipients = [];
 
     /**
      * Template constructor.
@@ -38,32 +66,33 @@ class Template {
     public function __construct(array $types, string $subject, string $view) {
         $this->subject  = $subject;
         $this->view     = $view;
-
-        foreach($types as $type) {
-            $this->types[] = $type === 'mail' ? 'email' : $type;
-        }
-
-        $this->types = array_unique($this->types);
+        $this->types    = array_unique($types);
     }
 
     /**
-     * @param string $category
+     * Sets recipients by names.
+     *
+     * @param array $recipients
      * @return $this
      */
-    public function setCategory(string $category) : self {
-        $this->category = $category;
+    public function setRecipients(array $recipients) : self {
+        $this->recipients = $recipients;
 
         return $this;
     }
 
     /**
-     * @return string
+     * Returns recipients names.
+     *
+     * @return string[]
      */
-    public function getCategory() : string {
-        return $this->category;
+    public function getRecipients() : array {
+        return $this->recipients;
     }
 
     /**
+     * Sets severity.
+     *
      * @param string $severity
      * @return $this
      */
@@ -74,6 +103,8 @@ class Template {
     }
 
     /**
+     * Returns severity.
+     *
      * @return string
      */
     public function getSeverity() : string {
@@ -81,6 +112,8 @@ class Template {
     }
 
     /**
+     * Returns types.
+     *
      * @return string[]
      */
     public function getTypes() : array {
@@ -88,6 +121,8 @@ class Template {
     }
 
     /**
+     * Return subject.
+     *
      * @return string
      */
     public function getSubject() : string {
@@ -95,6 +130,8 @@ class Template {
     }
 
     /**
+     * Returns view path.
+     *
      * @return string
      */
     public function getView() : string {
@@ -102,6 +139,8 @@ class Template {
     }
 
     /**
+     * Returns rendered view with given data.
+     *
      * @param array $data
      * @return string
      */
@@ -110,6 +149,8 @@ class Template {
     }
 
     /**
+     * Returns raw content of view.
+     *
      * @return string
      */
     public function getViewContent() : string {

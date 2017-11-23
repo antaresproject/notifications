@@ -1,5 +1,20 @@
-{% extends "antares/foundation::layouts.antares.index" %}
-{% block content %}    
-    {{ form|raw }}
-    {% include 'antares/notifications::admin.partials._modal' %}
+{% extends app.request.isXmlHttpRequest() ? "antares/foundation::layouts.antares..clear" : "antares/foundation::layouts.antares.index" %}
+{% block grid_col__container %}
+    <div class="grid-col grid--notification grid-col--container">
+        {% block content %}
+            <script src="https://unpkg.com/vue-select@latest"></script>
+
+            {{ form|raw }}
+
+            <style>
+                .fade-enter-active,
+                .fade-leave-active {
+                    transition: opacity 0ms cubic-bezier(1.0, 0.5, 0.8, 1.0) !important;
+                }
+                .v-select .dropdown-toggle {
+                    border:1px solid #dfe3e6 !important;
+                }
+            </style>
+        {% endblock %}
+    </div>
 {% endblock %}

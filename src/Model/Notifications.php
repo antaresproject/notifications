@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -20,11 +20,14 @@
 
 namespace Antares\Notifications\Model;
 
+use Antares\Notifications\Services\EventsRegistrarService;
+use Antares\Translations\Models\Languages;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Antares\Model\Eloquent;
+use Illuminate\Support\Arr;
 
 /**
  * Class Notifications
@@ -32,15 +35,18 @@ use Antares\Model\Eloquent;
  *
  * @property integer $id
  * @property integer $severity_id
- * @property integer $category_id
+ * @property string $event
+ * @property NotifiableEvent|string|null $event_model
+ * @property string $event_label
  * @property integer $type_id
  * @property boolean $active
- * @property string $classname
  * @property string $checksum
- * @property string $event
+ * @property string $name
+ * @property string $source
+ * @property string $category
+ * @property array $recipients
  * @method static Builder|Notifications active()
  * @property NotificationTypes $type
- * @property NotificationCategory $category
  * @property NotificationSeverity $severity
  * @property-read Collection|NotificationContents[] $contents
  * @property-read Collection|NotificationsStack[] $stack
@@ -50,13 +56,6 @@ class Notifications extends Eloquent
 {
 
     /**
-     * Low priority notification
-     *
-     * @var String 
-     */
-    protected $priority = 'low';
-
-    /**
      * The database table used by the model.
      *
      * @var string
@@ -64,34 +63,54 @@ class Notifications extends Eloquent
     protected $table = 'tbl_notifications';
 
     /**
-     * The class name to be used in polymorphic relations.
-     *
-     * @var string
-     */
-    protected $morphClass = 'Notifications';
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = ['severity_id', 'category_id', 'type_id', 'active', 'classname', 'checksum'];
+    protected $fillable = [
+        'source',
+        'severity_id',
+        'type_id',
+        'event',
+        'active',
+        'name',
+        'checksum',
+        'recipients',
+        'category',
+    ];
 
     /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
+     * {@inheritdoc}
      */
-    public $timestamps = false;
+    protected $attributes = [
+        'severity_id'   => 3 //medium
+    ];
 
     /**
-     * Query scope for active jobs
-     *
-     * @param  object     $query
-     *
-     * @return void
+     * {@inheritdoc}
      */
-    public function scopeActive($query)
+    protected $casts = [
+        'id'            => 'integer',
+        'severity_id'   => 'integer',
+        'type_id'       => 'integer',
+        'active'        => 'boolean',
+        'recipients'    => 'json',
+    ];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $appends = [
+        'event_label',
+        'event_model',
+    ];
+
+    /**
+     * Query scope for active notifications.
+     *
+     * @param Builder $query
+     */
+    public function scopeActive(Builder $query)
     {
         $query->where('active', 1);
     }
@@ -104,16 +123,6 @@ class Notifications extends Eloquent
     public function type()
     {
         return $this->hasOne(NotificationTypes::class, 'id', 'type_id');
-    }
-
-    /**
-     * relation to notification categories
-     * 
-     * @return HasOne
-     */
-    public function category()
-    {
-        return $this->hasOne(NotificationCategory::class, 'id', 'category_id');
     }
 
     /**
@@ -154,6 +163,73 @@ class Notifications extends Eloquent
     public static function getPatternUrl()
     {
         return handles('antares::notifications/edit/{id}');
+    }
+
+    /**
+     * Returns content for given language object.
+     *
+     * @param Languages $language
+     * @return NotificationContents
+     */
+    public function lang(Languages $language) {
+        /* @var $content \Antares\Notifications\Model\NotificationContents */
+
+        if( ! $this->relationLoaded('contents')) {
+            $this->with('contents');
+        }
+
+        foreach($this->contents as $content) {
+            if($language->code === $content->lang->code) {
+                return $content;
+            }
+        }
+
+        return new NotificationContents([
+            'lang_id' => $language->id,
+        ]);
+    }
+
+    /**
+     * Returns event model if exists. Otherwise simple event name will be returned.
+     *
+     * @return NotifiableEvent|string|null
+     */
+    public function getEventModelAttribute() {
+        $event  = (string) Arr::get($this->attributes, 'event');
+        $object = $this->getNotifiableEvent($event);
+
+        return $object ?: $event;
+    }
+
+    /**
+     * Returns event model label if exists. Otherwise simple event name will be returned.
+     *
+     * @return string
+     */
+    public function getEventLabelAttribute() {
+        $event  = (string) Arr::get($this->attributes, 'event');
+        $object = $this->getNotifiableEvent($event);
+
+        return $object ? $object->getLabel() : $event;
+    }
+
+    /**
+     * Returns notifiable event if exists by class name.
+     *
+     * @param string|null $event
+     * @return NotifiableEvent|null
+     */
+    private function getNotifiableEvent(string $event = null) {
+        return $event ? $this->getEventsRegistrarService()->getByClassName($event) : null;
+    }
+
+    /**
+     * Returns instance of Events Registrar Service.
+     *
+     * @return EventsRegistrarService
+     */
+    private function getEventsRegistrarService() : EventsRegistrarService {
+        return app()->make(EventsRegistrarService::class);
     }
 
 }

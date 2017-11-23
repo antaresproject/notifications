@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -20,68 +20,72 @@
 
 namespace Antares\Notifications\Listener;
 
-use Antares\Notifications\Repository\Repository;
-use Antares\Notifications\Event\EventDispatcher;
-use Illuminate\Foundation\Bus\DispatchesJobs;
+use Antares\Notifications\Model\NotifiableEvent;
+use Antares\Notifications\Model\Notifications;
+use Antares\Notifications\Services\NotificationsService;
+use Illuminate\Contracts\Events\Dispatcher;
 
 class NotificationsListener
 {
 
-    use DispatchesJobs;
-
     /**
-     * Repository instance
+     * Event Dispatcher instance.
      *
-     * @var Repository 
+     * @var Dispatcher
      */
-    protected $repository;
+    protected $dispatcher;
 
     /**
-     * Construct
-     * 
-     * @param Repository $repository
+     * Notifications service instance.
+     *
+     * @var NotificationsService
      */
-    public function __construct(Repository $repository)
-    {
-        $this->repository = $repository;
+    protected $notificationsService;
+
+    /**
+     * NotificationsListener constructor.
+     * @param Dispatcher $dispatcher
+     * @param NotificationsService $notificationsService
+     */
+    public function __construct(Dispatcher $dispatcher, NotificationsService $notificationsService) {
+        $this->dispatcher = $dispatcher;
+        $this->notificationsService = $notificationsService;
     }
 
     /**
      * Listening for notifications
      */
-    public function listen()
+    public function boot()
     {
-        $notifications = $this->repository->findSendable()->toArray();
+        /* @var $notifications Notifications[] */
+        $notifications = Notifications::query()->where('active', true)->whereNotNull('event')->with('contents')->get();
+
         foreach ($notifications as $notification) {
-            $this->listenNotificationsEvents($notification);
+            $this->listenNotificationEvent($notification);
         }
     }
 
     /**
-     * runs notification events
-     * 
-     * @param array $notification
-     * @return boolean
+     * Handles listening for given notification.
+     *
+     * @param Notifications $notification
      */
-    protected function listenNotificationsEvents(array $notification)
+    protected function listenNotificationEvent(Notifications $notification)
     {
-        is_null($events = array_get($notification, 'event')) ? $events = app($notification['classname'])->getEvents() : null;
-        foreach ((array) $events as $event) {
-            $this->runNotificationListener($event, $notification);
-        }
-    }
+        $eventClassName = null;
 
-    /**
-     * Runs notification listener
-     * 
-     * @param String $event
-     * @param \Antares\Notifications\Model\Notifications $notification
-     */
-    protected function runNotificationListener($event, $notification)
-    {
-        app('events')->listen($event, function($variables = null, $recipients = null) use($notification) {
-            app(EventDispatcher::class)->run($notification, $variables, $recipients);
-        });
+        if($notification->event_model instanceof NotifiableEvent) {
+            $eventClassName = $notification->event_model->getEventClass();
+        }
+        elseif($notification->event) {
+            $eventClassName = $notification->event;
+        }
+
+        if(is_string($eventClassName) && class_exists($eventClassName)) {
+            $this->dispatcher->listen($eventClassName, function($event) use($notification) {
+                $this->notificationsService->handle($notification, $event);
+            });
+        }
     }
 
 }

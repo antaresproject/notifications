@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -51,23 +51,25 @@ class NotificationNameFilter extends SelectFilter implements DataTableScopeContr
     /**
      * Filter instance dataprovider
      * 
-     * @return Collection
+     * @return array
      */
     protected function options()
     {
-        return Notifications::query()->get(['id', 'event'])->pluck('event', 'id')->toArray();
+        return Notifications::query()->pluck('event', 'id')->toArray();
     }
 
     /**
-     * filters data by parameters from memory
-     * 
-     * @param mixed $builder
+     * Filters data by parameters from memory
+     *
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder $builder
+     * @return void
      */
     public function apply($builder)
     {
         $values = $this->getValues();
+
         if (empty($values)) {
-            return false;
+            return;
         }
         $builder->whereIn('tbl_notifications.id', $values);
     }

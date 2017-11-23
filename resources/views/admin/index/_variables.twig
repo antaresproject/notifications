@@ -1,0 +1,49 @@
+<div class="variables-pane" style="height:790px">
+    <div class="variables-pane__top">
+        {{ trans('antares/notifications::messages.notification_available_variables') }}
+        <div class="variables-pane__close mdl-tabs--close-variables-panel">
+            <i class="zmdi zmdi-close"></i>
+        </div>
+    </div>
+
+    <div class="variables-pane__inner">
+        <div class="variables-pane__top variables-pane__top--mobile">
+            {{ trans('antares/notifications::messages.notification_available_variables') }}
+            <div class="variables-pane__close mdl-tabs--close-variables-panel">
+                <i class="zmdi zmdi-close"></i>
+            </div>
+        </div>
+
+        <div class="variables-pane__content">
+            <div class="variables-pane__instructions-type">
+                <div v-for="variable in variables">
+                    <div class="variables-pane__instructions-group">${ variable.module }</div>
+
+                    <div class="variables-pane__instructions">
+                        <div v-for="item in variable.list">
+                            <div class="variables-pane__row">
+                                <div class="variables-pane__instruction-name">
+                                    ${ item.label}
+                                </div>
+                                <div class="variables-pane__instruction-content">
+                                    <div class="variables-pane__copy-tools">
+                                        <i class="zmdi zmdi-copy variables-pane__copy" data-tooltip="true" :data-clipboard-text="item.code"></i>
+                                        <div class="tooltip-content">
+                                            {{ trans('antares/notifications::messages.notification_copy') }}
+                                        </div>
+
+                                        <i class="zmdi zmdi-arrow-right variables-pane__paste insert-instruction" data-tooltip="true" :data-variable-code="item.code"></i>
+                                        <div class="tooltip-content">
+                                            {{ trans('antares/notifications::messages.notification_insert') }}
+                                        </div>
+                                    </div>
+                                    <pre>${ item.code }</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

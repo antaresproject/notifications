@@ -11,7 +11,7 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Notifications
- * @version    0.9.0
+ * @version    0.9.2
  * @author     Antares Team
  * @license    BSD License (3-clause)
  * @copyright  (c) 2017, Antares
@@ -38,7 +38,7 @@ class NotificationWidgetForm
     /**
      * Assets factory instance
      *
-     * @var type 
+     * @var Factory
      */
     protected $assets;
 
@@ -73,50 +73,61 @@ class NotificationWidgetForm
         $this->scripts();
         return app('antares.form')->of("antares.widgets: notification-widget")->extend(function (FormGrid $form) {
 
-                    $form->name('Notification Tester');
-                    $form->simple(handles('antares::notifications/widgets/send'), ['id' => 'notification-widget-form']);
+            $form->name('Notification Tester');
+            $form->simple(handles('antares::notifications/widgets/send'), ['id' => 'notification-widget-form']);
 
-                    $form->layout('antares/notifications::widgets.forms.send_notification_form');
+            $form->layout('antares/notifications::widgets.forms.send_notification_form');
 
-                    $form->fieldset(trans('Default Fieldset'), function (Fieldset $fieldset) {
+            $events = [
+                'Antares\Logger\Events\NewDeviceDetected',
+            ];
 
-                        $fieldset->control('input:hidden', 'url')
-                                ->attributes(['class' => 'notification-widget-url'])
-                                ->value(handles('antares::notifications/notifications'))
-                                ->block(['class' => 'hidden']);
+            $notifications = $this->repository->getNotificationContentsByEvents($events, 'mail')->pluck('notification.name', 'id');
 
-                        $fieldset->control('select', 'type')
-                                ->attributes(['class' => 'notification-widget-change-type-select', 'url' => handles('antares::notifications/notifications')])
-                                ->options($this->repository->getDecoratedNotificationTypes())
-                                ->wrapper(['class' => 'w200']);
+            if($notifications->isEmpty()) {
+                $form->layout('antares/notifications::widgets.forms.send_notification_zero_data');
+            }
+            else {
+                $form->fieldset(trans('Default Fieldset'), function (Fieldset $fieldset) use($notifications) {
 
-                        $fieldset->control('select', 'notifications')
-                                ->attributes(['class' => 'notification-widget-notifications-select'])
-                                ->options($this->repository->getNotificationContents('email')->pluck('title', 'id'))
-                                ->wrapper(['class' => 'w300']);
+                    $fieldset->control('input:hidden', 'url')
+                        ->attributes(['class' => 'notification-widget-url'])
+                        ->value(handles('antares::notifications/notifications'))
+                        ->block(['class' => 'hidden']);
 
-                        if (!is_null(from_route('user'))) {
-                            $fieldset->control('button', 'send')
-                                    ->attributes([
-                                        'type'       => 'submit',
-                                        'class'      => 'notification-widget-send-button',
-                                        'data-title' => trans('Are you sure to send notification?'),
-                                        'url'        => handles('antares::notifications/widgets/send'),
-                                    ])->value(trans('Send'));
-                        }
-                        $fieldset->control('button', 'test')
-                                ->attributes([
-                                    'type'       => 'submit',
-                                    'class'      => 'notification-widget-test-button btn--red',
-                                    'data-title' => trans('Are you sure to test notification?'),
-                                    'url'        => handles('antares::notifications/widgets/test'),
-                                ])->value(trans('Test'));
-                    });
-                    $form->rules($this->rules);
-                    $form->ajaxable([
-                        'afterValidate' => $this->afterValidateInline()
-                    ]);
+                    $fieldset->control('select', 'type')
+                        ->attributes(['class' => 'notification-widget-change-type-select', 'url' => handles('antares::notifications/notifications')])
+                        ->options($this->repository->getDecoratedNotificationTypes());
+
+                    $fieldset->control('select', 'notifications')
+                        ->attributes(['class' => 'notification-widget-notifications-select'])
+                        ->options($notifications);
+
+                    if (!is_null(from_route('user'))) {
+                        $fieldset->control('button', 'send')
+                            ->attributes([
+                                'type'       => 'submit',
+                                'class'      => 'notification-widget-send-button',
+                                'data-title' => trans('Are you sure to send notification?'),
+                                'url'        => handles('antares::notifications/widgets/send'),
+                            ])->value(trans('Send'));
+                    }
+                    $fieldset->control('button', 'test')
+                        ->attributes([
+                            'type'       => 'submit',
+                            'class'      => 'notification-widget-test-button btn--red',
+                            'data-title' => trans('Are you sure to test notification?'),
+                            'url'        => handles('antares::notifications/widgets/test'),
+                        ])->value(trans('Test'));
                 });
+            }
+
+
+            $form->rules($this->rules);
+            $form->ajaxable([
+                'afterValidate' => $this->afterValidateInline()
+            ]);
+        });
     }
 
     /**
