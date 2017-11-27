@@ -108,7 +108,11 @@ class IndexController extends AdminController
             'contents.*.content.required'       => 'Content is required',
         ];
 
-        $this->validate($request, $rules, $messages);
+        $customAttributes = [
+            'type_id' => 'type',
+        ];
+
+        $this->validate($request, $rules, $messages, $customAttributes);
 
         return $this->processor->store($request->all())->notify()->resolve($request);
     }
@@ -152,7 +156,11 @@ class IndexController extends AdminController
             'contents.*.content.required'       => 'Content is required',
         ];
 
-        $this->validate($request, $rules, $messages);
+        $customAttributes = [
+            'type_id' => 'type',
+        ];
+
+        $this->validate($request, $rules, $messages, $customAttributes);
 
         return $this->processor->update($notification, $request->all())->notify()->resolve($request);
     }

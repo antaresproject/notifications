@@ -320,7 +320,7 @@ new Vue({
             notification.source = this.notification.source;
             notification.type_id = this.notification.type ? this.notification.type.id : null;
             notification.active = this.notification.active;
-            notification.category = this.category.id;
+            notification.category = this.category ? this.category.id : null;
             notification.event = this.notification.event ? this.notification.event.event_class : null;
             notification.recipients = _.map(this.notification.recipients || [], 'area');
             notification.contents = this.contents;
