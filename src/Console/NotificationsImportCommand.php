@@ -149,7 +149,7 @@ class NotificationsImportCommand extends Command
     protected function getFiles()
     {
         $path       = base_path('vendor/composer/autoload_classmap.php');
-        $autoload   = require_once $path;
+        $autoload   = include $path;
         $dirs       = $this->extension ? $this->getExtensionDirs($this->extension) : $this->getExtensionsDirs();
 
         if( ! is_array($autoload)) {
