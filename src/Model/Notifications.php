@@ -214,6 +214,14 @@ class Notifications extends Eloquent
     }
 
     /**
+     * @param $value
+     * @return array
+     */
+    public function getRecipientsAttribute($value) {
+        return (array) $value;
+    }
+
+    /**
      * Returns notifiable event if exists by class name.
      *
      * @param string|null $event
