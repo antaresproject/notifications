@@ -144,11 +144,17 @@ class NotificationsImportCommand extends Command
      * Gets message files in application filesystem.
      * 
      * @return Collection|string[]
+     * @throws \Exception
      */
     protected function getFiles()
     {
-        $autoload = require_once base_path('vendor/composer/autoload_classmap.php');
-        $dirs     = $this->extension ? $this->getExtensionDirs($this->extension) : $this->getExtensionsDirs();
+        $path       = base_path('vendor/composer/autoload_classmap.php');
+        $autoload   = include $path;
+        $dirs       = $this->extension ? $this->getExtensionDirs($this->extension) : $this->getExtensionsDirs();
+
+        if( ! is_array($autoload)) {
+            throw new \Exception('The content of [' . $path . '] is not array');
+        }
 
         if (!$dirs) {
             return new Collection();
