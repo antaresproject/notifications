@@ -94,7 +94,7 @@ class Notifications extends Eloquent
         'severity_id'   => 'integer',
         'type_id'       => 'integer',
         'active'        => 'boolean',
-        'recipients'    => 'json',
+        'recipients'    => 'array',
     ];
 
     /**
@@ -218,7 +218,7 @@ class Notifications extends Eloquent
      * @return array
      */
     public function getRecipientsAttribute($value) {
-        return (array) $value;
+        return empty($value) ? [] : json_decode($value);
     }
 
     /**
