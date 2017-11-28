@@ -4,6 +4,7 @@ $(document).ready(function() {
 
     $table.on('click', '.request-change-notification-status', function(e) {
         e.preventDefault();
+        e.stopPropagation();
 
         var url = $(this).attr('href');
 
