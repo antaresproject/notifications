@@ -22,6 +22,7 @@ namespace Antares\Notifications\Channels;
 
 use Antares\Notifications\Contracts\TemplateMessageContract;
 use Antares\Notifications\Decorator\MailDecorator;
+use Antares\Notifications\Model\HtmlWrapper;
 use Antares\Notifications\Services\ExceptionService;
 use Antares\Notifications\Services\TemplateBuilderService;
 use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
@@ -31,6 +32,7 @@ use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Arr;
 use Illuminate\Mail\Markdown;
+use Illuminate\Contracts\Support\Htmlable;
 use Log;
 
 class MailChannel extends BaseMailChannel
@@ -118,7 +120,11 @@ class MailChannel extends BaseMailChannel
 
             $message->view($rendered, $message->data());
 
-            return ['raw' => $rendered];
+            $rendered = new HtmlWrapper($rendered);
+
+            return [
+                'html' => $rendered,
+            ];
         }
         catch(\Exception $e) {
             Log::emergency($e);
