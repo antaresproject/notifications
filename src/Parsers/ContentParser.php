@@ -198,7 +198,7 @@ class ContentParser {
             }
         }
 
-        $content = str_replace(["&nbsp;", "&#39;"], ['', '"'], $content);
+        $content = str_replace(["&#39;"], ['"'], $content);
 
         return str_replace($search, $replace, $content);
     }
