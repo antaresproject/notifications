@@ -39,12 +39,11 @@ class ConfigurationListener
         $grid->fieldset(function(Fieldset $fieldset) {
             $fieldset->legend(trans('antares/notifications::logs.form.notifications_config_legend'));
 
-            $fieldset->control('input:text', 'days')
+            $fieldset->control('raw', 'days')
                     ->label('')
-                    ->wrapper(['class' => 'col-dt-23 col-23 col-mb-24 col-dt-offset-1 col-offset-1'])
                     ->field(function() {
                         $memory = app('antares.memory')->make('primary');
-                        return '<div class="general-config-days">' . trans('antares/notifications::logs.form.notifications_config_days_label', ['x' => '<input class="w50" type="number" name="days" value="' . $memory->get('notifications_remove_after_days', '') . '" size="2" max-length="2"  />']) . '</div>';
+                        return trans('antares/notifications::logs.form.notifications_config_days_label', ['x' => '<input class="w50" type="number" name="days" value="' . $memory->get('notifications_remove_after_days', '') . '" size="2" max-length="2"  />']);
                     });
             $fieldset->control('input:text', 'help')
                     ->label('')
