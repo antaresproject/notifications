@@ -123,7 +123,14 @@ class NotificationsService {
             $recipient = $eventModel->getRecipientByArea($recipientArea);
 
             if($recipient && ($resolvedRecipient = $recipient->resolve($event))) {
-                $resolvedRecipients->push($resolvedRecipient);
+                if($resolvedRecipient instanceof Collection || is_array($resolvedRecipient)) {
+                    foreach($resolvedRecipient as $singleRecipient) {
+                        $resolvedRecipients->push($singleRecipient);
+                    }
+                }
+                else {
+                    $resolvedRecipients->push($resolvedRecipient);
+                }
             }
         }
 
