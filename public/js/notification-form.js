@@ -223,9 +223,9 @@ new Vue({
             var lang = this.selectedLang;
 
             return {
-                wysiwyg: this.$refs['editor-wysiwyg-' + lang][0],
-                html: this.$refs['editor-html-' + lang][0],
-                text: this.$refs['editor-text-' + lang][0]
+                wysiwyg: this.$refs['editor-wysiwyg-' + lang] ? this.$refs['editor-wysiwyg-' + lang][0] : null,
+                html: this.$refs['editor-html-' + lang] ? this.$refs['editor-html-' + lang][0] : null,
+                text: this.$refs['editor-text-' + lang] ? this.$refs['editor-text-' + lang][0] : null
             };
         },
 
