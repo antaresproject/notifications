@@ -75,6 +75,10 @@ class NotificationCategoryFilter extends SelectFilter implements DataTableScopeC
             return;
         }
 
+        if( ! is_array($values) ) {
+            $values = [$values];
+        }
+
         $builder->whereIn('category', $values);
     }
 
