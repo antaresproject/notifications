@@ -349,7 +349,7 @@ new Vue({
                         $sidebar.find('.sidebar__content .sidebar__list').html('').append(notifications.join(''));
                     }
 
-                    $('.sidebar__header .notification-counter').html(notifications.length);
+                    $('.sidebar__header .notification-counter').html(notificationsCount);
 
                     $('#notification-counter')
                         .html(notificationsCount)
@@ -362,7 +362,7 @@ new Vue({
 
                     $('#main-alerts').parent().find('span.badge').html(alertsCount);
 
-                    $sidebarAlerts.find('.badge').html(alerts.length);
+                    $sidebarAlerts.find('.badge').html(alertsCount);
 
                     if (alerts.length > 0) {
                         $sidebarAlerts.find('.sidebar__footer').removeClass('hidden');
