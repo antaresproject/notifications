@@ -94,7 +94,7 @@ class SidebarProcessor extends Processor
     {
         try {
             $this->stack->markAsRead(from_route('type', 'notifications'));
-            return new JsonResponse('', 200);
+            return new JsonResponse();
         } catch (Exception $ex) {
             Log::alert($ex);
             return new JsonResponse(['message' => trans('antares/notifications::messages.sidebar.unable_to_mark_notifications_as_read')], 500);
@@ -114,15 +114,16 @@ class SidebarProcessor extends Processor
         else {
             $notifications  = $this->stack->getNotifications()->get();
             $alerts         = $this->stack->getAlerts()->get();
+            $unreadCounts   = $this->stack->getCount();
 
             $return = [
                 'notifications' => [
-                    'items' => $this->decorator->decorate($notifications),
-                    'count' => $notifications->count()
+                    'items'         => $this->decorator->decorate($notifications),
+                    'count'         => $unreadCounts['notifications'],
                 ],
                 'alerts'        => [
-                    'items' => $this->decorator->decorate($alerts, 'alert'),
-                    'count' => $alerts->count()
+                    'items'         => $this->decorator->decorate($alerts, 'alert'),
+                    'count'         => $unreadCounts['alerts'],
                 ],
             ];
 

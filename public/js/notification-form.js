@@ -335,6 +335,7 @@ new Vue({
 
         updateSidebar: function() {
             var url = $('.sidebar--notifications').data('url');
+
             $.ajax({
                 url: url,
                 success: function (response) {
@@ -345,10 +346,7 @@ new Vue({
 
                     if (notifications.length > 0) {
                         $sidebar.find('.sidebar__footer').removeClass('hidden');
-                        $sidebar.find('.sidebar__content .sidebar__list').html('');
-                    }
-                    for (var i = 0; i < notifications.length; ++i) {
-                        $sidebar.find('.sidebar__content .sidebar__list').append(notifications[i]);
+                        $sidebar.find('.sidebar__content .sidebar__list').html('').append(notifications.join(''));
                     }
 
                     $('.sidebar__header .notification-counter').html(notifications.length);
@@ -368,18 +366,22 @@ new Vue({
 
                     if (alerts.length > 0) {
                         $sidebarAlerts.find('.sidebar__footer').removeClass('hidden');
-                        $sidebarAlerts.find('.sidebar__content .sidebar__list').html('');
-                    }
-                    for (var i = 0; i < alerts.length; ++i) {
-                        $sidebarAlerts.find('.sidebar__content .sidebar__list').append(alerts[i]);
+                        $sidebarAlerts.find('.sidebar__content .sidebar__list').html('').append(alerts.join(''));
                     }
 
                     $('.notification-item .flex-block__close', document).on('click', function (e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        var handler = $(this), url = $('.sidebar .sidebar__content:first').data('delete'), id = handler.closest('.notification-item').data('id'), badge = handler.closest('.sidebar').find('.badge');
+
+                        var
+                            handler = $(this),
+                            url = $('.sidebar .sidebar__content:first').data('delete'),
+                            id = handler.closest('.notification-item').data('id'),
+                            badge = handler.closest('.sidebar').find('.badge'),
+                            count = parseInt(badge.text());
+
                         handler.closest('.flex-block').remove();
-                        var count = parseInt(badge.text());
+
                         $.ajax({
                             url: url,
                             method: 'POST',

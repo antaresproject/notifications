@@ -29,6 +29,7 @@ use Antares\Notifications\Model\NotificationsStack;
 use Antares\Notifications\Model\NotificationTypes;
 use Antares\Notifications\Model\Notifications;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Antares\Logger\Model\Logs;
 use Exception;
@@ -103,7 +104,7 @@ class StackRepository extends AbstractRepository
      */
     public function getCount()
     {
-        $read = $this->getReadStack();
+        $read = $this->getReadStack()->toArray();
 
         return [
             'notifications' => $this->getNotifications()->whereNotIn('id', $read)->count(),
@@ -114,7 +115,7 @@ class StackRepository extends AbstractRepository
     /**
      * Returns read stacks.
      *
-     * @return mixed
+     * @return Collection
      */
     protected function getReadStack() {
         return NotificationsStackRead::query()->select(['stack_id'])->withTrashed()->where('user_id', user()->id)->pluck('stack_id');
@@ -162,10 +163,11 @@ class StackRepository extends AbstractRepository
     public function markAsRead($type = 'notifications')
     {
         DB::beginTransaction();
+
         try {
             $builder = ($type == 'alerts') ? $this->getAlerts() : $this->getNotifications();
             $read    = $this->getReadStack();
-            $items   = $builder->whereNotIn('id', $read)->get();
+            $items   = $builder->whereNotIn('id', $read->toArray())->get();
 
             foreach ($items as $item) {
                 $item->read()->save(new NotificationsStackRead([
@@ -174,7 +176,7 @@ class StackRepository extends AbstractRepository
                 $item->save();
             }
         } catch (Exception $ex) {
-            DB::rollback();
+            DB::rollBack();
             return false;
         }
 
