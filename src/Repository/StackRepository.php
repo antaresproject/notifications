@@ -85,14 +85,7 @@ class StackRepository extends AbstractRepository
             ->select(['tbl_notifications_stack.*'])
             ->where(function (Builder $query) {
                 $query
-                    ->whereNull('author_id')
-                    ->orWhere('author_id', user()->id)
-                    ->orWhereHas('author', function(Builder $q) {
-                        $q->whereHas('roles', function(Builder $rolesQuery) {
-                            $rolesQuery->whereIn('tbl_roles.id', user()->roles->first()->getChilds());
-                        });
-                    })
-                    ->orWhereHas('params', function(Builder $q) {
+                    ->whereHas('params', function(Builder $q) {
                         $q->where('model_id', user()->id);
                     });
             })

@@ -26,6 +26,7 @@ use Antares\Notifications\Console\NotificationSeveritiesCommand;
 use Antares\Foundation\Support\Providers\ModuleServiceProvider;
 use Antares\Notifications\Console\NotificationsImportCommand;
 use Antares\Notifications\Console\NotificationTypesCommand;
+use Antares\Notifications\Http\Middleware\TransformBoolean;
 use Antares\Notifications\Listener\ConfigurationListener;
 use Antares\Notifications\Listener\NotificationsListener;
 use Antares\Notifications\Parsers\ContentParser;
@@ -38,6 +39,7 @@ use Antares\Notifications\Console\NotificationsRemover;
 use Antares\Acl\Http\Handlers\ControlPane;
 use Antares\Notifier\Mail\Mailer;
 use Antares\Memory\Model\Option;
+use Illuminate\Routing\Router;
 
 class NotificationsServiceProvider extends ModuleServiceProvider
 {
@@ -99,6 +101,13 @@ class NotificationsServiceProvider extends ModuleServiceProvider
         $this->app->singleton(ContentParser::class);
 
         $this->app->bind(RendererContract::class, TwigRenderer::class);
+    }
+
+    public function boot() {
+        parent::boot();
+
+        $router = $this->app->make(Router::class);
+        $router->pushMiddlewareToGroup('web', TransformBoolean::class);
     }
 
     /**

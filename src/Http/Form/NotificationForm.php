@@ -74,6 +74,8 @@ class NotificationForm {
             $contents[$lang->code] = $notification->lang($lang);
         }
 
+        $notification->setRelation('contents', []);
+
         $form->setDataProviders([
             'categories'    => $this->eventsRegistrarService->getEventsCategories()->toJson(),
             'types'         => NotificationTypes::all()->toJson(),

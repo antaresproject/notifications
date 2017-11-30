@@ -121,9 +121,17 @@ class NotificationContents extends Eloquent
         ];
     }
 
+    public function setContentAttribute($value) {
+        $this->attributes['content'] = htmlspecialchars($value);
+    }
+
+    public function getContentAttribute($value) {
+        return str_replace('&quot;', '"', htmlspecialchars_decode($value));
+    }
+
     /**
      * magic __get overwritten to apply template event fireing
-     * 
+     *
      * @param mixed $key
      * @return mixed
      */
