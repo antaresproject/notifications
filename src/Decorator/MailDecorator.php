@@ -21,6 +21,7 @@
 namespace Antares\Notifications\Decorator;
 
 use Antares\Brands\Model\BrandOptions;
+use Antares\Notifications\Parsers\ContentParser;
 
 class MailDecorator {
 
@@ -31,10 +32,17 @@ class MailDecorator {
      * @return string
      */
     public static function decorate(string $content) : string {
-        $brandTemplate = BrandOptions::query()->where('brand_id', brand_id())->first();
-        $header        = str_replace('</head>', '<style>' . $brandTemplate->styles . '</style></head>', $brandTemplate->header);
+        /* @var $contentParser ContentParser */
+        $contentParser  = app()->make(ContentParser::class);
 
-        return (string) sprintf('%s %s %s', $header, $content, $brandTemplate->footer);
+        $brandTemplate  = BrandOptions::query()->where('brand_id', brand_id())->first();
+        $header         = str_replace('</head>', '<style>' . $brandTemplate->styles . '</style></head>', $brandTemplate->header);
+        $footer         = $brandTemplate->footer;
+
+        $header = $contentParser->parse($header);
+        $footer = $contentParser->parse($footer);
+
+        return (string) sprintf('%s %s %s', $header, $content, $footer);
     }
 
 }

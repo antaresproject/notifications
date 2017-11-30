@@ -151,7 +151,7 @@ class ContentParser {
     public function parse(string $content, array $data = []) : string {
         foreach($this->variablesService->all() as $moduleVariables) {
             foreach($moduleVariables->getModelDefinitions() as $modelDefinition) {
-                $this->isSatisfiedDataRequirements($modelDefinition, $data);
+                $this->isSatisfiedDataRequirements($modelDefinition, $data, $moduleVariables->getModuleName());
             }
         }
 
@@ -208,13 +208,14 @@ class ContentParser {
      *
      * @param ModelVariableDefinitions $modelVariableDefinitions
      * @param array $data
+     * @param string $moduleName
      * @throws \Exception
      */
-    protected function isSatisfiedDataRequirements(ModelVariableDefinitions $modelVariableDefinitions, array & $data) {
+    protected function isSatisfiedDataRequirements(ModelVariableDefinitions $modelVariableDefinitions, array & $data, string $moduleName) {
         if( ! $modelVariableDefinitions->isSatisfiedRequirements($data)) {
             $variableName = $modelVariableDefinitions->getBindParameter()->getVariableName();
 
-            if($this->previewMode) {
+            if($this->previewMode || $moduleName === 'foundation') {
                 $data[$variableName] = $modelVariableDefinitions->getDefault();
             }
         }
