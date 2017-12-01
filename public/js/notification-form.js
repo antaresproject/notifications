@@ -50,6 +50,14 @@ new Vue({
                 return _category.id === category;
             });
         }
+
+        if( ! this.notification.type) {
+            this.$set(this.notification, 'type', undefined);
+        }
+
+        if( ! this.notification.recipients) {
+            this.$set(this.notification, 'recipients', []);
+        }
     },
 
     mounted: function() {
