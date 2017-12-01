@@ -1,6 +1,6 @@
 # Antares Notifications Module
 
-[![Laravel 5.4](https://img.shields.io/badge/Laravel-5.4-orange.svg)](http://laravel.com)
+[![Laravel 5.5](https://img.shields.io/badge/Laravel-5.5-orange.svg)](http://laravel.com)
 [![Coverage Status](https://coveralls.io/repos/github/antaresproject/notifications/badge.svg?branch=0.9.2)](https://coveralls.io/github/antaresproject/notifications?branch=0.9.2)
 [![Build Status](https://travis-ci.org/antaresproject/notifications.svg?branch=0.9.2)](https://travis-ci.org/antaresproject/notifications)
 [![Code Climate](https://codeclimate.com/github/antaresproject/notifications/badges/gpa.svg)](https://codeclimate.com/github/antaresproject/notifications)

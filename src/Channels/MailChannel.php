@@ -32,7 +32,7 @@ use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Arr;
 use Illuminate\Mail\Markdown;
-use Illuminate\Contracts\Support\Htmlable;
+use Exception;
 use Log;
 
 class MailChannel extends BaseMailChannel
@@ -87,10 +87,14 @@ class MailChannel extends BaseMailChannel
             return;
         }
 
-        if($message instanceof MailMessage) {
-            $this->mailer->send($this->view($message, $notification), $message->data(), function ($mailMessage) use ($notifiable, $notification, $message) {
-                $this->buildMessage($mailMessage, $notifiable, $notification, $message);
-            });
+        if ($message instanceof MailMessage) {
+            try {
+                $this->mailer->send($this->view($message, $notification), $message->data(), function ($mailMessage) use ($notifiable, $notification, $message) {
+                    $this->buildMessage($mailMessage, $notifiable, $notification, $message);
+                });
+            } catch (Exception $ex) {
+                Log::error($ex);
+            }
         }
     }
 
@@ -105,14 +109,13 @@ class MailChannel extends BaseMailChannel
     protected function view(MailMessage $message, Notification $notification)
     {
         try {
-            if( ! $message instanceof TemplateMessageContract) {
+            if (!$message instanceof TemplateMessageContract) {
                 return parent::buildView($message);
             }
 
-            if( property_exists($message, 'content')) {
+            if (property_exists($message, 'content')) {
                 $content = $message->content;
-            }
-            else {
+            } else {
                 $content = Arr::get($message->getViewData(), 'content', '');
             }
 
@@ -125,11 +128,10 @@ class MailChannel extends BaseMailChannel
             return [
                 'html' => $rendered,
             ];
-        }
-        catch(\Exception $e) {
+        } catch (\Exception $e) {
             Log::emergency($e);
 
-            if( ! (property_exists($notification, 'testable') && $notification->testable)) {
+            if (!(property_exists($notification, 'testable') && $notification->testable)) {
                 $message = 'While sending notification by Mail channel an error occurred: ' . $e->getMessage();
 
                 ExceptionService::report($e, $message);
@@ -137,7 +139,6 @@ class MailChannel extends BaseMailChannel
 
             throw $e;
         }
-
     }
 
 }
