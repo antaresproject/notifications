@@ -24,11 +24,13 @@ use Antares\Model\User;
 use Antares\Notifications\ChannelManager;
 use Antares\Notifications\Model\Notifications;
 use Antares\Notifications\Model\SimpleContent;
+use Antares\Notifications\Notifications\ExceptionNotification;
 use Antares\Notifications\Parsers\ContentParser;
 use Antares\Notifications\SimpleNotification;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 use ReflectionClass;
+use Log;
 
 class NotificationsService {
 
@@ -134,7 +136,26 @@ class NotificationsService {
             }
         }
 
-        $this->channelManager->send($resolvedRecipients->unique(), $notificationToSend);
+        try {
+            $this->channelManager->send($resolvedRecipients->unique(), $notificationToSend);
+        }
+        catch(\Exception $e) {
+            Log::emergency($e);
+
+            $message = 'Error occurred while sending notification. Please check logfile for more details.';
+            $exceptionNotification = new ExceptionNotification($e, $message);
+
+            /* @var $user User */
+            if( ($user = auth()->user()) && \Auth::isNot(['member', 'guest', 'client'])) {
+                $notifiable = $user;
+            }
+            else {
+                $notifiable = User::administrators()->get();
+            }
+
+            $this->channelManager->send($notifiable, $exceptionNotification);
+        }
+
     }
 
     /**
