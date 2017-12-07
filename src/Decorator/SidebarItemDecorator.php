@@ -57,14 +57,20 @@ class SidebarItemDecorator
      */
     public function item(NotificationsStack $item, string $view)
     {
-        return view($view, [
+        $params  = [
             'id'         => $item->id,
             'author'     => $item->author,
             'title'      => $item->title,
             'value'      => $item->content,
             'priority'   => priority_label($item->severity->name),
             'created_at' => $item->created_at
-        ])->render();
+        ];
+        $request = request();
+        if (!$request->ajax() && $request->isJson() && $request->wantsJson()) {
+            $params['priority'] = $item->severity;
+            return $params;
+        }
+        return view($view, $params)->render();
     }
 
 }
