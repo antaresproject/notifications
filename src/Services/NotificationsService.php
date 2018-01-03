@@ -97,6 +97,10 @@ class NotificationsService {
         $eventModel = $notification->event_model;
         $notificationToSend = null;
 
+        if(! is_object($eventModel)) {
+            return;
+        }
+
         if($handler = $eventModel->getHandler()) {
             $notificationToSend = app()->make($handler)->handle($event, $notification);
         }

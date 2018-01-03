@@ -40,7 +40,9 @@ new Vue({
         this.actionUrl = this.form.attr('action');
 
         if(this.notification.recipients && this.notification.event_model) {
-            this.notification.recipients = _(this.notification.event_model.recipients).keyBy('area').at(this.notification.recipients).value();
+            var recipients = _(this.notification.event_model.recipients).keyBy('area').at(this.notification.recipients).value();
+
+            this.notification.recipients = _.filter(recipients);
             this.notification.event = this.notification.event_model;
         }
 

@@ -129,9 +129,11 @@ class NotificationsServiceProvider extends ModuleServiceProvider
 
         $this->app->alias(Mailer::class, MailerContract::class);
 
-        app()->make(NotificationsListener::class)->boot();
-
         $this->importNotifications('antaresproject/component-notifications');
+    }
+
+    public function booted() {
+        app()->make(NotificationsListener::class)->boot();
     }
 
     /**
