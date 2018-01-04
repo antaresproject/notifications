@@ -75,7 +75,7 @@
         <div class="mdl-tabs__panel is-active" id="text-panel" v-if="onlyText">
             <fieldset>
                 <div class="form-block">
-                    <textarea class="p16" v-if="currentTab === '#text-panel'" class="h100p" :ref="'editor-text-' + lang" :id="'editor-text-' + lang" v-model="contents[lang].content" :data-lang-code="lang"></textarea>
+                    <textarea rows="20" v-if="currentTab === '#text-panel'" class="p16 h100p" :ref="'editor-text-' + lang" :id="'editor-text-' + lang" v-model="contents[lang].content" :data-lang-code="lang"></textarea>
                 </div>
             </fieldset>
         </div>

@@ -101,7 +101,9 @@ class NotificationsService {
             return;
         }
 
-        if($handler = $eventModel->getHandler()) {
+        $handler = $eventModel->getHandler();
+
+        if($handler) {
             $notificationToSend = app()->make($handler)->handle($event, $notification);
         }
 
