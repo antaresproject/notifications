@@ -128,12 +128,15 @@ class NotifiableEvent implements Arrayable {
     /**
      * Sets handler for event as closure or class name.
      *
-     * @param Closure|string $handler
+     * @param Closure|string|null $handler
      * @return NotifiableEvent
      * @throws InvalidArgumentException
      */
     public function setHandler($handler) : self {
-        if($handler instanceof Closure || (is_string($handler) && class_exists($handler))) {
+        if($handler === null) {
+            $this->handler = $handler;
+        }
+        elseif($handler instanceof Closure || (is_string($handler) && class_exists($handler))) {
             $this->handler = $handler;
         }
         else {

@@ -92,12 +92,19 @@ class NotificationsService {
      *
      * @param Notifications $notification
      * @param object $event
+     * @param array $data
      */
-    public function handle(Notifications $notification, $event) {
+    public function handle(Notifications $notification, $event, array $data = []) {
         $eventModel = $notification->event_model;
         $notificationToSend = null;
 
-        if($handler = $eventModel->getHandler()) {
+        if(! is_object($eventModel)) {
+            return;
+        }
+
+        $handler = $eventModel->getHandler();
+
+        if($handler) {
             $notificationToSend = app()->make($handler)->handle($event, $notification);
         }
 
@@ -111,8 +118,8 @@ class NotificationsService {
         else {
             $type               = $notification->type->name;
             $contentModel       = $notification->lang( lang() );
-            $titleLine          = $this->contentParser->parse($contentModel->title);
-            $contentLine        = $this->contentParser->parse($contentModel->content);
+            $titleLine          = $this->contentParser->parse($contentModel->title, $data);
+            $contentLine        = $this->contentParser->parse($contentModel->content, $data);
             $content            = new SimpleContent($contentModel->lang->code, $titleLine, $contentLine);
             $notificationToSend = new SimpleNotification($type, $content);
         }
